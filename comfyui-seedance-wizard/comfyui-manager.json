@@ -1,0 +1,14 @@
+{
+  "name": "Seedance Wizard",
+  "author": "Seedance Team",
+  "description": "AI-powered video creation wizard for Seedance 2.0. Chat with DeepSeek AI director, analyze reference images, adjust CSS filters in real-time, generate Flux previews, and export videos directly in ComfyUI.",
+  "repo": "https://github.com/your-org/comfyui-seedance-wizard",
+  "nodes": {
+    "SeedanceWizardNode": "Main wizard node — polls for video completion and outputs the downloaded video file path",
+    "SeedanceApiKeyNode": "Optional standalone API key input node"
+  },
+  "install_type": "git-clone",
+  "requirements": [],
+  "category": "Video",
+  "tags": ["video", "AI", "seedance", "text-to-video", "image-to-video", "wizard", "chat"]
+}

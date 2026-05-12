@@ -1,0 +1,44 @@
+# ═══════════════════════════════════════════════
+# 海外版 Docker Compose
+# DEPLOYMENT_REGION=intl
+# ═══════════════════════════════════════════════
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: seedance
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-seedance}
+      POSTGRES_DB: seedance
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DEPLOYMENT_REGION: intl
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      DATABASE_URL: postgresql://seedance:${DB_PASSWORD:-seedance}@postgres:5432/seedance
+      DEPLOYMENT_REGION: intl
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
+      MUAPI_KEY: ${MUAPI_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  pgdata:

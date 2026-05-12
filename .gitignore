@@ -1,0 +1,44 @@
+node_modules/
+dist/
+.next/
+.env
+*.log
+.DS_Store
+comfyui-seedance-wizard/__pycache__/
+
+# 规划文档（不部署，仅本地参考）
+*.pdf
+*.command
+check-flux-error.command
+comfyui-plan.md
+comfyui-full-plan.md
+comfyui-for-beginners.md
+comfyui-landscape.md
+seedance-plan.md
+deepseek-seedance-saas-plan.md
+lightweight-integration-plan.md
+competitive-analysis.md
+seedance-vs-kling.md
+summary of docs.md
+todo-list.md
+record.md
+dialogue.md
+memory.md
+
+# 旧版 ComfyUI 节点（已被 comfyui-seedance-wizard/ 取代）
+comfyui-node/
+
+# 设计草稿
+Seedance/
+
+# 根目录 config/（冗余副本，正式配置在 backend/config/）
+/config/
+
+# 部署配置模板（含敏感字段结构）
+deploy/.env.production
+
+# 开发时产生的 md 文件（仅后端目录内的 md 放行）
+*.md
+!backend/*.md
+!comfyui-seedance-wizard/*.md
+!contract/*.md

@@ -1,0 +1,19 @@
+# 环境变量 — 绝对不要提交
+.env
+.env.local
+.env.*.local
+
+# 编译产物
+dist/
+build/
+
+# 依赖
+node_modules/
+
+# 日志
+*.log
+npm-debug.log*
+
+# 运行时
+*.pid
+*.seed

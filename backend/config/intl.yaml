@@ -1,0 +1,31 @@
+# ═══════════════════════════════════════════════
+# 海外版配置
+# DEPLOYMENT_REGION=intl
+# ═══════════════════════════════════════════════
+
+region: intl
+currency: USD
+currency_subunit: cents
+locale: en
+
+auth:
+  providers: [email, google]
+  google_client_id: ${GOOGLE_CLIENT_ID}
+
+payment:
+  provider: stripe
+  stripe_public_key: ${STRIPE_PUBLISHABLE_KEY}
+
+cdn:
+  provider: cloudflare_r2
+  bucket: ${R2_BUCKET}
+
+pricing:
+  deepseek_input_per_1m_subunit: 200
+  deepseek_output_per_1m_subunit: 600
+  qwen_vl_per_1m_subunit: 400
+  flux_preview_per_image_subunit: 15
+  seedance_t2v_basic_per_sec_subunit: 5
+  seedance_t2v_high_per_sec_subunit: 8
+  seedance_i2v_basic_per_sec_subunit: 7
+  seedance_i2v_high_per_sec_subunit: 10

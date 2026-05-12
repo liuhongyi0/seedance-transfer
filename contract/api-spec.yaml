@@ -1,0 +1,686 @@
+openapi: 3.0.0
+info:
+  title: Seedance Wizard API（国内版，无支付）
+  version: 0.1.0
+  description: |
+    ComfyUI Seedance 向导的 Node.js 后端 API。
+    负责：DeepSeek 导演 / Qwen VL 看图 / Flux 预览 / Seedance 出片代理 / API Key 管理 / 余额追踪。
+
+    认证方式：所有 /api/* 路由（auth 除外）需在 Header 携带：
+      Authorization: Bearer sk-seed-<token>
+
+servers:
+  - url: http://localhost:3000
+    description: 本地开发
+  - url: https://api.seedance.cn
+    description: 国内生产环境（待定）
+
+# ─────────────────────────────────────────────
+# 通用数据结构
+# ─────────────────────────────────────────────
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: sk-seed-<token>
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:    { type: string, example: "INSUFFICIENT_BALANCE" }
+        message: { type: string, example: "余额不足，请充值" }
+
+    ApiKey:
+      type: object
+      properties:
+        id:          { type: string, format: uuid }
+        name:        { type: string, example: "我的主力 Key" }
+        key_prefix:  { type: string, example: "sk-seed-ab12" }
+        is_active:   { type: boolean }
+        created_at:  { type: string, format: date-time }
+        last_used_at: { type: string, format: date-time, nullable: true }
+
+    Balance:
+      type: object
+      properties:
+        amount_fen:   { type: integer, description: "余额，单位：分", example: 6800 }
+        amount_yuan:  { type: number,  description: "余额，单位：元", example: 68.00 }
+        currency:     { type: string,  description: "货币代码（国内版 CNY，海外版 USD）", example: "CNY" }
+
+    UsageLog:
+      type: object
+      properties:
+        id:         { type: string, format: uuid }
+        service:    { type: string, enum: [deepseek, qwen_vl, flux_preview, seedance_t2v, seedance_i2v] }
+        units:      { type: number, description: "计量单位（tokens 或 秒）" }
+        cost_fen:   { type: integer, description: "本次费用，单位：分" }
+        status:     { type: string, enum: [success, failed] }
+        created_at: { type: string, format: date-time }
+
+    WizardSession:
+      type: object
+      properties:
+        session_id:    { type: string, format: uuid }
+        messages:      { type: array, items: { type: object } }
+        current_prompt: { type: string, description: "DeepSeek 导演当前生成的 Prompt" }
+        image_url:     { type: string, nullable: true, description: "Qwen VL 分析后存储的图片引用" }
+
+    PromptParams:
+      type: object
+      description: 结构化 Prompt 参数，由 DeepSeek 分析生成，用于合成完整视频 Prompt
+      required: [style, lighting, shot_type, mood, color_tone, motion_intensity, depth_of_field, detail_richness, saturation_level]
+      properties:
+        style:
+          type: string
+          enum: [cinematic, commercial, documentary, social_media, artistic]
+          description: 视频风格
+        lighting:
+          type: string
+          enum: [bright_daylight, golden_hour, soft_diffused, dramatic_shadows, neon_night]
+          description: 光线效果
+        shot_type:
+          type: string
+          enum: [close_up, medium_shot, wide_shot, aerial_view, low_angle]
+          description: 镜头类型
+        mood:
+          type: string
+          enum: [energetic, serene, mysterious, joyful, dramatic]
+          description: 情绪氛围
+        color_tone:
+          type: string
+          enum: [warm, cool, vibrant, muted, monochrome]
+          description: 色调倾向
+        motion_intensity:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: 运动强度（0=静态，100=强运动感）
+        depth_of_field:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: 景深（0=全焦，100=极浅景深）
+        detail_richness:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: 细节丰富度（0=极简，100=超写实）
+        saturation_level:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: 饱和度（0=去色，100=超饱和）
+
+    GenerateTask:
+      type: object
+      properties:
+        task_id:        { type: string }
+        status:         { type: string, enum: [queued, processing, completed, failed] }
+        progress:       { type: integer, minimum: 0, maximum: 100 }
+        video_url:      { type: string, nullable: true }
+        estimated_cost_fen: { type: integer }
+        actual_cost_fen:    { type: integer, nullable: true }
+        created_at:     { type: string, format: date-time }
+        completed_at:   { type: string, format: date-time, nullable: true }
+
+security:
+  - ApiKeyAuth: []
+
+# ─────────────────────────────────────────────
+# 路由定义
+# ─────────────────────────────────────────────
+paths:
+
+  # ── 认证（无需 Bearer token）──────────────────
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: 手机号注册（国内版）
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, password, sms_code]
+              properties:
+                phone:    { type: string, example: "13800138000" }
+                password: { type: string, minLength: 8 }
+                sms_code: { type: string, example: "123456" }
+      responses:
+        "201":
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id: { type: string, format: uuid }
+                  message: { type: string, example: "注册成功" }
+        "400":
+          description: 参数错误或验证码无效
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: 手机号已注册
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: 登录，获取 Bearer token（用于后续所有请求）
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, password]
+              properties:
+                phone:    { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:  { type: string, description: "JWT，有效期 7 天" }
+                  token_type:    { type: string, example: "Bearer" }
+        "401":
+          description: 手机号或密码错误
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/auth/sms:
+    post:
+      tags: [Auth]
+      summary: 发送短信验证码
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string }
+      responses:
+        "200":
+          description: 验证码已发送
+        "429":
+          description: 发送过于频繁
+
+  # ── API Key 管理 ──────────────────────────────
+  /api/keys:
+    get:
+      tags: [API Keys]
+      summary: 获取当前用户的所有 API Key
+      responses:
+        "200":
+          description: Key 列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys: { type: array, items: { $ref: "#/components/schemas/ApiKey" } }
+
+    post:
+      tags: [API Keys]
+      summary: 创建新的 API Key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, example: "ComfyUI 主力机" }
+      responses:
+        "201":
+          description: 创建成功，**仅此一次**返回完整 Key 明文
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:    { type: string, example: "sk-seed-ab12cdef..." }
+                  detail: { $ref: "#/components/schemas/ApiKey" }
+
+  /api/keys/{id}:
+    delete:
+      tags: [API Keys]
+      summary: 撤销 API Key
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: 撤销成功 }
+        "404": { description: Key 不存在 }
+
+  # ── 余额 & 用量 ────────────────────────────────
+  /api/balance:
+    get:
+      tags: [Balance]
+      summary: 查询余额
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Balance" }
+
+  /api/usage:
+    get:
+      tags: [Balance]
+      summary: 查询用量历史
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 20, maximum: 100 }
+        - name: service
+          in: query
+          schema: { type: string, enum: [deepseek, qwen_vl, flux_preview, seedance_t2v, seedance_i2v] }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:  { type: integer }
+                  page:   { type: integer }
+                  items:  { type: array, items: { $ref: "#/components/schemas/UsageLog" } }
+
+  # ── 向导流程（核心）──────────────────────────────
+
+  /api/wizard/analyze:
+    post:
+      tags: [Wizard]
+      summary: |
+        新向导：一键分析图片 + 想法，生成结构化参数 + 预览图。
+        流程：① Qwen VL 分析参考图 → ② DeepSeek 结构化（输出 PromptParams）→
+               ③ composePrompt 合成完整英文 Prompt → ④ Wanx/Flux 生成预览图。
+        计费：Qwen VL + DeepSeek 费用先扣；Flux 失败时自动退款，preview_url=null。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [image_b64, user_idea]
+              properties:
+                image_b64:
+                  type: string
+                  description: 参考图 base64（含 data URI 前缀，如 data:image/jpeg;base64,...）
+                  example: "data:image/jpeg;base64,/9j/4AAQ..."
+                user_idea:
+                  type: string
+                  description: 用户的简要创作想法（中文自然语言）
+                  example: "高端商业广告，突出产品质感"
+                aspect_ratio:
+                  type: string
+                  enum: ["16:9", "9:16", "1:1", "4:3", "3:4"]
+                  default: "16:9"
+                  description: 输出画面宽高比
+      responses:
+        "200":
+          description: 分析完成，返回结构化参数与预览图
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                    description: 向导会话 ID，后续 /preview 和 /video/generate 使用
+                  base_description:
+                    type: string
+                    description: Qwen VL 提炼的图片描述（英文），作为 Prompt 基础
+                    example: "A white minimalist skincare bottle on a wooden surface, morning light"
+                  creative_rationale:
+                    type: string
+                    description: DeepSeek 的创作思路说明（中文）
+                    example: "产品质感突出，建议采用金色时段光线配合浅景深，营造高端感。"
+                  initial_params:
+                    $ref: "#/components/schemas/PromptParams"
+                  composed_prompt:
+                    type: string
+                    description: 由 initial_params 合成的完整英文视频 Prompt
+                    example: "A white minimalist skincare bottle, cinematic style, golden hour lighting..."
+                  preview_url:
+                    type: string
+                    nullable: true
+                    description: 预览图 CDN URL（Wanx/Flux 生成）；生成失败时为 null，不影响后续流程
+                    example: "https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/..."
+                  cost_fen:
+                    type: integer
+                    description: 本次分析总费用（Qwen + DeepSeek + Flux，分）
+                    example: 4
+                  balance_after:
+                    type: integer
+                    description: 扣费后账户余额（分）
+                    example: 9996
+        "400":
+          description: 参数错误（image_b64 格式不合法、user_idea 为空等）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "402":
+          description: 余额不足（Qwen + DeepSeek 费用无法覆盖）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/wizard/start:
+    post:
+      tags: [Wizard]
+      summary: |
+        开始一次创作向导会话。
+        流程：① Qwen VL 分析参考图（若有）→ ② DeepSeek 导演生成初步建议和 Prompt。
+        返回 session_id 供后续多轮对话使用。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [intent]
+              properties:
+                intent:
+                  type: string
+                  description: 用户的原始需求描述（中文自然语言）
+                  example: "温馨电商广告，15秒"
+                image_b64:
+                  type: string
+                  nullable: true
+                  description: |
+                    参考图的 base64 编码（含 data URI 前缀）。
+                    有图时先调 Qwen VL 分析，结果注入 DeepSeek 上下文。
+                    无图时直接调 DeepSeek，进入纯文本创作模式。
+                  example: "data:image/jpeg;base64,/9j/4AAQ..."
+                language:
+                  type: string
+                  enum: [zh, en]
+                  default: zh
+      responses:
+        "200":
+          description: 向导会话已启动，返回导演的第一轮建议
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                  director_message:
+                    type: string
+                    description: DeepSeek 导演的文本回复（含分析结果和选项建议）
+                    example: "我看到一个白色护肤品瓶，日系简约风格。建议方向：[电商广告] [品牌宣传] [社交媒体]"
+                  suggested_options:
+                    type: array
+                    description: 快捷选项按钮（供 HTML 向导渲染）
+                    items:
+                      type: object
+                      properties:
+                        label: { type: string, example: "温馨电商广告" }
+                        value: { type: string, example: "warm_ecommerce" }
+                  current_prompt:
+                    type: string
+                    description: DeepSeek 当前生成的视频 Prompt（英文，供 Seedance 使用）
+                    example: "A white skincare bottle on a wooden desk, warm morning light..."
+                  image_analyzed:
+                    type: boolean
+                    description: 是否成功完成了 Qwen VL 图像分析
+        "402":
+          description: 余额不足
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/wizard/message:
+    post:
+      tags: [Wizard]
+      summary: |
+        向导多轮对话。用户发送反馈，DeepSeek 导演更新 Prompt。
+        典型场景："光线再暖一点" / "换成赛博朋克风格" / "改成竖版"。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, message]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                message:
+                  type: string
+                  description: 用户的反馈或指令（自然语言）
+                  example: "光线再暖一点，背景虚化"
+                css_params:
+                  type: object
+                  nullable: true
+                  description: |
+                    当前 CSS 滤镜参数（由 HTML 向导前端传入）。
+                    DeepSeek 会把这些参数翻译成 Prompt 中的语言描述。
+                  properties:
+                    warmth:     { type: number, minimum: -1, maximum: 1, example: 0.3 }
+                    brightness: { type: number, minimum: -1, maximum: 1, example: 0.1 }
+                    blur:       { type: number, minimum: 0,  maximum: 1, example: 0.4 }
+                    contrast:   { type: number, minimum: -1, maximum: 1, example: 0.0 }
+                    saturation: { type: number, minimum: -1, maximum: 1, example: 0.2 }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  director_message: { type: string }
+                  current_prompt:   { type: string }
+                  suggested_options:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        label: { type: string }
+                        value: { type: string }
+
+  /api/wizard/preview:
+    post:
+      tags: [Wizard]
+      summary: |
+        重新生成预览图（参数驱动或 Prompt 覆盖）。
+        主路由：阿里云通义万象 wanx2.1-t2i-turbo；备用：fal.ai Flux-Schnell。
+        Flux 失败时 preview_url 返回 null，已扣费用自动退还。
+        计费：扣除预览费用（约 ¥0.01/张）。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                prompt_override:
+                  type: string
+                  nullable: true
+                  description: 若用户手动编辑了 Prompt，传入覆盖值；否则使用 session 中的 current_prompt
+                aspect_ratio:
+                  type: string
+                  enum: ["16:9", "9:16", "1:1", "4:3", "3:4"]
+                  default: "16:9"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preview_url:
+                    type: string
+                    nullable: true
+                    description: "预览图 CDN URL；生成失败时为 null，费用自动退还"
+                  composed_prompt:
+                    type: string
+                    description: "本次合成后的完整英文 Prompt（params 路径时返回）"
+                  cost_fen:      { type: integer, description: "本次预览费用（分，失败时为 0）", example: 1 }
+                  balance_after: { type: integer, description: "扣费后余额（分）" }
+        "402":
+          description: 余额不足
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # ── 视频生成 ──────────────────────────────────
+  /api/video/generate:
+    post:
+      tags: [Video]
+      summary: |
+        触发 Seedance 视频生成。
+        调用 muapi.ai Seedance API，返回 task_id 供轮询。
+        立即扣费（预扣）；失败时退款。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, mode]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                mode:
+                  type: string
+                  enum: [text_to_video, image_to_video]
+                  description: 出片模式
+                prompt_override:
+                  type: string
+                  nullable: true
+                  description: 手动覆盖 Prompt（不传则用 session 中的 current_prompt）
+                image_b64:
+                  type: string
+                  nullable: true
+                  description: I2V 模式的参考图（base64），T2V 模式不传
+                aspect_ratio:
+                  type: string
+                  enum: ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9"]
+                  default: "16:9"
+                duration:
+                  type: integer
+                  minimum: 4
+                  maximum: 15
+                  default: 5
+                  description: 视频时长（秒）
+                quality:
+                  type: string
+                  enum: [basic, high]
+                  default: high
+      responses:
+        "202":
+          description: 任务已提交，开始异步生成
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:            { type: string }
+                  estimated_cost_fen: { type: integer, example: 315 }
+                  estimated_seconds:  { type: integer, example: 90, description: "预计等待时间（秒）" }
+                  balance_after:      { type: integer, description: "预扣后余额（分）" }
+        "402":
+          description: 余额不足
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/video/{taskId}/status:
+    get:
+      tags: [Video]
+      summary: 查询视频生成状态（轮询接口，建议每 3 秒调一次）
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GenerateTask" }
+        "404":
+          description: task_id 不存在
+
+  /api/video/{taskId}/result:
+    get:
+      tags: [Video]
+      summary: 获取已完成任务的视频下载 URL（仅 status=completed 时有效）
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  video_url:      { type: string, description: "视频直链，有效期 24 小时" }
+                  duration_ms:    { type: integer }
+                  actual_cost_fen: { type: integer }
+        "400":
+          description: 任务尚未完成
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # ── 费用预估（无需余额扣减）──────────────────────
+  /api/estimate:
+    post:
+      tags: [Utils]
+      summary: 预估本次出片费用（不扣费，供 HTML 向导显示）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:         { type: string, enum: [text_to_video, image_to_video] }
+                duration:     { type: integer }
+                quality:      { type: string, enum: [basic, high] }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cost_fen:   { type: integer, example: 315 }
+                  cost_yuan:  { type: number,  example: 3.15 }

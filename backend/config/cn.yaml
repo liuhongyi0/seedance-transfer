@@ -1,0 +1,31 @@
+# ═══════════════════════════════════════════════
+# 国内版配置
+# DEPLOYMENT_REGION=cn
+# ═══════════════════════════════════════════════
+
+region: cn
+currency: CNY
+currency_subunit: fen
+locale: zh
+
+auth:
+  providers: [phone]
+  google_client_id: ""
+
+payment:
+  provider: wechat_alipay
+  stripe_public_key: ""
+
+cdn:
+  provider: aliyun_oss
+  bucket: ""
+
+pricing:
+  deepseek_input_per_1m_subunit: 364
+  deepseek_output_per_1m_subunit: 1456
+  qwen_vl_per_1m_subunit: 583
+  flux_preview_per_image_subunit: 1
+  seedance_t2v_basic_per_sec_subunit: 31
+  seedance_t2v_high_per_sec_subunit: 63
+  seedance_i2v_basic_per_sec_subunit: 31
+  seedance_i2v_high_per_sec_subunit: 63

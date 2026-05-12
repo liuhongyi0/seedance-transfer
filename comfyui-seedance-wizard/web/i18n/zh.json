@@ -1,0 +1,99 @@
+{
+  "title": "Seedance 视频精灵",
+
+  "balance_label": "余额",
+  "key_status_no_key": "未设置",
+  "key_status_ok": "已配置",
+  "key_status_tip": "API 密钥状态",
+
+  "welcome_title": "欢迎使用 Seedance 视频精灵！",
+  "welcome_subtitle": "描述你想创建的内容，或拖入图片开始创作。",
+
+  "drop_hint": "将图片拖放到此处",
+
+  "options_label": "推荐选项：",
+
+  "filter_title": "CSS 滤镜",
+  "filter_reset": "重置",
+  "filter_reset_tip": "重置所有滤镜",
+  "filter_warmth": "色温",
+  "filter_warmth_tip": "色温调节",
+  "filter_brightness": "亮度",
+  "filter_brightness_tip": "亮度调节",
+  "filter_blur": "模糊",
+  "filter_blur_tip": "背景模糊",
+  "filter_contrast": "对比度",
+  "filter_contrast_tip": "对比度调节",
+  "filter_saturation": "饱和度",
+  "filter_saturation_tip": "饱和度调节",
+
+  "preview_title": "预览",
+  "preview_placeholder": "暂无预览",
+  "preview_alt": "预览图片",
+
+  "prompt_title": "提示词",
+  "prompt_placeholder": "你的视频提示词将显示在这里...",
+
+  "input_placeholder": "描述你想要的视频...",
+  "send_button": "发送",
+  "send_button_tip": "发送",
+
+  "progress_default": "0%",
+
+  "btn_preview": "生成预览",
+  "btn_preview_tip": "生成预览",
+  "btn_video": "生成视频",
+  "btn_video_tip": "生成视频",
+  "btn_reset": "重置",
+  "btn_reset_tip": "重置",
+
+  "settings_title": "Seedance 设置",
+  "settings_api_key_label": "API 密钥",
+  "settings_api_key_placeholder": "sk-seed-...",
+  "settings_api_key_configured_placeholder": "已配置 ({0})，留空则不修改",
+  "settings_backend_url_label": "后端地址",
+  "settings_backend_url_placeholder": "http://localhost:3000",
+  "settings_language_label": "语言",
+  "settings_save": "保存",
+  "settings_cancel": "取消",
+  "settings_saved": "设置已保存！",
+  "settings_save_failed": "保存失败: {0}",
+
+  "language_zh": "中文",
+  "language_en": "English",
+
+  "status_creating": "开始创作...",
+  "status_error_prefix": "错误: {0}",
+  "status_request_timeout": "请求超时",
+  "status_request_failed": "请求失败",
+
+  "wizard_intent_default": "创作一个视频",
+
+  "session_required": "请先开始一个会话。",
+  "generating_preview": "正在生成预览图...",
+  "preview_ready": "预览已就绪！",
+  "preview_failed": "预览生成失败: {0}",
+
+  "submitting_video": "正在提交视频生成任务...",
+  "task_submitted": "任务已提交: {0} (预计 {1}秒)",
+  "generation_failed": "生成失败: {0}",
+  "status_queued": "排队中...",
+  "status_complete": "已完成！",
+  "status_unknown_error": "未知错误",
+  "status_polling_message": "{0} ({1}%)",
+  "video_ready_prefix": "视频已就绪！URL: {0}",
+  "video_complete": "视频生成已完成！",
+  "video_prefix": "视频: {0}",
+  "status_check_error": "状态查询出错: {0}",
+
+  "balance_insufficient": "余额不足，请充值后继续。",
+
+  "settings_load_failed": "加载设置失败: {0}",
+
+  "image_uploaded": "[图片已上传: {0}]",
+  "image_prompt_dialog": "请描述你想用这张图片创作什么：",
+  "image_default_intent": "基于这张图片创作视频",
+
+  "reset_welcome_title": "欢迎使用 Seedance 视频精灵！",
+  "reset_welcome_subtitle": "描述你想创建的内容，或拖入图片。"
+}

@@ -1,0 +1,99 @@
+{
+  "title": "Seedance Wizard",
+
+  "balance_label": "Balance",
+  "key_status_no_key": "No Key",
+  "key_status_ok": "Key OK",
+  "key_status_tip": "API Key status",
+
+  "welcome_title": "Welcome to Seedance Wizard!",
+  "welcome_subtitle": "Describe what you want to create, or drag an image to get started.",
+
+  "drop_hint": "Drop image here",
+
+  "options_label": "Suggested:",
+
+  "filter_title": "CSS Filters",
+  "filter_reset": "Reset",
+  "filter_reset_tip": "Reset all filters",
+  "filter_warmth": "Warmth",
+  "filter_warmth_tip": "Color Temperature",
+  "filter_brightness": "Bright",
+  "filter_brightness_tip": "Brightness",
+  "filter_blur": "Blur",
+  "filter_blur_tip": "Background Blur",
+  "filter_contrast": "Contrast",
+  "filter_contrast_tip": "Contrast",
+  "filter_saturation": "Saturate",
+  "filter_saturation_tip": "Saturation",
+
+  "preview_title": "Preview",
+  "preview_placeholder": "No preview yet",
+  "preview_alt": "Preview",
+
+  "prompt_title": "Prompt",
+  "prompt_placeholder": "Your video prompt will appear here...",
+
+  "input_placeholder": "Describe your video...",
+  "send_button": "Send",
+  "send_button_tip": "Send",
+
+  "progress_default": "0%",
+
+  "btn_preview": "Generate Preview",
+  "btn_preview_tip": "Generate Preview",
+  "btn_video": "Generate Video",
+  "btn_video_tip": "Generate Video",
+  "btn_reset": "Reset",
+  "btn_reset_tip": "Reset",
+
+  "settings_title": "Seedance Settings",
+  "settings_api_key_label": "API Key",
+  "settings_api_key_placeholder": "sk-seed-...",
+  "settings_api_key_configured_placeholder": "Configured ({0}), leave empty to keep",
+  "settings_backend_url_label": "Backend URL",
+  "settings_backend_url_placeholder": "http://localhost:3000",
+  "settings_language_label": "Language",
+  "settings_save": "Save",
+  "settings_cancel": "Cancel",
+  "settings_saved": "Settings saved!",
+  "settings_save_failed": "Save failed: {0}",
+
+  "language_zh": "中文",
+  "language_en": "English",
+
+  "status_creating": "Start creating...",
+  "status_error_prefix": "Error: {0}",
+  "status_request_timeout": "Request timeout",
+  "status_request_failed": "Request failed",
+
+  "wizard_intent_default": "Create a video",
+
+  "session_required": "Start a session first.",
+  "generating_preview": "Generating preview image...",
+  "preview_ready": "Preview ready!",
+  "preview_failed": "Preview failed: {0}",
+
+  "submitting_video": "Submitting video generation...",
+  "task_submitted": "Task submitted: {0} (est. {1}s)",
+  "generation_failed": "Generation failed: {0}",
+  "status_queued": "Queued...",
+  "status_complete": "Complete!",
+  "status_unknown_error": "Unknown error",
+  "status_polling_message": "{0} ({1}%)",
+  "video_ready_prefix": "Video ready! URL: {0}",
+  "video_complete": "Video generation complete!",
+  "video_prefix": "Video: {0}",
+  "status_check_error": "Status check error: {0}",
+
+  "balance_insufficient": "Please top up your balance to continue.",
+
+  "settings_load_failed": "Failed to load settings: {0}",
+
+  "image_uploaded": "[Image uploaded: {0}]",
+  "image_prompt_dialog": "Describe what you want to create with this image:",
+  "image_default_intent": "Create a video from this image",
+
+  "reset_welcome_title": "Welcome to Seedance Wizard!",
+  "reset_welcome_subtitle": "Describe what you want to create, or drop an image."
+}

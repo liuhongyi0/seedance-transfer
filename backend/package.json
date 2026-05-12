@@ -1,0 +1,41 @@
+{
+  "name": "seedance-wizard-backend",
+  "version": "0.1.0",
+  "description": "Seedance Wizard Node.js Backend - AI API proxy, wizard orchestration, and user management",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc && cp ../contract/db-schema.sql ./dist/db-schema.sql",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
+    "dev:intl": "DEPLOYMENT_REGION=intl ts-node src/server.ts",
+    "start:intl": "DEPLOYMENT_REGION=intl node dist/server.js",
+    "migrate": "ts-node src/db/migrate.ts"
+  },
+  "dependencies": {
+    "@alicloud/dysmsapi20170525": "^4.5.1",
+    "@alicloud/openapi-client": "^0.4.15",
+    "@alicloud/openapi-core": "^1.0.7",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "google-auth-library": "^10.6.2",
+    "js-yaml": "^4.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "openai": "^4.72.0",
+    "pg": "^8.13.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.9.0",
+    "@types/pg": "^8.11.10",
+    "@types/uuid": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
