@@ -13,6 +13,7 @@ ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 COPY web-portal/package.json web-portal/package-lock.json* ./
 RUN npm ci --production=false
 COPY web-portal/ .
+RUN mkdir -p public
 RUN npm run build
 
 FROM node:20-alpine AS runner
