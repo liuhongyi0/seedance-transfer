@@ -1,17 +1,18 @@
 # ─────────────────────────────────────────────
 # Seedance Web Portal — Next.js Docker 构建
+# 构建上下文: 项目根目录
 # ─────────────────────────────────────────────
 
 FROM node:20-alpine AS builder
 WORKDIR /app
-ARG NEXT_PUBLIC_REGION=cn
-ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+ARG NEXT_PUBLIC_REGION=intl
+ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_REGION=${NEXT_PUBLIC_REGION}
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
-COPY package.json package-lock.json* ./
+COPY web-portal/package.json web-portal/package-lock.json* ./
 RUN npm ci --production=false
-COPY . .
+COPY web-portal/ .
 RUN npm run build
 
 FROM node:20-alpine AS runner
