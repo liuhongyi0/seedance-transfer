@@ -20,10 +20,7 @@ lightweight-integration-plan.md
 competitive-analysis.md
 seedance-vs-kling.md
 summary of docs.md
-todo-list.md
-record.md
 dialogue.md
-memory.md
 
 # 旧版 ComfyUI 节点（已被 comfyui-seedance-wizard/ 取代）
 comfyui-node/
@@ -42,3 +39,7 @@ deploy/.env.production
 !backend/*.md
 !comfyui-seedance-wizard/*.md
 !contract/*.md
+!/record.md
+!/todo-list.md
+!/memory.md
+!/dialogue.md

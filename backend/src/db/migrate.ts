@@ -66,7 +66,9 @@ function splitSqlStatements(sql: string): string[] {
     // ── 语句分隔符 ──────────────────────────────
     if (ch === ';' && !inDollarQuote && !inSingleQuote) {
       const trimmed = current.trim();
-      if (trimmed.length > 0 && !trimmed.startsWith('--')) {
+      // 去掉 -- 注释行后判断是否为空（修复 section 注释+代码被整体跳过）
+      const stripped = trimmed.split('\\n').map((l: string) => l.trimStart()).filter((l: string) => l && !l.startsWith('--')).join('\\n').trim();
+      if (stripped.length > 0) {
         statements.push(trimmed);
       }
       current = '';
@@ -80,7 +82,8 @@ function splitSqlStatements(sql: string): string[] {
 
   // 最后一段（无尾部分号）
   const trimmed = current.trim();
-  if (trimmed.length > 0 && !trimmed.startsWith('--')) {
+  const stripped2 = trimmed.split('\\n').map((l: string) => l.trimStart()).filter((l: string) => l && !l.startsWith('--')).join('\\n').trim();
+  if (stripped2.length > 0) {
     statements.push(trimmed);
   }
 
@@ -92,6 +95,8 @@ function splitSqlStatements(sql: string): string[] {
  * 幂等：使用 IF NOT EXISTS / OR REPLACE 确保可重复执行
  * 每条语句独立 SAVEPOINT，已存在的对象跳过不报错
  */
+let lastMigrationStats = { applied: 0, skipped: 0, failed: 0, errors: [] as string[], skippedErrors: [] as string[] };
+
 export async function runMigrations(): Promise<void> {
   // 优先查找生产部署路径（dist 同目录），其次本地开发路径
   const candidates = [
@@ -125,6 +130,7 @@ export async function runMigrations(): Promise<void> {
   let applied = 0;
   let skipped = 0;
   let failed  = 0;
+  const errors: string[] = [];
 
   try {
     // 开启外层事务（保证每个 SAVEPOINT 有事务上下文）
@@ -150,10 +156,11 @@ export async function runMigrations(): Promise<void> {
           msg.includes('already exists') ||
           msg.includes('duplicate key') ||
           msg.includes('unique constraint') ||
-          msg.includes('does not exist') ||
+          (msg.includes('does not exist') && !msg.includes('function')) ||
           msg.includes('violates');
 
         if (isIdempotent) {
+          errors.push(`[SKIP ${i+1}] ` + msg.substring(0, 200));
           console.log(`[Migrate] Statement ${i + 1}: skipped (${msg.substring(0, 80)})`);
           skipped++;
         } else {
@@ -164,12 +171,14 @@ export async function runMigrations(): Promise<void> {
             `[Migrate] Statement preview: ${stmt.substring(0, 200)}`
           );
           failed++;
+          errors.push(msg.substring(0, 200));
           // 非幂等错误：继续执行其余语句，但记录失败数
         }
       }
     }
 
     await client.query('COMMIT');
+    lastMigrationStats = { applied, skipped, failed, errors, skippedErrors: errors.filter(e => e.startsWith("[SKIP")) };
     console.log(
       `[Migrate] Done — applied=${applied}, skipped=${skipped}, failed=${failed}`
     );
@@ -204,3 +213,5 @@ if (require.main === module) {
       process.exit(1);
     });
 }
+
+export { lastMigrationStats };

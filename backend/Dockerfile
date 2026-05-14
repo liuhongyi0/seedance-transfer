@@ -23,6 +23,7 @@ RUN npm ci --production && npm cache clean --force
 COPY --from=builder /app/dist ./dist
 COPY backend/config/ ./config/
 COPY contract/db-schema.sql ./dist/db-schema.sql
+COPY contract/db-schema.sql ./dist/db/db-schema.sql
 
 EXPOSE 3000
 CMD ["node", "dist/server.js"]
