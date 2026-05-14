@@ -170,7 +170,13 @@ router.post('/email/send-code', async (req: Request, res: Response, next: NextFu
     }
 
     // 检查是否已注册
-    const user = await findUserByEmail(email);
+    let user;
+    try {
+      user = await findUserByEmail(email);
+    } catch (dbErr: any) {
+      console.error('[send-code] findUserByEmail failed:', dbErr.message, dbErr.stack);
+      throw AppError.internal('数据库查询失败: ' + dbErr.message);
+    }
     if (user) {
       throw AppError.conflict('该邮箱已注册');
     }
@@ -178,10 +184,16 @@ router.post('/email/send-code', async (req: Request, res: Response, next: NextFu
     const code = String(Math.floor(100000 + Math.random() * 900000));
     emailCodeStore.set(email, { code, expires: Date.now() + config.smsCodeExpiryMs });
 
-    await sendVerificationCode(email, code);
+    try {
+      await sendVerificationCode(email, code);
+    } catch (mailErr: any) {
+      console.error('[send-code] sendVerificationCode threw:', mailErr.message, mailErr.stack);
+      // non-fatal: code is already stored, continue
+    }
 
     res.json({ message: '验证码已发送' });
   } catch (err) {
+    console.error('[send-code] Unexpected error:', err instanceof Error ? err.message : String(err));
     next(err);
   }
 });
