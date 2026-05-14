@@ -66,7 +66,9 @@ function splitSqlStatements(sql: string): string[] {
     // ── 语句分隔符 ──────────────────────────────
     if (ch === ';' && !inDollarQuote && !inSingleQuote) {
       const trimmed = current.trim();
-      if (trimmed.length > 0 && !trimmed.startsWith('--')) {
+      // 去掉 -- 注释行后判断是否为空（修复 section 注释+代码被整体跳过）
+      const stripped = trimmed.split('\\n').map((l: string) => l.trimStart()).filter((l: string) => l && !l.startsWith('--')).join('\\n').trim();
+      if (stripped.length > 0) {
         statements.push(trimmed);
       }
       current = '';
@@ -80,7 +82,8 @@ function splitSqlStatements(sql: string): string[] {
 
   // 最后一段（无尾部分号）
   const trimmed = current.trim();
-  if (trimmed.length > 0 && !trimmed.startsWith('--')) {
+  const stripped2 = trimmed.split('\\n').map((l: string) => l.trimStart()).filter((l: string) => l && !l.startsWith('--')).join('\\n').trim();
+  if (stripped2.length > 0) {
     statements.push(trimmed);
   }
 
