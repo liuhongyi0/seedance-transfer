@@ -174,8 +174,8 @@ router.post('/email/send-code', async (req: Request, res: Response, next: NextFu
     try {
       user = await findUserByEmail(email);
     } catch (dbErr: any) {
-      console.error('[send-code] findUserByEmail failed:', dbErr.message, dbErr.stack);
-      throw AppError.internal('数据库查询失败: ' + dbErr.message);
+	      console.error('[send-code] findUserByEmail failed:', JSON.stringify(dbErr));
+	      throw AppError.internal('数据库查询失败: ' + JSON.stringify(dbErr));
     }
     if (user) {
       throw AppError.conflict('该邮箱已注册');
