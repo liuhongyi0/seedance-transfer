@@ -74,8 +74,19 @@ app.use((req, _res, next) => {
 app.use(rateLimiter);
 
 // 健康检查（无需认证，必须在 authMiddleware 之前注册）
+
+// 启动状态（由 start() 填充）
+let startupStatus = {
+  dbConnected: false,
+  migration: "not_run",
+  migrationDetail: "",
+};
+
 app.get('/health', (_req, res) => {
   res.json({
+    db: startupStatus.dbConnected ? "connected" : "disconnected",
+    migration: startupStatus.migration,
+    migrationDetail: startupStatus.migrationDetail,
     status: 'ok',
     service: 'seedance-wizard-api',
     version: '0.1.0',
@@ -133,15 +144,15 @@ async function start(): Promise<void> {
   }
 
   // 数据库连接 & 迁移
-  let dbConnected = false;
+  startupStatus.dbConnected = false;
   try {
-    dbConnected = await testConnection();
-    if (dbConnected) {
+    startupStatus.dbConnected = await testConnection();
+    if (startupStatus.dbConnected) {
       try {
         await runMigrations();
-        console.log('[DB] Migrations applied successfully');
+        console.log('[DB] Migrations applied successfully'); startupStatus.migration = 'ok';
       } catch (migErr: any) {
-        console.error('[DB] Migration error:', migErr.message);
+        startupStatus.migration = 'error'; startupStatus.migrationDetail = (migErr as any).message || String(migErr); console.error('[DB] Migration error:', (migErr as any).message);
         console.warn('[DB] Server will start without running migrations');
       }
 
@@ -171,10 +182,10 @@ async function start(): Promise<void> {
     console.log('');
     console.log(`[Server] Listening on http://localhost:${PORT}`);
     console.log(`[Server] Health check: http://localhost:${PORT}/health`);
-    console.log(`[Server] Database: ${dbConnected ? 'connected' : 'DISCONNECTED'}`);
+    console.log(`[Server] Database: ${startupStatus.dbConnected ? 'connected' : 'DISCONNECTED'}`);
     console.log('');
 
-    if (!dbConnected) {
+    if (!startupStatus.dbConnected) {
       console.warn(
         '[Server] WARNING: Running without database. ' +
         'Auth, wizard, video, and balance endpoints will fail.'
