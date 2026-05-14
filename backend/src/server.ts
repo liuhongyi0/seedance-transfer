@@ -85,8 +85,8 @@ let startupStatus = {
 app.get('/health', async (_req, res) => {
   let tables: string[] = [];
   try {
-    const result = await query("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname='public'");
-    tables = result.rows.map((r: any) => r.tablename);
+    const result = await query("SELECT schemaname, tablename FROM pg_catalog.pg_tables");
+    tables = result.rows.map((r: any) => r.schemaname + "." + r.tablename);
   } catch (e: any) {
     tables = ['query_error: ' + e.message];
   }
