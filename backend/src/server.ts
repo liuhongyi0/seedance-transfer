@@ -82,11 +82,19 @@ let startupStatus = {
   migrationDetail: "",
 };
 
-app.get('/health', (_req, res) => {
+app.get('/health', async (_req, res) => {
+  let tables: string[] = [];
+  try {
+    const result = await query("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname='public'");
+    tables = result.rows.map((r: any) => r.tablename);
+  } catch (e: any) {
+    tables = ['query_error: ' + e.message];
+  }
   res.json({
     db: startupStatus.dbConnected ? "connected" : "disconnected",
     migration: startupStatus.migration,
     migrationDetail: startupStatus.migrationDetail,
+    tables,
     status: 'ok',
     service: 'seedance-wizard-api',
     version: '0.1.0',
