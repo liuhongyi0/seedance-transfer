@@ -92,7 +92,7 @@ function splitSqlStatements(sql: string): string[] {
  * 幂等：使用 IF NOT EXISTS / OR REPLACE 确保可重复执行
  * 每条语句独立 SAVEPOINT，已存在的对象跳过不报错
  */
-let lastMigrationStats = { applied: 0, skipped: 0, failed: 0, errors: [] as string[] };
+let lastMigrationStats = { applied: 0, skipped: 0, failed: 0, errors: [] as string[], skippedErrors: [] as string[] };
 
 export async function runMigrations(): Promise<void> {
   // 优先查找生产部署路径（dist 同目录），其次本地开发路径
@@ -157,6 +157,7 @@ export async function runMigrations(): Promise<void> {
           msg.includes('violates');
 
         if (isIdempotent) {
+          errors.push(`[SKIP ${i+1}] ` + msg.substring(0, 200));
           console.log(`[Migrate] Statement ${i + 1}: skipped (${msg.substring(0, 80)})`);
           skipped++;
         } else {
@@ -174,7 +175,7 @@ export async function runMigrations(): Promise<void> {
     }
 
     await client.query('COMMIT');
-    lastMigrationStats = { applied, skipped, failed, errors };
+    lastMigrationStats = { applied, skipped, failed, errors, skippedErrors: errors.filter(e => e.startsWith("[SKIP")) };
     console.log(
       `[Migrate] Done — applied=${applied}, skipped=${skipped}, failed=${failed}`
     );
