@@ -150,7 +150,7 @@ export async function runMigrations(): Promise<void> {
           msg.includes('already exists') ||
           msg.includes('duplicate key') ||
           msg.includes('unique constraint') ||
-          msg.includes('does not exist') ||
+          (msg.includes('does not exist') && !msg.includes('function')) ||
           msg.includes('violates');
 
         if (isIdempotent) {
