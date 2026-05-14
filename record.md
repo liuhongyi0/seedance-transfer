@@ -852,3 +852,111 @@ SENDGRID_FROM_EMAIL=noreply@seedance.ai
 | SSL | 阿里云免费 DV 证书 | ¥0 |
 | **固定合计** | | **≈ ¥294/月** |
 | **AI 成本（变量）** | DashScope + muapi（按用量） | 按收入比例 |
+
+---
+
+## Phase 14: Railway 海外版后端调试与 E2E 跑通（2026-05-14）
+
+### 背景
+
+Railway 部署完成后，`POST /api/auth/email/send-code` 返回 500 INTERNAL_ERROR，
+需要逐层排查并修复。
+
+### Bug 1：PostgreSQL 未挂载
+
+**现象**：send-code 报 `ECONNREFUSED`，health 显示 DB disconnected
+
+**原因**：用户删除旧 PostgreSQL 重建后，新 DB 未挂载到 backend service
+
+**解决**：在 Railway dashboard 将 PostgreSQL 挂载到 backend service
+
+### Bug 2：uuid-ossp 扩展不可用
+
+**现象**：migration 报 `42P01: undefined_table`，CREATE TABLE 全部失败
+
+**原因**：Railway 托管 PostgreSQL 不含 `uuid-ossp` 扩展，`uuid_generate_v4()` 无法使用
+
+**解决**：用内置函数实现自定义 `uid()`：
+```sql
+CREATE OR REPLACE FUNCTION uid() RETURNS uuid AS $$
+DECLARE res uuid;
+BEGIN
+  SELECT md5(random()::text || clock_timestamp()::text)::uuid INTO res;
+  RETURN res;
+END;
+$$ LANGUAGE plpgsql;
+```
+所有 `DEFAULT uuid_generate_v4()` → `DEFAULT uid()`
+
+### Bug 3：splitSqlStatements 注释行 Bug（根因）
+
+**现象**：migration 只解析出 50 条语句，CREATE EXTENSION、uid() 函数、5 张 CREATE TABLE 被静默丢弃
+
+**原因**：SQL 文件中有 section 标题注释（如 `-- ═══ 用户表 ═══`），
+与紧跟的 `CREATE TABLE` 语句间无分号分隔，被合并成一个 chunk。
+旧代码用 `trimmed.startsWith('--')` 判断是否为注释行，导致整个 chunk 被跳过。
+
+**修复 v1（ef79b72）**：
+```typescript
+// 去掉 -- 注释行后判断是否为空
+const stripped = trimmed.split('\\n')
+  .map(l => l.trimStart())
+  .filter(l => l && !l.startsWith('--'))
+  .join('\\n').trim();
+if (stripped.length > 0) statements.push(trimmed);
+```
+
+**修复 v2（86d4e2b）**：v1 中 `'\\n'` 是字面量字符串（反斜杠+n），不是真正换行符，split/join 实际未生效。
+改为 `'\n'`（真正换行符）后，72 条语句完整解析（+22 条）。
+
+### Bug 4：Railway 部署分支不一致
+
+**现象**：多次 push main 后 Railway 仍运行旧代码
+
+**原因**：Railway 部署的是 `railway/fix-deploy-103cbe` 分支，而所有修复在 `main` 上
+
+**解决**：将 main 合并到 Railway 分支并推送 → 后续 Railway 直接监控 main
+
+### Bug 5：域名混淆
+
+**现象**：curl `seedance-transfer-backend.railway.app` 返回 404
+
+**原因**：actual backend domain 是 `seedance-transfer-production.up.railway.app`，
+`seedance-transfer-backend.railway.app` 指向 web-portal 或其他服务
+
+**解决**：使用正确域名 `seedance-transfer-production.up.railway.app`
+
+### 最终 E2E 测试（2026-05-14 23:25 UTC）
+
+```
+✅ Email 验证码发送     POST /api/auth/email/send-code  → 验证码已发送
+✅ Email 注册          POST /api/auth/email/register   → 注册成功
+✅ Email 登录          POST /api/auth/email/login      → JWT Token
+✅ 余额查询             GET  /api/balance              → 0 USD
+✅ API Key 创建         POST /api/keys                 → sk-seed-xxx
+✅ API Key 列表         GET  /api/keys                 → keys[]
+```
+
+### 数据库直接修复
+
+在 splitter 修复部署前，用 psql 直接连接 Railway PostgreSQL 执行完整 schema：
+```bash
+PGPASSWORD=xxx psql -h viaduct.proxy.rlwy.net -U postgres -p 14748 -d railway \
+  -f contract/db-schema.sql
+```
+一次性创建了 8 张表 + 4 个存储函数 + 所有类型/索引/触发器。
+
+### 当前部署架构
+
+```
+Railway 项目: seedance-transfer
+├── PostgreSQL (viaduct.proxy.rlwy.net:14748)
+├── Backend Service
+│   ├── Dockerfile: backend/Dockerfile
+│   ├── Branch: main
+│   └── Domain: seedance-transfer-production.up.railway.app
+└── Web Portal Service
+    ├── Dockerfile: web-portal/Dockerfile
+    ├── Branch: main
+    └── Domain: robust-mercy-production-80fc.up.railway.app
+```

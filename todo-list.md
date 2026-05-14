@@ -1,6 +1,6 @@
 # Seedance Wizard — 开发进度 & 上线计划
 
-> 最后更新：2026-05-13（Phase 12 海外版 Railway 部署后）
+> 最后更新：2026-05-15（Railway 海外版后端 E2E 跑通）
 > 完整开发记录见 `record.md`，架构决策见 `dialogue.md`
 
 ---
@@ -18,7 +18,7 @@
 | ComfyUI 节点 + HTML 向导 | ✅ | 实机安装完成 |
 | 国际化（zh-CN / en-US） | ✅ | next-intl |
 | 海外版架构（DEPLOYMENT_REGION=intl） | ✅ | email + Google OAuth 架构就绪 |
-| migrate.ts SQL 解析 | ✅ | 单引号 + 美元引号均正确处理 |
+| migrate.ts SQL 解析 | ✅ | 单引号 + 美元引号 + section 注释行过滤（72→50 修复） |
 | 生产 build 验证 | ✅ | npx tsc 零错误，migrate failed=0 |
 | contract/api-spec.yaml 完整性 | ✅ | 新增 /analyze 端点 + PromptParams schema + Balance.currency + nullable preview_url，YAML 格式修复 |
 | Web Portal API 对接修复 | ✅ | ApiKey/Balance 字段名 snake_case→camelCase 规范化，手机号正则前后端对齐 |
@@ -28,14 +28,17 @@
 | Backend Railway 部署 | ✅ | seedance-transfer-production.up.railway.app |
 | Web Portal Railway 部署 | ✅ | robust-mercy-production-80fc.up.railway.app |
 | PostgreSQL Railway 托管 | ✅ | 自动注入 DATABASE_URL |
+| **海外版 Email 认证 E2E** | ✅ | 注册/登录/余额/API Key 全链路通过 |
+| **splitSqlStatements 注释行 Bug** | ✅ | `\\n`→`\n` 修复，72 语句完整解析 |
+| **uuid-ossp 不可用（Railway PG）** | ✅ | 自定义 `uid()` 函数替代 |
 
 ### 未完成 ❌
 
 | 模块 | 状态 | 优先级 |
 |------|------|------|
-| **Backend 环境变量配置** | ❌ API Key 未填 | P0 — 立即 |
+| **Resend 真实邮件发送** | ❌ RESEND_API_KEY 已设，待验 | P0 |
 | **域名 see4dance.com DNS → Railway** | ❌ Namecheap CNAME 未配置 | P0 |
-| **Resend 域名验证 see4dance.com** | ❌ DKIM 已验证，Resend 控制台待确认 | P0 |
+| Resend 域名验证 see4dance.com | ❌ DKIM 已验证，Resend 控制台待确认 | P0 |
 | 短信验证码接入 | ❌ 仅 console mock，国内版延期 | P1 |
 | 支付接入 | ❌ 充值页有 UI，按钮"即将上线" | P1 |
 | 国内版部署（阿里云 ECS） | ❌ 待海外版稳定后 | P1 |
@@ -43,45 +46,37 @@
 | 监控/告警 | ❌ | P1 |
 | Google OAuth 接入 | ❌ 架构就绪，GOOGLE_CLIENT_ID 未填 | P2 |
 | Stripe 支付（海外版） | ❌ stub | P2 |
+| **大模型 API Key 配置** | ❌ DEEPSEEK/DASHSCOPE/MUAPI 未填 | P0 |
 
 ---
 
-## 二、下一步执行计划（当前：2026-05-13）
+## 二、下一步执行计划（当前：2026-05-15）
 
-### Step 1：Backend 环境变量（立即，5分钟）
+### Step 1：配置大模型 API Key（立即）
 
 在 Railway Backend Service → Settings → Variables 添加：
 
 ```
-DEPLOYMENT_REGION=intl
-JWT_SECRET=<node -e "console.log(require('crypto').randomBytes(64).toString('hex'))">
-RESEND_API_KEY=re_KSEcahRk_NsTspRCBPLo73rTPiu5TurdV
-RESEND_FROM_EMAIL=onboarding@resend.dev
-DEEPSEEK_API_KEY=<待用户填入>
-DASHSCOPE_API_KEY=<待用户填入>
-MUAPI_KEY=<待用户填入>
-FAL_KEY=<可选，已废弃>
+DEEPSEEK_API_KEY=<用户填入>
+DASHSCOPE_API_KEY=<用户填入>
+MUAPI_KEY=<用户填入>
 ```
 
-### Step 2：域名 DNS 指向 Railway
+> 已有变量：DEPLOYMENT_REGION=intl, JWT_SECRET, RESEND_API_KEY, RESEND_FROM_EMAIL
+
+### Step 2：配置 Resend 真实发信
+
+1. Resend 控制台 → API Keys → 确认 `re_KSEcahRk_NsTspRCBPLo73rTPiu5TurdV` 有效
+2. 当前 `RESEND_FROM_EMAIL=onboarding@resend.dev`（Resend 测试发件人，仅可发给自己）
+3. 域名验证通过后改为 `Seedance <noreply@see4dance.com>`
+
+### Step 3：域名 DNS 指向 Railway
 
 1. Namecheap → Domain List → see4dance.com → Manage → Advanced DNS
 2. 删除现有 A 记录
 3. 添加 CNAME 记录：`@` → `robust-mercy-production-80fc.up.railway.app`
 4. 等 DNS 生效（5-30分钟）
 5. Railway Web Portal Service → Settings → Domains → 添加 `see4dance.com`
-
-### Step 3：Resend 域名验证
-
-1. Resend 控制台 → Domains → see4dance.com → 点 Verify
-2. 验证通过后改 `RESEND_FROM_EMAIL=Seedance <noreply@see4dance.com>`
-
-### Step 4：端到端测试
-
-1. 浏览器打开 `https://see4dance.com`
-2. 注册账号（邮箱 + 验证码）
-3. 登录 → 仪表盘 → API Key 页
-4. 如果有 API Key 配好，跑一次完整向导分析
 
 > **LLM 可直接实现本节所有代码变更，用户只需完成控制台申请步骤。**
 
