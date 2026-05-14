@@ -67,7 +67,7 @@ function splitSqlStatements(sql: string): string[] {
     if (ch === ';' && !inDollarQuote && !inSingleQuote) {
       const trimmed = current.trim();
       // 去掉 -- 注释行后判断是否为空（修复 section 注释+代码被整体跳过）
-      const stripped = trimmed.split('\\n').map((l: string) => l.trimStart()).filter((l: string) => l && !l.startsWith('--')).join('\\n').trim();
+      const stripped = trimmed.split('\n').map((l: string) => l.trimStart()).filter((l: string) => l && !l.startsWith('--')).join('\n').trim();
       if (stripped.length > 0) {
         statements.push(trimmed);
       }
@@ -82,7 +82,7 @@ function splitSqlStatements(sql: string): string[] {
 
   // 最后一段（无尾部分号）
   const trimmed = current.trim();
-  const stripped2 = trimmed.split('\\n').map((l: string) => l.trimStart()).filter((l: string) => l && !l.startsWith('--')).join('\\n').trim();
+  const stripped2 = trimmed.split('\n').map((l: string) => l.trimStart()).filter((l: string) => l && !l.startsWith('--')).join('\n').trim();
   if (stripped2.length > 0) {
     statements.push(trimmed);
   }
