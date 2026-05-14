@@ -7,14 +7,14 @@
 -- ============================================================
 
 -- 启用 UUID 扩展
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- uuid-ossp replaced by pgcrypto (more widely available)
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ─────────────────────────────────────────
 -- 用户表
 -- ─────────────────────────────────────────
 CREATE TABLE users (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phone           VARCHAR(20)  UNIQUE,                        -- 手机号（国内版必填，海外版可选）
     email           VARCHAR(255) UNIQUE,                        -- 邮箱（海外版必填，国内版可选）
     google_id        VARCHAR(255) UNIQUE,                       -- Google OAuth sub（海外版）
@@ -44,7 +44,7 @@ COMMENT ON COLUMN users.auth_provider IS '认证方式: phone(国内默认) | em
 -- API Key 表
 -- ─────────────────────────────────────────
 CREATE TABLE api_keys (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name            VARCHAR(100) NOT NULL DEFAULT 'My Key',  -- 用户自定义名称
     key_prefix      VARCHAR(16) NOT NULL,                    -- 明文前缀，如 "sk-seed-ab12"，供展示识别
@@ -109,7 +109,7 @@ CREATE TYPE log_status AS ENUM (
 );
 
 CREATE TABLE usage_logs (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES users(id),
     api_key_id      UUID REFERENCES api_keys(id),            -- 使用的 Key（删 Key 后置 NULL）
     service         service_type NOT NULL,
@@ -148,7 +148,7 @@ COMMENT ON COLUMN usage_logs.request_meta IS 'JSON 元数据，如 {"model":"see
 -- 向导会话表（DeepSeek 对话历史）
 -- ─────────────────────────────────────────
 CREATE TABLE wizard_sessions (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES users(id),
     -- 对话历史（OpenAI messages 格式的 JSON 数组）
     messages        JSONB NOT NULL DEFAULT '[]',
@@ -181,7 +181,7 @@ CREATE TYPE task_status AS ENUM (
 );
 
 CREATE TABLE video_tasks (
-    id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id             UUID NOT NULL REFERENCES users(id),
     usage_log_id        UUID REFERENCES usage_logs(id),
     -- muapi.ai 返回的上游 task id
@@ -402,7 +402,7 @@ UPDATE usage_logs SET currency = 'CNY' WHERE currency IS NULL;
 -- Migration v3: 支付订单表
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS payment_orders (
-    id            UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id       UUID        NOT NULL REFERENCES users(id),
     out_trade_no  VARCHAR(64) UNIQUE NOT NULL,
     package_key   VARCHAR(32) NOT NULL,
