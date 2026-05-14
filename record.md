@@ -960,3 +960,64 @@ Railway 项目: seedance-transfer
     ├── Branch: main
     └── Domain: robust-mercy-production-80fc.up.railway.app
 ```
+
+---
+
+## Phase 15: 大模型 API 接入 + 全链路 E2E 测试（2026-05-15）
+
+### 配置
+
+在 Railway Backend Variables 中添加：
+- `DEEPSEEK_API_KEY` — DeepSeek 分析服务
+- `DASHSCOPE_API_KEY` — 阿里云通义万象预览图
+- `MUAPI_KEY` — Seedance 视频生成
+
+### Wizard 分析测试
+
+```
+POST /api/wizard/analyze
+Request:  { image_b64, user_idea:"阳光海滩走秀", aspect_ratio:"16:9" }
+Response: {
+  session_id, base_description, creative_rationale,
+  initial_params: { style, lighting, shot_type, mood, ... },
+  composed_prompt,
+  preview_url: "https://dashscope-result-*.oss-cn-wulanchabu-*.aliyuncs.com/...",
+  cost_fen: 4, balance_after: 9996
+}
+```
+
+- DeepSeek: 中英文分析通过，创意参数合理
+- DashScope Wanx: 预览图 URL 可访问，PNG 格式
+- 费用: 4 cents（DeepSeek 1 + Wanx 1 + Qwen VL 2）
+
+### 视频生成测试
+
+```
+POST /api/video/generate
+Request:  { session_id, mode:"text_to_video", duration:5, quality:"basic" }
+Response: { task_id, estimated_cost_fen:155, balance_after:9841 }
+
+GET /api/video/:taskId/result
+Response: { video_url, duration_ms:5000, actual_cost_fen:"155" }
+```
+
+- MuAPI Seedance T2V: 任务提交→完成
+- 费用: 155 cents ($1.55)
+
+### 余额字段修正
+
+`amount_yuan` → `amount`，消除 USD 下显示"元"的语义问题。
+
+### E2E 全链路结果
+
+| 步骤 | 接口 | 结果 | 费用 |
+|------|------|------|------|
+| 验证码 | email/send-code | ✅ | 0 |
+| 注册 | email/register | ✅ | 0 |
+| 登录 | email/login | ✅ | 0 |
+| 余额 | /api/balance | ✅ 9841 USD | — |
+| API Key | /api/keys | ✅ | 0 |
+| 分析 | /api/wizard/analyze | ✅ preview_url | 4 |
+| 视频 | /api/video/generate | ✅ video_url | 155 |
+
+**初始 10000 → 9841，扣费 159 cents = $1.59 ✅**

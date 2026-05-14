@@ -31,6 +31,10 @@
 | **海外版 Email 认证 E2E** | ✅ | 注册/登录/余额/API Key 全链路通过 |
 | **splitSqlStatements 注释行 Bug** | ✅ | `\\n`→`\n` 修复，72 语句完整解析 |
 | **uuid-ossp 不可用（Railway PG）** | ✅ | 自定义 `uid()` 函数替代 |
+| **大模型 API Key 配置** | ✅ | DeepSeek + DashScope + MuAPI 全部配好 |
+| **Wizard 分析 E2E（Railway）** | ✅ | DeepSeek 分析 + Wanx 预览图，cost_fen=4 |
+| **视频生成 E2E（Railway）** | ✅ | MuAPI Seedance T2V，cost_fen=155 |
+| **余额字段语义修正** | ✅ | `amount_yuan` → `amount`，币种无关 |
 
 ### 未完成 ❌
 
@@ -46,37 +50,43 @@
 | 监控/告警 | ❌ | P1 |
 | Google OAuth 接入 | ❌ 架构就绪，GOOGLE_CLIENT_ID 未填 | P2 |
 | Stripe 支付（海外版） | ❌ stub | P2 |
-| **大模型 API Key 配置** | ❌ DEEPSEEK/DASHSCOPE/MUAPI 未填 | P0 |
 
 ---
 
 ## 二、下一步执行计划（当前：2026-05-15）
 
-### Step 1：配置大模型 API Key（立即）
-
-在 Railway Backend Service → Settings → Variables 添加：
-
-```
-DEEPSEEK_API_KEY=<用户填入>
-DASHSCOPE_API_KEY=<用户填入>
-MUAPI_KEY=<用户填入>
-```
-
-> 已有变量：DEPLOYMENT_REGION=intl, JWT_SECRET, RESEND_API_KEY, RESEND_FROM_EMAIL
-
-### Step 2：配置 Resend 真实发信
+### Step 1：Resend 真实发信（P0）
 
 1. Resend 控制台 → API Keys → 确认 `re_KSEcahRk_NsTspRCBPLo73rTPiu5TurdV` 有效
 2. 当前 `RESEND_FROM_EMAIL=onboarding@resend.dev`（Resend 测试发件人，仅可发给自己）
 3. 域名验证通过后改为 `Seedance <noreply@see4dance.com>`
 
-### Step 3：域名 DNS 指向 Railway
+### Step 2：域名 DNS 指向 Railway（P0）
 
 1. Namecheap → Domain List → see4dance.com → Manage → Advanced DNS
 2. 删除现有 A 记录
 3. 添加 CNAME 记录：`@` → `robust-mercy-production-80fc.up.railway.app`
 4. 等 DNS 生效（5-30分钟）
 5. Railway Web Portal Service → Settings → Domains → 添加 `see4dance.com`
+
+### Step 3：Web Portal 海外版 UI
+
+1. 浏览器打开 `https://robust-mercy-production-80fc.up.railway.app`
+2. 验证英文 UI、Email 注册/登录流程
+3. 仪表盘、API Key、用量页面显示 USD
+
+### E2E 测试结果（2026-05-15 Railway 生产环境）
+
+```
+✅ 发送验证码     POST /api/auth/email/send-code
+✅ 注册          POST /api/auth/email/register
+✅ 登录          POST /api/auth/email/login
+✅ 余额查询       GET  /api/balance           → 9841 USD
+✅ API Key 管理   POST/GET /api/keys
+✅ Wizard 分析    POST /api/wizard/analyze    → preview_url + cost_fen=4
+✅ 视频生成       POST /api/video/generate    → video_url + cost_fen=155
+✅ 计费扣减       10000 - 4 - 155 = 9841     ✅
+```
 
 > **LLM 可直接实现本节所有代码变更，用户只需完成控制台申请步骤。**
 
