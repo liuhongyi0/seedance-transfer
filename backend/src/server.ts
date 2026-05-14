@@ -13,7 +13,7 @@ dotenv.config();
 
 import { config, validateConfig } from './config';
 import { testConnection, query } from './db/pool';
-import { runMigrations } from './db/migrate';
+import { runMigrations, lastMigrationStats } from './db/migrate';
 import { recoverOrphanedPolls } from './routes/video';
 import { authMiddleware } from './middleware/auth';
 import { rateLimiter } from './middleware/rateLimit';

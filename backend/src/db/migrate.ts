@@ -92,6 +92,8 @@ function splitSqlStatements(sql: string): string[] {
  * 幂等：使用 IF NOT EXISTS / OR REPLACE 确保可重复执行
  * 每条语句独立 SAVEPOINT，已存在的对象跳过不报错
  */
+let lastMigrationStats = { applied: 0, skipped: 0, failed: 0, errors: [] as string[] };
+
 export async function runMigrations(): Promise<void> {
   // 优先查找生产部署路径（dist 同目录），其次本地开发路径
   const candidates = [
@@ -125,6 +127,7 @@ export async function runMigrations(): Promise<void> {
   let applied = 0;
   let skipped = 0;
   let failed  = 0;
+  const errors: string[] = [];
 
   try {
     // 开启外层事务（保证每个 SAVEPOINT 有事务上下文）
@@ -164,12 +167,14 @@ export async function runMigrations(): Promise<void> {
             `[Migrate] Statement preview: ${stmt.substring(0, 200)}`
           );
           failed++;
+          errors.push(msg.substring(0, 200));
           // 非幂等错误：继续执行其余语句，但记录失败数
         }
       }
     }
 
     await client.query('COMMIT');
+    lastMigrationStats = { applied, skipped, failed, errors };
     console.log(
       `[Migrate] Done — applied=${applied}, skipped=${skipped}, failed=${failed}`
     );
@@ -204,3 +209,5 @@ if (require.main === module) {
       process.exit(1);
     });
 }
+
+export { lastMigrationStats };
