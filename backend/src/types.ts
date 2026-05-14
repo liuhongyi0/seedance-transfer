@@ -99,7 +99,7 @@ export interface KeyListResponse {
 
 export interface BalanceResponse {
   amount_fen: number;
-  amount_yuan: number;
+  amount: number;
   currency: string;
 }
 

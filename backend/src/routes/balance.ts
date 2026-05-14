@@ -23,7 +23,7 @@ router.get('/balance', async (req: Request, res: Response, next: NextFunction) =
 
     const response: BalanceResponse = {
       amount_fen: amountFen,
-      amount_yuan: Math.round(amountFen) / 100,
+      amount: Math.round(amountFen) / 100,
       currency: getCurrency(),
     };
 
