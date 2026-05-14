@@ -102,6 +102,20 @@ app.get('/health', async (_req, res) => {
   });
 });
 
+
+// 手动触发迁移（诊断用）
+app.post('/admin/migrate', async (_req, res) => {
+  try {
+    await runMigrations();
+    startupStatus.migration = 'manual_ok';
+    res.json({ status: 'ok', stats: lastMigrationStats });
+  } catch (err: any) {
+    startupStatus.migration = 'manual_error';
+    startupStatus.migrationDetail = err.message || String(err);
+    res.status(500).json({ status: 'error', message: err.message, stats: lastMigrationStats });
+  }
+});
+
 // 认证（白名单 /api/auth/* 自动跳过）
 app.use(authMiddleware);
 
