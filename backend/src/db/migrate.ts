@@ -124,7 +124,7 @@ export async function runMigrations(): Promise<void> {
   // 避免把函数体内的 ; 当作语句分隔符
   const statements = splitSqlStatements(sql);
 
-  console.log(`[Migrate] Found ${statements.length} SQL statements to execute`);
+  console.log(`[Migrate] splitter-v2: Found ${statements.length} SQL statements to execute`);
 
   const client = await pool.connect();
   let applied = 0;
