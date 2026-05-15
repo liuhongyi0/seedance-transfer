@@ -1,19 +1,16 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { locales } from '@/i18n';
-import { useRouter } from '@/navigation';
 
 export default function LocaleSwitcher() {
   const locale = useLocale();
-  const router = useRouter();
 
   const nextLocale = locale === 'zh-CN' ? 'en-US' : 'zh-CN';
   const label = locale === 'zh-CN' ? 'EN' : '中';
 
   function switchLocale() {
     document.cookie = `NEXT_LOCALE=${nextLocale};path=/;max-age=31536000;SameSite=Lax`;
-    router.refresh();
+    window.location.reload();
   }
 
   return (
