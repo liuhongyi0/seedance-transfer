@@ -4,6 +4,7 @@ import {NextIntlClientProvider} from 'next-intl';
 import {getLocale, getMessages} from 'next-intl/server';
 import {AuthProvider} from '@/lib/auth';
 import {ToastProvider} from '@/components/Toast';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -30,7 +31,12 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              <div style={{ position: 'fixed', top: 12, right: 16, zIndex: 9999 }}>
+                <LocaleSwitcher />
+              </div>
+              {children}
+            </ToastProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>
