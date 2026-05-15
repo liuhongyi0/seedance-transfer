@@ -35,14 +35,14 @@
 | **Wizard 分析 E2E（Railway）** | ✅ | DeepSeek 分析 + Wanx 预览图，cost_fen=4 |
 | **视频生成 E2E（Railway）** | ✅ | MuAPI Seedance T2V，cost_fen=155 |
 | **余额字段语义修正** | ✅ | `amount_yuan` → `amount`，币种无关 |
+| **Resend 真实邮件发送** | ✅ | Gmail 收信验证通过 |
+| **DNS 域名绑定** | ✅ | api.see4dance.com + see4dance.com |
+| **Web Portal 语言切换** | ✅ | 右上角 EN/中 按钮 |
 
 ### 未完成 ❌
 
 | 模块 | 状态 | 优先级 |
 |------|------|------|
-| **Resend 真实邮件发送** | ❌ RESEND_API_KEY 已设，待验 | P0 |
-| **域名 see4dance.com DNS → Railway** | ❌ Namecheap CNAME 未配置 | P0 |
-| Resend 域名验证 see4dance.com | ❌ DKIM 已验证，Resend 控制台待确认 | P0 |
 | 短信验证码接入 | ❌ 仅 console mock，国内版延期 | P1 |
 | 支付接入 | ❌ 充值页有 UI，按钮"即将上线" | P1 |
 | 国内版部署（阿里云 ECS） | ❌ 待海外版稳定后 | P1 |
@@ -53,39 +53,46 @@
 
 ---
 
-## 二、下一步执行计划（当前：2026-05-15）
+## 二、下一步执行计划（当前：2026-05-16）
 
-### Step 1：Resend 真实发信（P0）
+### Step 1：Web Portal E2E 验证（立即）
 
-1. Resend 控制台 → API Keys → 确认 `re_KSEcahRk_NsTspRCBPLo73rTPiu5TurdV` 有效
-2. 当前 `RESEND_FROM_EMAIL=onboarding@resend.dev`（Resend 测试发件人，仅可发给自己）
-3. 域名验证通过后改为 `Seedance <noreply@see4dance.com>`
+1. 浏览器打开 `https://see4dance.com`
+2. 验证英文/中文切换（右上角按钮）
+3. Email 注册 → 登录 → Dashboard
+4. API Key 页 → 余额页 → 用量页
 
-### Step 2：域名 DNS 指向 Railway（P0）
+### Step 2：支付接入（P1）
 
-1. Namecheap → Domain List → see4dance.com → Manage → Advanced DNS
-2. 删除现有 A 记录
-3. 添加 CNAME 记录：`@` → `robust-mercy-production-80fc.up.railway.app`
-4. 等 DNS 生效（5-30分钟）
-5. Railway Web Portal Service → Settings → Domains → 添加 `see4dance.com`
+- 国内：微信/支付宝（虎皮椒）
+- 海外：Stripe（当前 stub，"即将上线"）
 
-### Step 3：Web Portal 海外版 UI
+### Step 3：国内版部署（P1）
 
-1. 浏览器打开 `https://robust-mercy-production-80fc.up.railway.app`
-2. 验证英文 UI、Email 注册/登录流程
-3. 仪表盘、API Key、用量页面显示 USD
+- 阿里云 ECS 2核4G
+- 共享同一套代码，`DEPLOYMENT_REGION=cn`
 
-### E2E 测试结果（2026-05-15 Railway 生产环境）
+### Step 4：Google OAuth + 监控告警（P2）
+
+### 当前部署架构
 
 ```
-✅ 发送验证码     POST /api/auth/email/send-code
-✅ 注册          POST /api/auth/email/register
-✅ 登录          POST /api/auth/email/login
-✅ 余额查询       GET  /api/balance           → 9841 USD
-✅ API Key 管理   POST/GET /api/keys
-✅ Wizard 分析    POST /api/wizard/analyze    → preview_url + cost_fen=4
-✅ 视频生成       POST /api/video/generate    → video_url + cost_fen=155
-✅ 计费扣减       10000 - 4 - 155 = 9841     ✅
+https://api.see4dance.com  → Railway Backend (seedance-transfer)
+https://see4dance.com       → Railway Web Portal (robust-mercy)
+```
+
+### E2E 测试结果（2026-05-16 Railway 生产环境）
+
+```
+✅ Resend 真实邮件     Gmail 收信 → 验证码 961880
+✅ Email 注册          straathofbeechler@gmail.com
+✅ Email 登录          JWT Token
+✅ 余额查询            0 USD
+✅ API Key 管理        sk-seed-xxx
+✅ Wizard 分析         preview_url (DashScope Wanx)
+✅ 视频生成            video_url (MuAPI Seedance)
+✅ 域名绑定            api.see4dance.com + see4dance.com
+✅ 语言切换            EN/中 按钮（右上角）
 ```
 
 > **LLM 可直接实现本节所有代码变更，用户只需完成控制台申请步骤。**

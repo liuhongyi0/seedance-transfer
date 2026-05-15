@@ -1021,3 +1021,35 @@ Response: { video_url, duration_ms:5000, actual_cost_fen:"155" }
 | 视频 | /api/video/generate | ✅ video_url | 155 |
 
 **初始 10000 → 9841，扣费 159 cents = $1.59 ✅**
+
+---
+
+## Phase 16: Resend 真实邮件 + DNS 域名绑定 + 语言切换（2026-05-16）
+
+### Resend 真实邮件
+
+- 配置 `RESEND_FROM_EMAIL=Seedance <noreply@see4dance.com>`
+- Namecheap DNS 添加 MX + SPF + DMARC 用于 Resend 域名验证
+- 测试：`straathofbeechler@gmail.com` 成功收到验证码
+
+### DNS 域名绑定
+
+Namecheap CNAME：
+- `@` → Web Portal Railway 域名
+- `api` → Backend Railway 域名
+
+Railway 验证所需 TXT 记录：
+- `_railway-verify` → Web Portal
+- `_railway-verify.api` → Backend
+
+最终域名：
+- `https://see4dance.com` — Web Portal
+- `https://api.see4dance.com` — Backend API
+
+### 语言切换按钮
+
+新建 `web-portal/components/LocaleSwitcher.tsx`：
+- 固定右上角位置，z-index 9999
+- 显示当前语言：`中` / `EN`
+- 切换逻辑：设置 `NEXT_LOCALE` cookie → `window.location.reload()`
+- 构建错误：初始文件放在 `src/components/` 但项目 `@/*` 别名指向 `./*`（非 `src/*`），移到 `components/` 修复
