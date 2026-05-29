@@ -2,15 +2,18 @@
 nodes.py — ComfyUI Seedance Wizard core module
 
 Contains:
-  - SeedanceWizardNode: main output node (video path)
+  - SeedanceWizardNode: main node with dual-mode support
+    * Sidebar mode — interactive wizard via HTML panel
+    * Pipeline mode — accepts IMAGE/STRING inputs from upstream nodes
   - SeedanceApiKeyNode: optional API key configuration node
-  - PromptServer route handlers: forward requests to Node.js backend
+  - SeedanceImageInputNode: bridge node for pipeline image input
+  - PromptServer route handlers: forward requests to FastAPI backend
   - Configuration management: read/write seedance_config.json
-  - API client: authenticated HTTP forwarding to Node.js backend
+  - API client: authenticated HTTP forwarding to backend
 
 All routes are prefixed with /seedance. The HTML wizard panel fetches
 to localhost:8188/seedance/*, and this module attaches the Bearer token
-before forwarding to the Node.js backend.
+before forwarding to the backend.
 
 License: MIT
 Copyright (c) 2025 Seedance Wizard Contributors
@@ -24,7 +27,12 @@ import threading
 import urllib.parse
 import urllib.request
 import urllib.error
+import io
+import base64
 from typing import Optional, Dict, Any
+
+import numpy as np
+from PIL import Image
 
 logger = logging.getLogger("seedance.nodes")
 
@@ -51,12 +59,59 @@ def _reset_wizard_state():
 
 
 # ──────────────────────────────────────────────
+# IMAGE tensor conversion helpers
+# ──────────────────────────────────────────────
+
+def tensor_to_base64(img_tensor) -> str:
+    """Convert ComfyUI IMAGE tensor [B,H,W,C] float32 0~1 → base64 PNG string.
+
+    Returns a data URI string: data:image/png;base64,...
+    """
+    # Take first batch item: [1, H, W, C] → [H, W, C]
+    arr = img_tensor[0].cpu().numpy()
+    arr = (arr * 255).clip(0, 255).astype(np.uint8)
+    pil_img = Image.fromarray(arr, mode="RGB")
+    buf = io.BytesIO()
+    pil_img.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode("utf-8")
+
+
+def url_to_tensor(image_url: str) -> Optional[Any]:
+    """Download an image URL and convert to ComfyUI IMAGE tensor [1,H,W,C].
+
+    Returns None on failure.
+    """
+    import torch
+
+    try:
+        req = urllib.request.Request(image_url, headers={
+            "User-Agent": "ComfyUI-Seedance/1.0"
+        })
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = resp.read()
+        pil_img = Image.open(io.BytesIO(data)).convert("RGB")
+        arr = np.array(pil_img).astype(np.float32) / 255.0
+        tensor = torch.from_numpy(arr).unsqueeze(0)  # [1, H, W, C]
+        return tensor
+    except Exception as e:
+        logger.error("Failed to download/convert preview image: %s", e)
+        return None
+
+
+def tensor_to_pil(img_tensor) -> Image.Image:
+    """Convert ComfyUI IMAGE tensor [B,H,W,C] → PIL Image (first batch item)."""
+    arr = img_tensor[0].cpu().numpy()
+    arr = (arr * 255).clip(0, 255).astype(np.uint8)
+    return Image.fromarray(arr, mode="RGB")
+
+
+# ──────────────────────────────────────────────
 # Configuration management
 # ──────────────────────────────────────────────
 
 DEFAULT_CONFIG = {
     "api_key": "",
-    "backend_url": "http://localhost:3000",
+    "backend_url": "http://localhost:8000",
     "language": "zh",
     "last_session_id": "",
 }
@@ -137,7 +192,7 @@ def get_backend_url() -> str:
 # ──────────────────────────────────────────────
 
 class SeedanceApiClient:
-    """Synchronous HTTP client that forwards requests to the Node.js backend
+    """Synchronous HTTP client that forwards requests to the backend
     with Bearer token authentication."""
 
     def __init__(self, api_key: str, backend_url: str):
@@ -223,7 +278,7 @@ def _register_routes():
     async def _forward_json(request: web.Request, method: str, path: str) -> web.Response:
         """Parse JSON body, forward to backend, return JSON response."""
         try:
-            body = await request.json() if request.can_read_body else None
+            body = await request.json()
         except Exception:
             body = None
 
@@ -281,11 +336,13 @@ def _register_routes():
                         "message": f"{status.capitalize()} ({progress}%)",
                     })
 
-            # Check for error responses
-            if result.get("code") == "INSUFFICIENT_BALANCE":
+            # Check for error responses (backend uses "detail" for HTTPException, "error" for others)
+            err_code = result.get("code") or result.get("error") or ""
+            err_msg = result.get("message") or result.get("detail") or ""
+            if "BALANCE" in str(err_code).upper() or "402" in str(err_msg):
                 server.send_sync("seedance_error", {
                     "code": "INSUFFICIENT_BALANCE",
-                    "message": result.get("message", "Insufficient balance"),
+                    "message": err_msg or "Insufficient balance",
                 })
 
         except Exception as e:
@@ -402,59 +459,134 @@ _register_routes()
 
 class SeedanceWizardNode:
     """
-    Main Seedance Wizard output node.
+    Seedance Wizard — dual-mode AI video generation node.
 
-    This node acts as the Python-side host for the HTML wizard panel.
-    It holds internal state (current task_id) and, when triggered,
-    polls the backend until video generation completes, downloads
-    the result, and outputs the video file path.
+    **Sidebar mode** (interactive):
+      Open the Seedance Wizard tab, upload an image, describe your idea,
+      tune parameters, and generate. The 'trigger' input polls for results.
 
-    The primary interaction is through the HTML wizard sidebar panel.
-    This node is the final output carrier within the ComfyUI workflow.
+    **Pipeline mode** (node graph):
+      Connect IMAGE from LoadImage (or any image-output node) and STRING
+      prompts from text nodes directly. The node handles the full pipeline:
+      analyze → preview → generate → download.
+
+      Outputs:
+        - video_path: local file path to the generated MP4
+        - preview_thumbnail: preview image as ComfyUI IMAGE tensor
+        - final_prompt: the composed English prompt sent to the video model
     """
 
     CATEGORY = "Seedance Wizard"
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("video_path",)
+    RETURN_TYPES = ("STRING", "IMAGE", "STRING")
+    RETURN_NAMES = ("video_path", "preview_thumbnail", "final_prompt")
     OUTPUT_NODE = True
-    FUNCTION = "wait_for_video"
+    FUNCTION = "process"
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "trigger": ("INT", {"default": 0, "min": 0, "max": 999999,
-                                    "tooltip": "Increment to trigger video generation"}),
+                "trigger": ("INT", {
+                    "default": 0, "min": 0, "max": 999999,
+                    "tooltip": "Sidebar mode: increment to poll sidebar-submitted task. Starts at 1."
+                }),
             },
             "optional": {
+                # ── Pipeline mode inputs ──
+                "image": ("IMAGE", {
+                    "tooltip": "Pipeline mode: connect LoadImage or any image-output node here."
+                }),
+                "prompt": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Pipeline mode: optional! AI auto-generates prompt/style/everything from image. Add 1-2 sentences to guide direction."
+                }),
+                "aspect_ratio": (["16:9", "9:16", "1:1"], {
+                    "default": "16:9",
+                    "tooltip": "Video aspect ratio."
+                }),
+                "style": (["cinematic", "commercial", "documentary", "social_media", "artistic"], {
+                    "default": "cinematic",
+                    "tooltip": "Visual style category."
+                }),
+                "mood": (["energetic", "serene", "mysterious", "joyful", "dramatic"], {
+                    "default": "dramatic",
+                    "tooltip": "Emotional atmosphere."
+                }),
+                "camera": (["close_up", "medium_shot", "wide_shot", "aerial_view", "low_angle"], {
+                    "default": "medium_shot",
+                    "tooltip": "Camera shot type."
+                }),
+                "lighting": (["bright_daylight", "golden_hour", "soft_diffused", "dramatic_shadows", "neon_night"], {
+                    "default": "soft_diffused",
+                    "tooltip": "Lighting setup."
+                }),
+                "color_tone": (["warm", "cool", "vibrant", "muted", "monochrome"], {
+                    "default": "warm",
+                    "tooltip": "Color palette."
+                }),
+                "motion_intensity": ("FLOAT", {
+                    "default": 0.5, "min": 0.0, "max": 1.0, "step": 0.05,
+                    "tooltip": "How much camera movement / action."
+                }),
+                "seed": ("INT", {
+                    "default": 0, "min": 0, "max": 0xffffffffffffffff,
+                    "tooltip": "Random seed (0 = random)."
+                }),
                 "api_key": ("STRING", {
                     "default": "",
                     "multiline": False,
-                    "tooltip": "Override API key (leave empty to use config file)"
+                    "tooltip": "Override API key (leave empty to use config file)."
+                }),
+                "model_key": (["seedance-1.5", "seedance-2.0", "kling-3.0", "wan-2.6", "hailuo-2.3"], {
+                    "default": "seedance-1.5",
+                    "tooltip": "Video model for generation. Seedance 2.0 = Volcengine direct, others = EvoLink."
                 }),
             }
         }
 
-    def wait_for_video(self, trigger: int, api_key: str = "") -> tuple:
-        """Poll for video completion, download, and return the file path.
-
-        When trigger is 0 or no task is in progress, returns an empty string.
-        When a task is active (submitted by the wizard UI), polls until
-        complete or failed, downloads the video, and returns its path.
+    def process(self, trigger: int = 0, image=None, prompt: str = "",
+                aspect_ratio: str = "16:9", style: str = "cinematic",
+                mood: str = "dramatic", camera: str = "medium_shot",
+                lighting: str = "soft_diffused", color_tone: str = "warm",
+                motion_intensity: float = 0.5, seed: int = 0,
+                api_key: str = "", model_key: str = "seedance-1.5", **kwargs):
         """
+        Main entry point. Detects sidebar vs pipeline mode automatically.
+        """
+        # Detect mode: pipeline mode when image tensor has content
+        is_pipeline = (image is not None and hasattr(image, "shape")
+                       and len(image.shape) >= 3 and image.shape[0] > 0)
+
+        if is_pipeline:
+            _reset_wizard_state()
+            return self._pipeline_mode(
+                image=image, prompt=prompt, aspect_ratio=aspect_ratio,
+                style=style, mood=mood, camera=camera, lighting=lighting,
+                color_tone=color_tone, motion_intensity=motion_intensity,
+                seed=seed, api_key=api_key, model_key=model_key
+            )
+        else:
+            return self._sidebar_mode(trigger, api_key)
+
+    # ── Sidebar Mode ──────────────────────────────────────────────────
+
+    def _sidebar_mode(self, trigger: int, api_key: str = "") -> tuple:
+        """Poll for video completion from sidebar wizard submission."""
+        if trigger < 1:
+            return ("", None, "")
+
         task_id = _wizard_state.get("current_task_id")
         if not task_id:
-            logger.debug("SeedanceWizardNode: no task_id, returning empty")
-            return ("",)
+            logger.debug("SeedanceWizardNode (sidebar): no task_id, returning empty")
+            return ("", None, "")
 
-        logger.info("SeedanceWizardNode: waiting for task %s", task_id)
+        logger.info("SeedanceWizardNode (sidebar): waiting for task %s", task_id)
 
         client = _get_client()
 
-        # Poll synchronously (blocks the prompt queue; video gen is the
-        # final step so this is acceptable)
-        max_wait = 600  # 10 minutes max
-        poll_interval = 3  # seconds
+        max_wait = 600
+        poll_interval = 3
         elapsed = 0
 
         while elapsed < max_wait:
@@ -464,10 +596,17 @@ class SeedanceWizardNode:
 
             logger.debug("Task %s status: %s (%d%%)", task_id, task_status, progress)
 
+            # Check for connection / backend errors
+            if status >= 500 or result.get("error"):
+                err_msg = result.get("error", f"Backend error (HTTP {status})")
+                _wizard_state["last_error"] = err_msg
+                _wizard_state["task_status"] = "failed"
+                self._push_ws("seedance_error", {"code": "BACKEND_ERROR", "message": err_msg, "task_id": task_id})
+                return ("", None, "")
+
             if task_status == "completed":
                 video_url = result.get("video_url", "")
                 if not video_url:
-                    # Try the result endpoint
                     res2, _ = client.forward("GET", f"/api/video/{task_id}/result")
                     video_url = res2.get("video_url", "")
 
@@ -477,61 +616,248 @@ class SeedanceWizardNode:
                     _wizard_state["video_url"] = video_url
                     _wizard_state["task_status"] = "completed"
 
-                    # Push completion via WebSocket
-                    try:
-                        from server import PromptServer
-                        PromptServer.instance.send_sync("seedance_video_complete", {
-                            "task_id": task_id,
-                            "video_url": video_url,
-                            "local_path": local_path,
-                            "estimated_cost_fen": result.get("estimated_cost_fen"),
-                            "actual_cost_fen": result.get("actual_cost_fen"),
-                            "message": "Video ready!",
-                        })
-                    except Exception:
-                        pass
+                    self._push_ws("seedance_video_complete", {
+                        "task_id": task_id,
+                        "video_url": video_url,
+                        "local_path": local_path,
+                        "message": "Video ready!",
+                    })
 
-                    return (local_path,)
-                else:
-                    _wizard_state["last_error"] = "No video URL in completed response"
-                    return ("",)
+                    return (local_path, None, "")
+
+                _wizard_state["last_error"] = "No video URL in completed response"
+                return ("", None, "")
 
             elif task_status == "failed":
                 error_msg = result.get("error", result.get("message", "Unknown error"))
                 _wizard_state["last_error"] = error_msg
                 _wizard_state["task_status"] = "failed"
+                self._push_ws("seedance_error", {
+                    "code": "GENERATION_FAILED",
+                    "message": error_msg,
+                    "task_id": task_id,
+                })
+                return ("", None, "")
 
-                try:
-                    from server import PromptServer
-                    PromptServer.instance.send_sync("seedance_error", {
-                        "code": "GENERATION_FAILED",
-                        "message": error_msg,
-                        "task_id": task_id,
-                    })
-                except Exception:
-                    pass
-
-                return ("",)
-
-            # Still processing — wait and retry
             time.sleep(poll_interval)
             elapsed += poll_interval
 
-        # Timeout
         _wizard_state["last_error"] = f"Video generation timed out after {max_wait}s"
         _wizard_state["task_status"] = "timeout"
+        self._push_ws("seedance_error", {
+            "code": "TIMEOUT",
+            "message": _wizard_state["last_error"],
+            "task_id": task_id,
+        })
+        return ("", None, "")
 
-        try:
-            from server import PromptServer
-            PromptServer.instance.send_sync("seedance_error", {
-                "code": "TIMEOUT",
-                "message": _wizard_state["last_error"],
-                "task_id": task_id,
+    # ── Pipeline Mode ─────────────────────────────────────────────────
+
+    def _pipeline_mode(self, image, prompt: str, aspect_ratio: str,
+                       style: str, mood: str, camera: str, lighting: str,
+                       color_tone: str, motion_intensity: float, seed: int,
+                       api_key: str = "", model_key: str = "seedance-1.5") -> tuple:
+        """Full auto pipeline: analyze → preview → generate → download."""
+        import torch
+
+        # Check API Key early
+        effective_key = api_key if api_key else get_api_key()
+        if not effective_key:
+            err_msg = "No API Key configured. Open Seedance Wizard sidebar → Settings → Register/Login to get one."
+            logger.error(err_msg)
+            self._push_ws("seedance_error", {"code": "NO_API_KEY", "message": err_msg})
+            raise RuntimeError(err_msg)
+
+        img_b64 = tensor_to_base64(image)
+
+        self._push_ws("seedance_pipeline_progress", {
+            "stage": "analyze",
+            "progress": 5,
+            "message": "Analyzing image with AI...",
+        })
+
+        # Step 1: Analyze
+        analyze_result, analyze_status = self._call_analyze(img_b64, prompt, aspect_ratio)
+
+        if not analyze_result.get("success") and analyze_status >= 400:
+            logger.error("Pipeline analyze failed: %s", analyze_result)
+            self._push_ws("seedance_error", {
+                "code": "ANALYZE_FAILED",
+                "message": analyze_result.get("detail", str(analyze_result)),
             })
-        except Exception:
-            pass
+            return ("", None, "")
 
-        return ("",)
+        final_prompt = analyze_result.get("prompt_en", prompt)
+        ai_style = analyze_result.get("style", style)
+        ai_mood = analyze_result.get("mood", mood)
+        ai_camera = analyze_result.get("camera", camera)
+        ai_color = analyze_result.get("color_palette", color_tone)
+        ai_lighting = analyze_result.get("lighting", lighting)
+
+        self._push_ws("seedance_pipeline_progress", {
+            "stage": "preview",
+            "progress": 25,
+            "message": "Generating preview image...",
+            "analyze_result": {
+                "style": ai_style, "mood": ai_mood, "camera": ai_camera,
+                "color_palette": ai_color, "lighting": ai_lighting,
+                "prompt_en": final_prompt,
+            }
+        })
+
+        # Step 2: Preview (Flux / Wanx)
+        preview_result, _ = self._call_preview(
+            style=ai_style, mood=ai_mood, color_palette=ai_color,
+            camera=ai_camera, prompt_en=final_prompt, aspect_ratio=aspect_ratio,
+            lighting=ai_lighting
+        )
+
+        preview_url = preview_result.get("preview_url", "")
+
+        self._push_ws("seedance_pipeline_progress", {
+            "stage": "generate",
+            "progress": 45,
+            "message": "Submitting video generation task...",
+        })
+
+        # Step 3: Generate video
+        gen_result, gen_status = self._call_generate_video(
+            prompt_en=final_prompt, aspect_ratio=aspect_ratio,
+            image_b64=img_b64, model_key=model_key
+        )
+
+        task_id = gen_result.get("task_id", "")
+        if not task_id:
+            logger.error("Pipeline generate failed: %s", gen_result)
+            self._push_ws("seedance_error", {
+                "code": "GENERATE_FAILED",
+                "message": gen_result.get("detail", "No task_id returned"),
+            })
+            # Return preview at least
+            preview_tensor = url_to_tensor(preview_url) if preview_url else None
+            return ("", preview_tensor, final_prompt)
+
+        _wizard_state["current_task_id"] = task_id
+
+        # Step 4: Poll for completion
+        client = _get_client()
+        max_wait = 600
+        poll_interval = 3
+        elapsed = 0
+
+        while elapsed < max_wait:
+            result, status = client.forward("GET", f"/api/video/{task_id}/status")
+            task_status = result.get("status", "unknown")
+            progress = result.get("progress", 0)
+            err_msg = result.get("error", "")
+
+            self._push_ws("seedance_pipeline_progress", {
+                "stage": "generating",
+                "progress": 45 + int(progress * 0.5),
+                "message": f"Generating video: {progress}%",
+                "task_id": task_id,
+                "task_status": task_status,
+            })
+
+            # Early exit on connection / backend / balance errors
+            if status >= 500 or err_msg:
+                self._push_ws("seedance_error", {"code": "BACKEND_ERROR", "message": err_msg or f"HTTP {status}", "task_id": task_id})
+                preview_tensor = url_to_tensor(preview_url) if preview_url else None
+                return ("", preview_tensor, final_prompt)
+
+            if task_status == "completed":
+                video_url = result.get("video_url", "")
+                if not video_url:
+                    res2, _ = client.forward("GET", f"/api/video/{task_id}/result")
+                    video_url = res2.get("video_url", "")
+
+                if video_url:
+                    local_path = self._download_video(video_url, task_id)
+                    _wizard_state["video_path"] = local_path
+                    _wizard_state["video_url"] = video_url
+                    _wizard_state["task_status"] = "completed"
+
+                    preview_tensor = url_to_tensor(preview_url) if preview_url else None
+
+                    self._push_ws("seedance_video_complete", {
+                        "task_id": task_id,
+                        "video_url": video_url,
+                        "local_path": local_path,
+                        "preview_url": preview_url,
+                        "message": "Pipeline complete!",
+                    })
+
+                    return (local_path, preview_tensor, final_prompt)
+
+                _wizard_state["last_error"] = "No video URL in completed response"
+                return ("", None, final_prompt)
+
+            elif task_status == "failed":
+                error_msg = result.get("error", "Unknown error")
+                _wizard_state["last_error"] = error_msg
+                _wizard_state["task_status"] = "failed"
+                self._push_ws("seedance_error", {
+                    "code": "GENERATION_FAILED",
+                    "message": error_msg,
+                    "task_id": task_id,
+                })
+                return ("", None, final_prompt)
+
+            time.sleep(poll_interval)
+            elapsed += poll_interval
+
+        _wizard_state["last_error"] = f"Video generation timed out after {max_wait}s"
+        _wizard_state["task_status"] = "timeout"
+        self._push_ws("seedance_error", {
+            "code": "TIMEOUT",
+            "message": _wizard_state["last_error"],
+            "task_id": task_id,
+        })
+        return ("", None, final_prompt)
+
+    # ── API call helpers ──────────────────────────────────────────────
+
+    def _call_analyze(self, img_b64: str, prompt: str, aspect_ratio: str) -> tuple:
+        """Call /api/wizard/analyze. Returns (result_dict, status_code)."""
+        client = _get_client()
+        return client.forward("POST", "/api/wizard/analyze", {
+            "image_b64": img_b64,
+            "idea_text": prompt,
+            "aspect_ratio": aspect_ratio,
+        })
+
+    def _call_preview(self, style: str, mood: str, color_palette: str,
+                      camera: str, prompt_en: str, aspect_ratio: str,
+                      lighting: str = "soft_diffused") -> tuple:
+        """Call /api/wizard/preview. Returns (result_dict, status_code)."""
+        client = _get_client()
+        return client.forward("POST", "/api/wizard/preview", {
+            "style": style,
+            "mood": mood,
+            "color_palette": color_palette,
+            "camera": camera,
+            "lighting": lighting,
+            "prompt_en": prompt_en,
+            "aspect_ratio": aspect_ratio,
+        })
+
+    def _call_generate_video(self, prompt_en: str, aspect_ratio: str,
+                             image_b64: str = "", duration: int = 5,
+                             resolution: str = "720p",
+                             model_key: str = "seedance-1.5") -> tuple:
+        """Call /api/video/generate. Returns (result_dict, status_code)."""
+        client = _get_client()
+        body = {
+            "prompt_en": prompt_en,
+            "aspect_ratio": aspect_ratio,
+            "duration": duration,
+            "resolution": resolution,
+            "image_b64": image_b64 if image_b64 else None,
+            "model_key": model_key,
+        }
+        return client.forward("POST", "/api/video/generate", body)
+
+    # ── Shared helpers ────────────────────────────────────────────────
 
     def _download_video(self, video_url: str, task_id: str) -> str:
         """Download a video from the given URL to ComfyUI's output directory."""
@@ -547,15 +873,31 @@ class SeedanceWizardNode:
         try:
             urllib.request.urlretrieve(video_url, local_path)
         except Exception as e:
-            logger.error("Failed to download video: %s", e)
-            # Try with a timeout-aware approach
-            req = urllib.request.Request(video_url)
-            with urllib.request.urlopen(req, timeout=300) as resp:
-                with open(local_path, "wb") as f:
-                    f.write(resp.read())
+            logger.error("urlretrieve failed, trying manual download: %s", e)
+            try:
+                req = urllib.request.Request(video_url, headers={
+                    "User-Agent": "ComfyUI-Seedance/1.0"
+                })
+                with urllib.request.urlopen(req, timeout=300) as resp:
+                    with open(local_path, "wb") as f:
+                        while True:
+                            chunk = resp.read(8192)
+                            if not chunk:
+                                break
+                            f.write(chunk)
+            except OSError as oe:
+                logger.error("Download/save failed: %s", oe)
+                return ""
 
-        logger.info("Video saved to %s", local_path)
-        return local_path
+        return local_path  # success path for both urlretrieve and manual download
+
+    def _push_ws(self, event: str, data: dict):
+        """Push a WebSocket event to the ComfyUI frontend (best-effort)."""
+        try:
+            from server import PromptServer
+            PromptServer.instance.send_sync(event, data)
+        except Exception:
+            pass
 
 
 # ──────────────────────────────────────────────
@@ -594,15 +936,53 @@ class SeedanceApiKeyNode:
 
 
 # ──────────────────────────────────────────────
+# ComfyUI Node: SeedanceImageInputNode (pipeline helper)
+# ──────────────────────────────────────────────
+
+class SeedanceImageInputNode:
+    """
+    Pipeline helper: explicitly marks an IMAGE input for Seedance Wizard.
+
+    This is a convenience node. You can also connect any image-output node
+    (LoadImage, VAE Decode, etc.) directly to SeedanceWizardNode's 'image'
+    input. This node exists so the workflow is self-documenting.
+
+    Connect the output of LoadImage → SeedanceImageInputNode →
+    SeedanceWizardNode for a clearly readable pipeline.
+    """
+
+    CATEGORY = "Seedance Wizard"
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image",)
+    FUNCTION = "passthrough"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE", {
+                    "tooltip": "Connect a LoadImage or any image-output node here."
+                }),
+            }
+        }
+
+    def passthrough(self, image):
+        """Pass the image tensor through unchanged."""
+        return (image,)
+
+
+# ──────────────────────────────────────────────
 # ComfyUI mapping exports
 # ──────────────────────────────────────────────
 
 NODE_CLASS_MAPPINGS = {
     "SeedanceWizardNode": SeedanceWizardNode,
     "SeedanceApiKeyNode": SeedanceApiKeyNode,
+    "SeedanceImageInputNode": SeedanceImageInputNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "SeedanceWizardNode": "Seedance Wizard",
     "SeedanceApiKeyNode": "Seedance API Key",
+    "SeedanceImageInputNode": "Seedance Image Input",
 }

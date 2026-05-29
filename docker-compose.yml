@@ -1,0 +1,64 @@
+# Seedance Studio — One-Click Deployment
+# Usage: docker compose up -d
+#
+# Services:
+#   backend   — FastAPI (Python 3.11) on port 8000
+#   db        — PostgreSQL 16
+#   nginx     — Reverse proxy on port 80 (static files + API proxy)
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Seedance/backend/Dockerfile
+    container_name: seedance-backend
+    restart: unless-stopped
+    env_file:
+      - Seedance/backend/.env
+    environment:
+      - PORT=8000
+      - DATABASE_URL=postgresql://seedance:${DB_PASSWORD:-seedance_dev}@db:5432/seedance
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - seedance-net
+
+  db:
+    image: postgres:16-alpine
+    container_name: seedance-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: seedance
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-seedance_dev}
+      POSTGRES_DB: seedance
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seedance"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - seedance-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: seedance-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - Seedance/backend/static:/usr/share/nginx/html:ro
+      - Seedance/backend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - seedance-net
+
+volumes:
+  pgdata:
+
+networks:
+  seedance-net:
+    driver: bridge

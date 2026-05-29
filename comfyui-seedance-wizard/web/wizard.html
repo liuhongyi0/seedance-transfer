@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seedance 向导</title>
-<link rel="stylesheet" href="/extensions/comfyui-seedance-wizard/wizard.css">
+<title data-i18n="title">Seedance 向导</title>
+<link rel="stylesheet" href="/extensions/seedance-wizard/wizard.css">
+<script src="i18n.js"></script>
 <style>
 /* ─── 新向导专属样式 ─── */
 
@@ -538,38 +539,52 @@
   background: var(--bg-primary, #111);
   color: var(--text-primary, #e0e0e0);
 }
+
+/* Toast notification */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  max-width: 480px; padding: 12px 20px; border-radius: 8px;
+  font-size: 14px; line-height: 1.5; z-index: 9999;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateX(-50%) translateY(10px);
+}
+#toast.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+#toast.error { background: #dc2626; color: #fff; }
+#toast.warn  { background: #d97706; color: #fff; }
 </style>
 </head>
 <body>
+<div id="toast"></div>
 <div id="app">
 
   <!-- 状态栏 -->
   <div id="status-bar">
     <div id="balance-display">
-      <span class="status-label">余额</span>
+      <span class="status-label" data-i18n="balance_label">余额</span>
       <span id="balance-amount" class="status-value">--</span>
     </div>
     <div id="key-status">
       <span class="status-dot" id="key-dot"></span>
-      <span id="key-text">未配置</span>
+      <span id="key-text" data-i18n="key_unconfigured">未配置</span>
     </div>
   </div>
 
   <!-- 顶部右侧按钮 -->
   <div id="top-actions">
-    <button class="top-btn" id="btn-restart-top" title="重新开始" style="display:none">↩ 重来</button>
+    <button class="top-btn" id="btn-restart-top" data-i18n="btn_restart" style="display:none">↩ 重来</button>
     <button class="top-btn" id="btn-settings" title="设置">⚙</button>
   </div>
 
   <!-- 步骤指示器 -->
   <div id="step-indicator">
-    <div class="step-dot active" id="dot-1" title="上传与想法">1</div>
+    <div class="step-dot active" id="dot-1" data-i18n-title="step1_title">1</div>
     <div class="step-line" id="line-1"></div>
-    <div class="step-dot" id="dot-2" title="AI 分析中">2</div>
+    <div class="step-dot" id="dot-2" data-i18n-title="step2_title">2</div>
     <div class="step-line" id="line-2"></div>
-    <div class="step-dot" id="dot-3" title="参数调优">3</div>
+    <div class="step-dot" id="dot-3" data-i18n-title="step3_title">3</div>
     <div class="step-line" id="line-3"></div>
-    <div class="step-dot" id="dot-4" title="生成视频">4</div>
+    <div class="step-dot" id="dot-4" data-i18n-title="step4_title">4</div>
   </div>
 
   <!-- ═══ STEP 1：上传 & 想法 ═══ -->
@@ -577,41 +592,45 @@
 
     <!-- 图片上传区 -->
     <div>
-      <div class="field-label">原图</div>
+      <div class="field-label" data-i18n="label_original_image">原图</div>
       <div id="upload-zone" role="button" tabindex="0" aria-label="点击或拖放上传原图">
         <img id="thumb" src="" alt="缩略图" style="display:none">
         <div class="upload-hint">
           <div class="upload-icon">🖼️</div>
-          <div class="upload-text">点击上传 或 拖放图片至此<br><small style="color:#555">支持 PNG / JPG / WEBP</small></div>
+          <div class="upload-text">
+            <span data-i18n="upload_click_hint">点击上传 或 拖放图片至此</span><br>
+            <small style="color:#555" data-i18n="upload_formats">支持 PNG / JPG / WEBP</small>
+          </div>
         </div>
         <div id="upload-overlay">
-          <button class="upload-overlay-btn">更换图片</button>
+          <button class="upload-overlay-btn" data-i18n="btn_change_image">更换图片</button>
         </div>
       </div>
     </div>
 
     <!-- 创意想法 -->
     <div>
-      <div class="field-label">您的创意想法</div>
+      <div class="field-label" data-i18n="label_creative_idea">您的创意想法</div>
       <textarea id="idea-input" rows="3"
+        data-i18n-placeholder="idea_placeholder"
         placeholder="用一两句话描述您的想法，例如：把这个产品做成有质感的商业广告，突出高端感和科技感"></textarea>
     </div>
 
     <!-- 宽高比 -->
     <div>
-      <div class="field-label">视频比例</div>
+      <div class="field-label" data-i18n="label_aspect_ratio">视频比例</div>
       <select id="ratio-select" class="param-select" style="width:100%">
-        <option value="16:9">16:9 横屏</option>
-        <option value="9:16">9:16 竖屏</option>
-        <option value="1:1">1:1 方形</option>
+        <option value="16:9" data-i18n="ratio_16_9">16:9 横屏</option>
+        <option value="9:16" data-i18n="ratio_9_16">9:16 竖屏</option>
+        <option value="1:1" data-i18n="ratio_1_1">1:1 方形</option>
         <option value="4:3">4:3</option>
         <option value="3:4">3:4</option>
       </select>
     </div>
 
     <!-- 开始按钮 -->
-    <button id="btn-analyze" disabled>✨ 开始 AI 分析</button>
-    <div id="cost-hint">分析费用约 ¥0.02（Qwen + DeepSeek + Flux 预览）</div>
+    <button id="btn-analyze" disabled data-i18n="btn_analyze">✨ 开始 AI 分析</button>
+    <div id="cost-hint" data-i18n="cost_hint">分析费用约 ¥0.02（Qwen + DeepSeek + 通义万象预览）</div>
 
     <input type="file" id="file-input" accept="image/*" style="display:none">
   </div>
@@ -619,23 +638,23 @@
   <!-- ═══ STEP 2：分析中 ═══ -->
   <div class="step-panel" id="step2">
     <div class="analyzing-spinner"></div>
-    <div class="analyzing-title">AI 正在理解您的创意…</div>
+    <div class="analyzing-title" data-i18n="analyzing_title">AI 正在理解您的创意…</div>
     <div class="analyzing-steps">
       <div class="analysis-step" id="astep-qwen">
         <div class="step-icon">👁️</div>
-        <div>Qwen VL 识别图片内容</div>
+        <div data-i18n="analysis_qwen">Qwen VL 识别图片内容</div>
         <div class="mini-spinner" id="spin-qwen" style="display:none"></div>
         <div id="done-qwen" style="display:none; color:#4caf50">✓</div>
       </div>
       <div class="analysis-step" id="astep-ds">
         <div class="step-icon">🎬</div>
-        <div>DeepSeek 制定创作方案</div>
+        <div data-i18n="analysis_deepseek">DeepSeek 制定创作方案</div>
         <div class="mini-spinner" id="spin-ds" style="display:none"></div>
         <div id="done-ds" style="display:none; color:#4caf50">✓</div>
       </div>
       <div class="analysis-step" id="astep-flux">
         <div class="step-icon">🖌️</div>
-        <div>Flux 生成预览图</div>
+        <div data-i18n="analysis_flux">通义万象 生成预览图</div>
         <div class="mini-spinner" id="spin-flux" style="display:none"></div>
         <div id="done-flux" style="display:none; color:#4caf50">✓</div>
       </div>
@@ -651,7 +670,7 @@
         <img id="preview-img" src="" alt="预览图" style="display:none">
         <div id="preview-placeholder" style="display:none">
           <span style="font-size:28px;opacity:.3">🖼️</span>
-          <span style="font-size:11px;color:var(--text-muted,#666);margin-top:4px">预览图生成中…</span>
+          <span style="font-size:11px;color:var(--text-muted,#666);margin-top:4px" data-i18n="preview_generating">预览图生成中…</span>
         </div>
         <!-- Flux 不可用时的原图降级区 -->
         <div id="preview-fallback" style="display:none;position:relative;width:100%;height:100%">
@@ -662,79 +681,79 @@
             text-align:center;font-size:10px;
             color:rgba(255,255,255,.7);
             text-shadow:0 1px 3px rgba(0,0,0,.8);
-            pointer-events:none">
+            pointer-events:none" data-i18n="flux_unavailable">
             Flux 预览不可用 — 显示原图供参考，可直接生成视频
           </div>
         </div>
         <div id="regen-overlay">
           <div class="regen-spinner"></div>
-          <div class="regen-text">正在重新生成…</div>
+          <div class="regen-text" data-i18n="regenerating">正在重新生成…</div>
         </div>
       </div>
 
       <!-- 创意说明 -->
       <div id="rationale-box">
-        <div class="rationale-label">AI 创意说明</div>
+        <div class="rationale-label" data-i18n="rationale_label">AI 创意说明</div>
         <div id="rationale-text">—</div>
       </div>
 
       <!-- 分类参数 -->
       <div>
-        <div class="param-section-title">风格参数</div>
+        <div class="param-section-title" data-i18n="param_style_title">风格参数</div>
         <div class="param-grid">
 
           <div class="param-field">
-            <label for="p-style">画面风格</label>
+            <label for="p-style" data-i18n="label_style">画面风格</label>
             <select id="p-style" class="param-select" data-param="style">
-              <option value="cinematic">电影感</option>
-              <option value="commercial">商业广告</option>
-              <option value="documentary">纪录片</option>
-              <option value="social_media">社交媒体</option>
-              <option value="artistic">艺术创意</option>
+              <option value="cinematic" data-i18n="style_cinematic">电影感</option>
+              <option value="commercial" data-i18n="style_commercial">商业广告</option>
+              <option value="documentary" data-i18n="style_documentary">纪录片</option>
+              <option value="social_media" data-i18n="style_social_media">社交媒体</option>
+              <option value="artistic" data-i18n="style_artistic">艺术创意</option>
             </select>
           </div>
 
           <div class="param-field">
-            <label for="p-lighting">灯光效果</label>
+            <label for="p-lighting" data-i18n="label_lighting">灯光效果</label>
             <select id="p-lighting" class="param-select" data-param="lighting">
-              <option value="bright_daylight">明亮日光</option>
-              <option value="golden_hour">黄金时段</option>
-              <option value="soft_diffused">柔和漫射</option>
-              <option value="dramatic_shadows">戏剧阴影</option>
-              <option value="neon_night">霓虹夜景</option>
+              <option value="bright_daylight" data-i18n="lighting_bright_daylight">明亮日光</option>
+              <option value="golden_hour" data-i18n="lighting_golden_hour">黄金时段</option>
+              <option value="soft_diffused" data-i18n="lighting_soft_diffused">柔和漫射</option>
+              <option value="dramatic_shadows" data-i18n="lighting_dramatic_shadows">戏剧阴影</option>
+              <option value="neon_night" data-i18n="lighting_neon_night">霓虹夜景</option>
             </select>
           </div>
 
           <div class="param-field">
-            <label for="p-shot">构图景别</label>
+            <label for="p-shot" data-i18n="label_shot_type">构图景别</label>
             <select id="p-shot" class="param-select" data-param="shot_type">
-              <option value="close_up">特写</option>
-              <option value="medium_shot">中景</option>
-              <option value="wide_shot">广角</option>
-              <option value="aerial_view">俯瞰</option>
-              <option value="low_angle">仰视</option>
+              <option value="close_up" data-i18n="shot_close_up">特写</option>
+              <option value="medium_shot" data-i18n="shot_medium_shot">中景</option>
+              <option value="wide_shot" data-i18n="shot_wide_shot">广角</option>
+              <option value="aerial_view" data-i18n="shot_aerial_view">俯瞰</option>
+              <option value="low_angle" data-i18n="shot_low_angle">仰视</option>
             </select>
           </div>
 
           <div class="param-field">
-            <label for="p-mood">情绪氛围</label>
+            <label for="p-mood" data-i18n="label_mood">情绪氛围</label>
             <select id="p-mood" class="param-select" data-param="mood">
-              <option value="energetic">活力动感</option>
-              <option value="serene">宁静优雅</option>
-              <option value="mysterious">神秘感</option>
-              <option value="joyful">欢快喜悦</option>
-              <option value="dramatic">戏剧张力</option>
+              <option value="energetic" data-i18n="mood_energetic">活力动感</option>
+              <option value="serene" data-i18n="mood_serene">宁静优雅</option>
+              <option value="mysterious" data-i18n="mood_mysterious">神秘感</option>
+              <option value="joyful" data-i18n="mood_joyful">欢快喜悦</option>
+              <option value="dramatic" data-i18n="mood_dramatic">戏剧张力</option>
             </select>
           </div>
 
           <div class="param-field" style="grid-column: span 2">
-            <label for="p-color">色调倾向</label>
+            <label for="p-color" data-i18n="label_color_tone">色调倾向</label>
             <select id="p-color" class="param-select" data-param="color_tone">
-              <option value="warm">暖色调</option>
-              <option value="cool">冷色调</option>
-              <option value="vibrant">鲜艳饱和</option>
-              <option value="muted">低饱和</option>
-              <option value="monochrome">单色系</option>
+              <option value="warm" data-i18n="color_warm">暖色调</option>
+              <option value="cool" data-i18n="color_cool">冷色调</option>
+              <option value="vibrant" data-i18n="color_vibrant">鲜艳饱和</option>
+              <option value="muted" data-i18n="color_muted">低饱和</option>
+              <option value="monochrome" data-i18n="color_monochrome">单色系</option>
             </select>
           </div>
 
@@ -743,12 +762,12 @@
 
       <!-- 数值参数 -->
       <div>
-        <div class="param-section-title">精细调节</div>
+        <div class="param-section-title" data-i18n="param_fine_tune">精细调节</div>
         <div class="slider-list">
 
           <div class="slider-row">
             <div class="slider-label">
-              动感强度
+              <span data-i18n="slider_motion">动感强度</span>
               <span id="lbl-motion">30</span>
             </div>
             <div class="slider-track">
@@ -759,7 +778,7 @@
 
           <div class="slider-row">
             <div class="slider-label">
-              景深虚化
+              <span data-i18n="slider_dof">景深虚化</span>
               <span id="lbl-dof">40</span>
             </div>
             <div class="slider-track">
@@ -770,7 +789,7 @@
 
           <div class="slider-row">
             <div class="slider-label">
-              细节丰富
+              <span data-i18n="slider_detail">细节丰富</span>
               <span id="lbl-detail">55</span>
             </div>
             <div class="slider-track">
@@ -781,7 +800,7 @@
 
           <div class="slider-row">
             <div class="slider-label">
-              饱和度
+              <span data-i18n="slider_saturation">饱和度</span>
               <span id="lbl-sat">50</span>
             </div>
             <div class="slider-track">
@@ -796,7 +815,7 @@
       <!-- 合成 Prompt 展示 -->
       <div id="composed-prompt-box">
         <div class="prompt-toggle-row" id="prompt-toggle-row">
-          <span class="prompt-toggle-label">合成 Prompt（只读）</span>
+          <span class="prompt-toggle-label" data-i18n="prompt_label">合成 Prompt（只读）</span>
           <span class="prompt-toggle-arrow" id="prompt-arrow">▼</span>
         </div>
         <div id="composed-prompt-text"></div>
@@ -807,14 +826,14 @@
 
   <!-- Step 3 操作按钮（固定在底部） -->
   <div id="step3-actions" style="display:none">
-    <button id="btn-regen-manual" disabled>↺ 重新生成预览</button>
-    <button id="btn-gen-video" disabled>▶ 生成视频</button>
+    <button id="btn-regen-manual" disabled data-i18n="btn_regen">↺ 重新生成预览</button>
+    <button id="btn-gen-video" disabled data-i18n="btn_gen_video">▶ 生成视频</button>
   </div>
 
   <!-- ═══ STEP 4：视频生成中 ═══ -->
   <div class="step-panel" id="step4">
     <div class="analyzing-spinner" id="video-spinner"></div>
-    <div id="video-status-title">正在生成视频…</div>
+    <div id="video-status-title" data-i18n="video_generating">正在生成视频…</div>
     <div id="video-progress-wrap">
       <div id="video-progress-bar">
         <div id="video-progress-fill"></div>
@@ -825,39 +844,81 @@
     <!-- 完成状态 -->
     <div id="video-result">
       <div class="result-icon">🎬</div>
-      <div class="result-title">视频生成完成！</div>
+      <div class="result-title" data-i18n="video_complete_title">视频生成完成！</div>
       <div id="video-url-display" style="font-size:11px; color:#666; word-break:break-all; text-align:center; max-width:260px;"></div>
-      <button id="btn-copy-url">复制视频链接</button>
-      <button id="btn-restart">重新制作</button>
+      <button id="btn-copy-url" data-i18n="btn_copy_url">复制视频链接</button>
+      <button id="btn-restart" data-i18n="btn_new_video">重新制作</button>
     </div>
   </div>
 
   <!-- 设置弹窗 -->
   <div id="settings-modal" role="dialog" aria-modal="true">
     <div class="modal-card">
-      <div class="modal-title">⚙ Seedance 设置</div>
+      <div class="modal-title" data-i18n="settings_title">⚙ Seedance 设置</div>
+
+      <!-- 注册 / 登录 Tab -->
+      <div class="tab-bar" style="display:flex;margin-bottom:12px;border-bottom:2px solid var(--border)">
+        <button class="tab-btn active" id="tab-register" style="flex:1;padding:8px;border:none;background:none;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--accent);margin-bottom:-2px" data-i18n="settings_tab_register">注册</button>
+        <button class="tab-btn" id="tab-login" style="flex:1;padding:8px;border:none;background:none;color:var(--text2);font-size:14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px" data-i18n="settings_tab_login">登录</button>
+      </div>
+
+      <div id="settings-register-panel">
+        <p style="font-size:12px;color:var(--text2);margin:0 0 10px" data-i18n="settings_register_hint">一步注册，自动激活 API Key</p>
+        <div class="form-group">
+          <label for="set-email" data-i18n="settings_email_label">邮箱</label>
+          <input type="email" id="set-email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="set-password" data-i18n="settings_password_label">密码（至少8位）</label>
+          <input type="password" id="set-password" placeholder="········" autocomplete="new-password">
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn-save" id="btn-register-activate" style="flex:1" data-i18n="settings_register_btn">注册并激活</button>
+        </div>
+      </div>
+
+      <div id="settings-login-panel" style="display:none">
+        <p style="font-size:12px;color:var(--text2);margin:0 0 10px" data-i18n="settings_login_hint">用已有账号登录，自动获取 API Key</p>
+        <div class="form-group">
+          <label for="set-email2" data-i18n="settings_email_label">邮箱</label>
+          <input type="email" id="set-email2" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="set-password2" data-i18n="settings_password_label">密码</label>
+          <input type="password" id="set-password2" placeholder="········" autocomplete="current-password">
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn-save" id="btn-login-activate" style="flex:1" data-i18n="settings_login_btn">登录并激活</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;color:var(--text3);font-size:11px">
+        <hr style="flex:1;border:none;border-top:1px solid var(--border)">
+        <span data-i18n="settings_or_manual">或手动输入</span>
+        <hr style="flex:1;border:none;border-top:1px solid var(--border)">
+      </div>
 
       <div class="form-group">
-        <label for="set-api-key">API Key</label>
+        <label for="set-api-key" data-i18n="settings_api_key_label">API Key</label>
         <input type="password" id="set-api-key" placeholder="sk-seed-...">
       </div>
 
       <div class="form-group">
-        <label for="set-backend">后端地址</label>
-        <input type="text" id="set-backend" placeholder="http://localhost:3000">
+        <label for="set-backend" data-i18n="settings_backend_label">后端地址</label>
+        <input type="text" id="set-backend" placeholder="https://see4dance.com">
       </div>
 
       <div class="form-group">
-        <label for="set-lang">界面语言</label>
+        <label for="set-lang" data-i18n="settings_language_label">界面语言</label>
         <select id="set-lang">
-          <option value="zh">中文</option>
-          <option value="en">English</option>
+          <option value="zh" data-i18n="language_zh">中文</option>
+          <option value="en" data-i18n="language_en">English</option>
         </select>
       </div>
 
       <div class="modal-actions">
-        <button class="btn-save" id="btn-settings-save">保存</button>
-        <button class="btn-cancel" id="btn-settings-cancel">取消</button>
+        <button class="btn-save" id="btn-settings-save" data-i18n="settings_save">保存</button>
+        <button class="btn-cancel" id="btn-settings-cancel" data-i18n="settings_cancel">取消</button>
       </div>
       <div class="settings-msg" id="settings-msg"></div>
     </div>
@@ -870,6 +931,7 @@
 // Seedance Wizard v2 — 参数驱动流程
 //
 // 通信链：wizard.html <-> postMessage <-> main.js <-> PromptServer <-> Node.js Backend
+// i18n: window.__t(key, ...args) / window.__setLocale(lang) / window.__getLocale()
 // ──────────────────────────────────────────────────────────────
 
 (function () {
@@ -894,7 +956,7 @@
       setTimeout(function () {
         if (_rpcCallbacks[id]) {
           delete _rpcCallbacks[id];
-          reject(new Error("RPC 超时：" + route));
+          reject(new Error(__t("error_rpc_timeout") + route));
         }
       }, 90000);
     });
@@ -978,7 +1040,25 @@
     regenPending: false,
     isRegenerating: false,
     hasPreview: false,
+    _llmCamera: null,
+    _llmColorPalette: null,
   };
+
+  // ── Toast 提示 ───────────────────────────────────────────────
+
+  var toastTimer = null;
+  function showToast(msg, type) {
+    type = type || "error";
+    var el = document.getElementById("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.className = type;
+    el.classList.add("visible");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      el.classList.remove("visible");
+    }, 4000);
+  }
 
   // ── 步骤切换 ─────────────────────────────────────────────────
 
@@ -1092,16 +1172,24 @@
 
     rpcCall("/seedance/wizard/analyze", "POST", {
       image_b64:   state.imageB64,
-      user_idea:   ideaInput.value.trim(),
+      idea_text:   ideaInput.value.trim(),
       aspect_ratio: ratioSelect.value,
     })
     .then(function (data) {
-      // 更新状态
-      state.sessionId       = data.session_id;
-      state.baseDescription = data.base_description;
-      state.currentParams   = data.initial_params;
-      state.composedPrompt  = data.composed_prompt;
-      state.previewUrl      = data.preview_url;
+      // 更新状态 — backend returns {style, mood, color_palette, camera, prompt_en, prompt_cn}
+      state.currentParams = {
+        style: data.style || "cinematic",
+        mood: data.mood || "dramatic",
+        color_palette: data.color_palette || "",
+        camera: data.camera || "static",
+        lighting: data.lighting || "soft_diffused",
+        prompt_en: data.prompt_en || "",
+      };
+      // Preserve LLM descriptions for API calls (dropdown codes are lossy)
+      state._llmCamera = data.camera || "";
+      state._llmColorPalette = data.color_palette || "";
+      state.composedPrompt = data.prompt_en || "";
+      state.previewUrl = "";  // populated after preview step
 
       // 标记全部步骤完成（真实延迟由网络决定，这里视觉上快进）
       setAnalysisStep(3);
@@ -1115,7 +1203,7 @@
     })
     .catch(function (err) {
       goToStep(1);
-      alert("分析失败：" + err.message);
+      showToast(__t("error_analyze_failed") + err.message);
     });
 
     // 模拟各子步骤进度（实际是单次 API 调用，这里只做视觉）
@@ -1130,11 +1218,11 @@
     var p = state.currentParams;
 
     // 分类下拉
-    $("#p-style").value   = p.style     || "cinematic";
-    $("#p-lighting").value= p.lighting  || "soft_diffused";
-    $("#p-shot").value    = p.shot_type || "medium_shot";
-    $("#p-mood").value    = p.mood      || "serene";
-    $("#p-color").value   = p.color_tone|| "vibrant";
+    $("#p-style").value   = p.style          || "cinematic";
+    $("#p-lighting").value= p.lighting       || "soft_diffused";
+    $("#p-shot").value    = p.camera         || "medium_shot";
+    $("#p-mood").value    = p.mood           || "serene";
+    $("#p-color").value   = p.color_palette  || "vibrant";
 
     // 数值滑块
     setSlider("s-motion",  "v-motion",  p.motion_intensity);
@@ -1152,7 +1240,7 @@
     // 创意说明
     rationaleText.textContent = state.baseDescription
       ? (state.currentParams && state.composedPrompt
-          ? "已根据图片内容和您的想法生成初始创作方案。可调整下方参数来实时更新预览图。"
+          ? __t("rationale_default")
           : "—")
       : "—";
 
@@ -1227,9 +1315,9 @@
     return {
       style:            $("#p-style").value,
       lighting:         $("#p-lighting").value,
-      shot_type:        $("#p-shot").value,
+      camera:           $("#p-shot").value,
       mood:             $("#p-mood").value,
-      color_tone:       $("#p-color").value,
+      color_palette:    $("#p-color").value,
       motion_intensity: parseInt($("#s-motion").value, 10),
       depth_of_field:   parseInt($("#s-dof").value, 10),
       detail_richness:  parseInt($("#s-detail").value, 10),
@@ -1244,7 +1332,7 @@
     syncSliderDisplay("s-detail", "v-detail");
     syncSliderDisplay("s-sat",    "v-sat");
 
-    if (!state.sessionId || !state.hasPreview) return;
+    if (!state.composedPrompt || !state.hasPreview) return;
 
     // 防抖 600ms
     if (state.regenDebounceTimer) clearTimeout(state.regenDebounceTimer);
@@ -1272,19 +1360,26 @@
   // ── 调用 /preview（参数驱动）────────────────────────────────
 
   function triggerRegen() {
-    if (state.isRegenerating || !state.sessionId) return;
+    if (state.isRegenerating || !state.composedPrompt) return;
     state.isRegenerating = true;
     state.currentParams  = readCurrentParams();
+
+    // Prefer LLM descriptions for camera/color (dropdown codes are lossy)
+    if (state._llmCamera)        state.currentParams.camera        = state._llmCamera;
+    if (state._llmColorPalette)  state.currentParams.color_palette = state._llmColorPalette;
 
     regenOverlay.classList.add("visible");
     btnRegenManual.disabled = true;
     btnGenVideo.disabled    = true;
 
+    var p = state.currentParams || {};
     rpcCall("/seedance/wizard/preview", "POST", {
-      session_id:       state.sessionId,
-      params:           state.currentParams,
-      base_description: state.baseDescription,
-      aspect_ratio:     ratioSelect.value,
+      style:        p.style || "cinematic",
+      mood:         p.mood || "dramatic",
+      color_palette: p.color_palette || "",
+      camera:       p.camera || "static",
+      prompt_en:    state.composedPrompt || p.prompt_en || "",
+      aspect_ratio: ratioSelect.value,
     })
     .then(function (data) {
       state.previewUrl     = data.preview_url;
@@ -1297,7 +1392,7 @@
       }
     })
     .catch(function (err) {
-      alert("预览更新失败：" + err.message);
+      showToast(__t("error_preview_failed") + err.message);
     })
     .finally(function () {
       state.isRegenerating = false;
@@ -1321,37 +1416,54 @@
 
   // ── 生成视频 ─────────────────────────────────────────────────
 
+  function buildGenPrompt() {
+    var p = state.currentParams || readCurrentParams();
+    var parts = [state.composedPrompt];
+    var hints = [];
+    if (p.style)     hints.push("Style: " + p.style);
+    if (p.lighting)  hints.push("Lighting: " + p.lighting);
+    if (p.camera)    hints.push("Camera: " + p.camera);
+    if (p.mood)      hints.push("Mood: " + p.mood);
+    if (p.color_palette) hints.push("Colors: " + p.color_palette);
+    if (p.motion_intensity !== undefined)  hints.push("Motion: " + p.motion_intensity + "%");
+    if (p.depth_of_field !== undefined)    hints.push("DOF: " + p.depth_of_field + "%");
+    if (p.detail_richness !== undefined)   hints.push("Detail: " + p.detail_richness + "%");
+    if (p.saturation_level !== undefined)  hints.push("Saturation: " + p.saturation_level + "%");
+    if (hints.length) parts.push(hints.join(", "));
+    return parts.join(". ");
+  }
+
   btnGenVideo.addEventListener("click", function () {
-    if (!state.sessionId || !state.composedPrompt) return;
+    if (!state.composedPrompt) return;
 
     goToStep(4);
     videoResult.classList.remove("visible");
     videoSpinner.style.display = "block";
-    videoStatusTitle.textContent = "正在提交视频任务…";
+    videoStatusTitle.textContent = __t("video_submitting");
     videoProgressFill.style.width = "0%";
     videoProgressText.textContent = "0%";
+    btnGenVideo.disabled = true;
 
     // I2V: prefer original uploaded image as reference (always base64)
     var i2vMode = Boolean(state.previewUrl || state.imageB64);
     var refImage = state.imageB64 || state.previewUrl || null;
 
     rpcCall("/seedance/video/generate", "POST", {
-      session_id:    state.sessionId,
-      mode:          i2vMode ? "image_to_video" : "text_to_video",
-      prompt_override: state.composedPrompt,
+      prompt_en:     buildGenPrompt(),
       image_b64:     refImage,
       aspect_ratio:  ratioSelect.value,
       duration:      5,
-      quality:       "basic",
+      resolution:    "720p",
     })
     .then(function (data) {
       state.videoTaskId = data.task_id;
-      videoStatusTitle.textContent = "视频生成中（任务已提交）…";
+      videoStatusTitle.textContent = __t("video_task_submitted");
       startVideoPoll();
     })
     .catch(function (err) {
       goToStep(3);
-      alert("视频生成失败：" + err.message);
+      showToast(__t("error_video_failed") + err.message);
+      btnGenVideo.disabled = false;
     });
   });
 
@@ -1368,7 +1480,7 @@
           var pct = Math.min(data.progress || 0, 99);
           videoProgressFill.style.width = pct + "%";
           videoProgressText.textContent = pct + "%";
-          videoStatusTitle.textContent = "视频生成中 " + pct + "%…";
+          videoStatusTitle.textContent = __t("video_progress", String(pct));
 
           if (data.status === "completed") {
             clearInterval(videoPollTimer);
@@ -1386,7 +1498,7 @@
     videoSpinner.style.display = "none";
     videoProgressFill.style.width = "100%";
     videoProgressText.textContent = "100%";
-    videoStatusTitle.textContent = "完成！";
+    videoStatusTitle.textContent = __t("video_complete_status");
     videoUrlDisplay.textContent = url || "";
     videoResult.classList.add("visible");
     loadBalance();
@@ -1394,7 +1506,7 @@
 
   function onVideoFailed(msg) {
     videoSpinner.style.display = "none";
-    videoStatusTitle.textContent = "生成失败：" + (msg || "未知错误");
+    videoStatusTitle.textContent = __t("error_generation_failed") + (msg || __t("error_unknown"));
   }
 
   // WebSocket 事件（来自 nodes.py 推送）
@@ -1408,6 +1520,51 @@
       videoProgressText.textContent = pct + "%";
     } else if (event === "seedance_error") {
       onVideoFailed(payload.message);
+    } else if (event === "seedance_pipeline_progress") {
+      handlePipelineProgress(payload);
+    }
+  }
+
+  function handlePipelineProgress(payload) {
+    var stage = payload.stage;
+    if (stage === "analyze") {
+      goToStep(2);
+      setAnalysisStep(0);
+      // Simulate step animation
+      setTimeout(function () { setAnalysisStep(1); }, 1500);
+      setTimeout(function () { setAnalysisStep(2); }, 4000);
+      setTimeout(function () { setAnalysisStep(3); }, 5000);
+    } else if (stage === "preview") {
+      goToStep(3);
+      if (payload.analyze_result) {
+        state.composedPrompt = payload.analyze_result.prompt_en;
+        state._llmCamera = payload.analyze_result.camera || "";
+        state._llmColorPalette = payload.analyze_result.color_palette || "";
+        state.currentParams = {
+          style: payload.analyze_result.style,
+          mood: payload.analyze_result.mood,
+          camera: payload.analyze_result.camera,
+          color_palette: payload.analyze_result.color_palette,
+          lighting: payload.analyze_result.lighting,
+          motion_intensity: 0.5,
+          depth_of_field: 0.5,
+          detail_richness: 0.7,
+          saturation_level: 0.6,
+        };
+        renderParamPanel();
+        updatePromptDisplay();
+      }
+    } else if (stage === "generate" || stage === "generating") {
+      goToStep(4);
+      videoResult.classList.remove("visible");
+      videoSpinner.style.display = "block";
+      videoStatusTitle.textContent = payload.message || __t("video_generating");
+      var pct = Math.min(payload.progress || 0, 99);
+      videoProgressFill.style.width = pct + "%";
+      videoProgressText.textContent = pct + "%";
+      if (payload.task_id) {
+        state.videoTaskId = payload.task_id;
+      }
     }
   }
 
@@ -1416,8 +1573,8 @@
   btnCopyUrl.addEventListener("click", function () {
     var url = videoUrlDisplay.textContent;
     if (url) navigator.clipboard.writeText(url).then(function () {
-      btnCopyUrl.textContent = "已复制！";
-      setTimeout(function () { btnCopyUrl.textContent = "复制视频链接"; }, 2000);
+      btnCopyUrl.textContent = __t("btn_copied");
+      setTimeout(function () { btnCopyUrl.textContent = __t("btn_copy_url"); }, 2000);
     });
   });
 
@@ -1431,6 +1588,8 @@
     state.previewUrl      = null;
     state.videoTaskId     = null;
     state.hasPreview      = false;
+    state._llmCamera      = null;
+    state._llmColorPalette = null;
 
     if (videoPollTimer) clearInterval(videoPollTimer);
 
@@ -1463,8 +1622,8 @@
     rpcCall("/seedance/settings", "GET", null)
       .then(function (cfg) {
         $("#set-api-key").value  = "";  // 安全起见不回显
-        $("#set-backend").value  = cfg.backend_url || "http://localhost:3000";
-        $("#set-lang").value     = cfg.language    || "zh";
+        $("#set-backend").value  = cfg.backend_url || "http://localhost:8000";
+        $("#set-lang").value     = cfg.language    || __getLocale();
       })
       .catch(function () {});
     settingsModal.classList.add("open");
@@ -1475,6 +1634,128 @@
   });
   settingsModal.addEventListener("click", function (e) {
     if (e.target === settingsModal) settingsModal.classList.remove("open");
+  });
+
+  // ── Tab 切换 ────────────────────────────────────────────────
+  var tabRegister = $("#tab-register");
+  var tabLogin = $("#tab-login");
+  var panelRegister = $("#settings-register-panel");
+  var panelLogin = $("#settings-login-panel");
+
+  tabRegister.addEventListener("click", function () {
+    tabRegister.classList.add("active"); tabRegister.style.color = "var(--text)";
+    tabRegister.style.fontWeight = "600"; tabRegister.style.borderBottomColor = "var(--accent)";
+    tabLogin.classList.remove("active"); tabLogin.style.color = "var(--text2)";
+    tabLogin.style.fontWeight = "400"; tabLogin.style.borderBottomColor = "transparent";
+    panelRegister.style.display = "block";
+    panelLogin.style.display = "none";
+    settingsMsg.textContent = ""; settingsMsg.className = "settings-msg";
+  });
+  tabLogin.addEventListener("click", function () {
+    tabLogin.classList.add("active"); tabLogin.style.color = "var(--text)";
+    tabLogin.style.fontWeight = "600"; tabLogin.style.borderBottomColor = "var(--accent)";
+    tabRegister.classList.remove("active"); tabRegister.style.color = "var(--text2)";
+    tabRegister.style.fontWeight = "400"; tabRegister.style.borderBottomColor = "transparent";
+    panelLogin.style.display = "block";
+    panelRegister.style.display = "none";
+    settingsMsg.textContent = ""; settingsMsg.className = "settings-msg";
+  });
+
+  // ── 通用激活逻辑 ────────────────────────────────────────────
+  function getBackend() {
+    return ($("#set-backend").value.trim() || "https://see4dance.com").replace(/\/$/, "");
+  }
+  function handleActivationResult(result) {
+    if (!result.ok) throw new Error(result.data.detail || "Activation failed");
+    var d = result.data;
+    if (d.api_key) {
+      $("#set-api-key").value = d.api_key;
+      settingsMsg.textContent = __t("settings_activated") || "Activated! Saving...";
+      settingsMsg.className = "settings-msg ok";
+      rpcCall("/seedance/settings", "POST", {
+        api_key: d.api_key,
+        backend_url: getBackend(),
+        language: $("#set-lang").value
+      })
+      .then(function () {
+        settingsMsg.textContent = d.is_new
+          ? (__t("settings_registered_saved") || "Account created! API key saved.")
+          : (__t("settings_activated_saved") || "Ready! API key saved.");
+        loadKeyStatus();
+        setTimeout(function () { settingsModal.classList.remove("open"); }, 1500);
+      })
+      .catch(function () {
+        settingsMsg.textContent = __t("settings_activated_manual_save") || "Activated! Click Save to finish.";
+      });
+    } else {
+      settingsMsg.textContent = __t("settings_has_key") || "Logged in. You have existing API keys — check web portal.";
+      settingsMsg.className = "settings-msg ok";
+    }
+  }
+
+  // ── 注册激活 ────────────────────────────────────────────────
+  var btnRegisterActivate = $("#btn-register-activate");
+  btnRegisterActivate.addEventListener("click", function () {
+    var email = $("#set-email").value.trim();
+    var password = $("#set-password").value;
+    if (!email || !password) {
+      settingsMsg.textContent = __t("settings_login_fill_fields") || "Please fill in email and password";
+      settingsMsg.className = "settings-msg err";
+      return;
+    }
+    if (password.length < 8) {
+      settingsMsg.textContent = __t("settings_password_short") || "Password must be at least 8 characters";
+      settingsMsg.className = "settings-msg err";
+      return;
+    }
+    btnRegisterActivate.disabled = true;
+    btnRegisterActivate.textContent = (__t("settings_registering") || "Creating account...");
+
+    fetch(getBackend() + "/api/auth/comfyui/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, password: password })
+    })
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+    .then(handleActivationResult)
+    .catch(function (err) {
+      settingsMsg.textContent = err.message;
+      settingsMsg.className = "settings-msg err";
+    })
+    .finally(function () {
+      btnRegisterActivate.disabled = false;
+      btnRegisterActivate.textContent = __t("settings_register_btn") || "Register & Activate";
+    });
+  });
+
+  // ── 登录激活 ────────────────────────────────────────────────
+  var btnLoginActivate = $("#btn-login-activate");
+  btnLoginActivate.addEventListener("click", function () {
+    var email = $("#set-email2").value.trim();
+    var password = $("#set-password2").value;
+    if (!email || !password) {
+      settingsMsg.textContent = __t("settings_login_fill_fields") || "Please fill in email and password";
+      settingsMsg.className = "settings-msg err";
+      return;
+    }
+    btnLoginActivate.disabled = true;
+    btnLoginActivate.textContent = __t("settings_logging_in") || "Logging in...";
+
+    fetch(getBackend() + "/api/auth/comfyui/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, password: password })
+    })
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+    .then(handleActivationResult)
+    .catch(function (err) {
+      settingsMsg.textContent = err.message;
+      settingsMsg.className = "settings-msg err";
+    })
+    .finally(function () {
+      btnLoginActivate.disabled = false;
+      btnLoginActivate.textContent = __t("settings_login_btn") || "Login & Activate";
+    });
   });
 
   btnSettingsSave.addEventListener("click", function () {
@@ -1489,16 +1770,48 @@
 
     rpcCall("/seedance/settings", "POST", updates)
       .then(function () {
-        settingsMsg.textContent = "保存成功！";
+        // 同步 i18n 语言
+        if (lang && lang !== __getLocale()) {
+          __setLocale(lang).then(function () {
+            // 重新应用翻译后，更新动态文本
+            refreshDynamicI18n();
+          });
+        }
+        settingsMsg.textContent = __t("settings_saved");
         settingsMsg.className = "settings-msg ok";
         setTimeout(function () { settingsModal.classList.remove("open"); }, 1200);
         loadKeyStatus();
       })
       .catch(function (err) {
-        settingsMsg.textContent = "保存失败：" + err.message;
+        settingsMsg.textContent = __t("settings_save_failed_prefix") + err.message;
         settingsMsg.className = "settings-msg err";
       });
   });
+
+  // ── 语言变更后刷新动态文本 ──────────────────────────────────
+
+  function refreshDynamicI18n() {
+    // 更新按钮文本（可能在 JS 中被修改过）
+    btnCopyUrl.textContent = __t("btn_copy_url");
+    // 状态栏 key 文本
+    loadKeyStatus();
+    // 如果当前在 step3，更新 rationale
+    if (state.currentStep === 3 && state.baseDescription && state.currentParams && state.composedPrompt) {
+      rationaleText.textContent = __t("rationale_default");
+    }
+    // 视频状态标题
+    if (state.currentStep === 4) {
+      if (state.videoTaskId) {
+        videoStatusTitle.textContent = __t("video_task_submitted");
+      } else {
+        videoStatusTitle.textContent = __t("video_generating");
+      }
+    }
+    // 更新按钮的 data-i18n 元素（由 i18n.js applyTranslations 处理）
+    if (typeof window.__t === "function") {
+      // i18n.js 会在 setLocale 后自动调用 applyTranslations
+    }
+  }
 
   // ── 余额 & Key 状态 ──────────────────────────────────────────
 
@@ -1520,27 +1833,49 @@
       .then(function (cfg) {
         if (cfg.api_key_configured) {
           keyDot.className = "status-dot connected";
-          keyText.textContent = cfg.api_key_prefix || "已配置";
+          keyText.textContent = cfg.api_key_prefix || __t("key_configured");
         } else {
           keyDot.className = "status-dot error";
-          keyText.textContent = "未配置";
+          keyText.textContent = __t("key_unconfigured");
         }
       })
       .catch(function () {
         keyDot.className = "status-dot";
-        keyText.textContent = "检查失败";
+        keyText.textContent = __t("key_check_failed");
       });
   }
 
   // ── 初始化 ───────────────────────────────────────────────────
 
   function init() {
-    loadKeyStatus();
-    loadBalance();
-    goToStep(1);
+    // 同步 i18n locale 与 Python 配置
+    rpcCall("/seedance/locale", "GET", null)
+      .then(function (data) {
+        var cfgLocale = data.locale || "zh";
+        if (cfgLocale !== __getLocale()) {
+          return __setLocale(cfgLocale);
+        }
+      })
+      .catch(function () {
+        // i18n.js 已经用浏览器语言初始化，忽略错误
+      })
+      .finally(function () {
+        loadKeyStatus();
+        loadBalance();
+        goToStep(1);
+      });
   }
 
-  init();
+  // 等待 i18n.js 加载完成后再初始化
+  if (window.__t) {
+    init();
+  } else {
+    // i18n.js 尚未加载完成，等待 locale_changed 事件
+    document.addEventListener("seedance_locale_changed", function onLocaleReady() {
+      document.removeEventListener("seedance_locale_changed", onLocaleReady);
+      init();
+    });
+  }
 
 })();
 </script>

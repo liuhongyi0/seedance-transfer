@@ -1,0 +1,3820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * blob:; connect-src *; frame-src https://accounts.google.com;">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seedance Studio · 视频创作工作台</title>
+<style>
+:root {
+  --bg: #0a0a0f; --bg2: #13131a; --bg3: #1c1c26; --bg4: #252535;
+  --border: #2a2a3a; --border2: #383850;
+  --accent: #7c6dfa; --accent2: #9d91fc; --accent-glow: rgba(124,109,250,0.15);
+  --text: #e8e8f0; --text2: #9090a8; --text3: #55556a;
+  --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+  --radius: 10px; --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; font-size: 14px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* HEADER */
+header { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 56px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; gap: 16px; }
+.logo { font-size: 16px; font-weight: 700; letter-spacing: .5px; color: var(--text); display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
+.step-nav { display: flex; align-items: center; gap: 4px; }
+.step-btn { display: flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all .2s; color: var(--text3); font-size: 13px; user-select: none; border: 1px solid transparent; }
+.step-btn:hover { color: var(--text2); background: var(--bg3); }
+.step-btn.active { color: var(--accent2); background: var(--accent-glow); border-color: var(--accent); }
+.step-btn.done { color: var(--green); }
+.step-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: var(--bg4); }
+.step-btn.active .step-num { background: var(--accent); color: #fff; }
+.step-btn.done .step-num { background: var(--green); color: #fff; }
+.step-arrow { color: var(--text3); font-size: 12px; margin: 0 2px; }
+
+/* LANG TOGGLE */
+.lang-toggle-btn { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; background: var(--bg3); border: 1.5px solid var(--border2); cursor: pointer; color: var(--text2); transition: all .15s; white-space: nowrap; }
+.lang-toggle-btn.active { border-color: var(--accent); color: var(--accent2); background: var(--accent-glow); }
+.lang-en-label { display: none; font-size: 10px; color: var(--text3); margin-top: 1px; line-height: 1; }
+body.lang-en .lang-en-label { display: block; }
+
+/* LAYOUT */
+.workspace { display: flex; flex: 1; overflow: hidden; }
+.main-content { flex: 1; overflow-y: auto; padding: 24px; }
+.main-content::-webkit-scrollbar { width: 5px; }
+.main-content::-webkit-scrollbar-track { background: transparent; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* MATERIAL PANEL */
+.material-panel { width: 260px; flex-shrink: 0; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.mat-header { padding: 14px 16px 10px; font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.mat-section { border-bottom: 1px solid var(--border); }
+.mat-section-title { padding: 10px 16px; font-size: 12px; color: var(--text2); font-weight: 600; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.mat-count { font-size: 11px; color: var(--text3); background: var(--bg4); padding: 1px 7px; border-radius: 10px; }
+.mat-body { padding: 8px 12px 12px; }
+.mat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; }
+.mat-thumb { aspect-ratio: 16/9; border-radius: 5px; background: var(--bg4); border: 1.5px solid transparent; cursor: pointer; overflow: hidden; transition: all .15s; position: relative; display: flex; align-items: center; justify-content: center; }
+.mat-thumb:hover { border-color: var(--accent); }
+.mat-thumb.selected { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+.mat-thumb.empty { border-style: dashed; border-color: var(--border2); cursor: default; }
+.mat-thumb.empty:hover { border-color: var(--border2); }
+.mat-thumb-placeholder { font-size: 18px; opacity: .3; }
+.mat-thumb .check-badge { display: none; position: absolute; top: 3px; right: 3px; width: 14px; height: 14px; background: var(--green); border-radius: 50%; font-size: 8px; color: #fff; font-weight: 700; align-items: center; justify-content: center; }
+.mat-thumb.selected .check-badge { display: flex; }
+.mat-list { display: flex; flex-direction: column; gap: 6px; }
+.mat-item { background: var(--bg3); border-radius: 7px; padding: 8px 10px; display: flex; align-items: center; gap: 9px; border: 1.5px solid transparent; cursor: pointer; transition: all .15s; }
+.mat-item:hover { border-color: var(--accent); }
+.mat-item.selected { border-color: var(--accent); background: var(--accent-glow); }
+.mat-item-icon { width: 32px; height: 24px; border-radius: 4px; background: var(--bg4); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; position: relative; cursor: pointer; }
+.mat-item-info { flex: 1; min-width: 0; }
+.mat-item-name { font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mat-item-meta { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.mat-item-del { color: var(--text3); font-size: 14px; padding: 2px 4px; border-radius: 3px; cursor: pointer; }
+.mat-item-del:hover { color: var(--red); background: rgba(248,113,113,.1); }
+.mat-placeholder { text-align: center; padding: 12px 0; color: var(--text3); font-size: 12px; }
+
+/* STEP PANELS */
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+.panel-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.panel-subtitle { color: var(--text2); font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+
+/* CARD */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+.card-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.card-title::before { content: ''; width: 3px; height: 13px; background: var(--accent); border-radius: 2px; }
+
+/* THEME GRID */
+.theme-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; }
+.theme-card { background: var(--bg3); border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 6px; text-align: center; cursor: pointer; transition: all .15s; }
+.theme-card:hover { border-color: var(--accent); background: var(--accent-glow); }
+.theme-card.selected { border-color: var(--accent); background: var(--accent-glow); color: var(--accent2); }
+.theme-card .icon { font-size: 20px; margin-bottom: 4px; }
+.theme-card .label { font-size: 11px; color: var(--text2); }
+.theme-card.selected .label { color: var(--accent2); }
+
+/* TAG ROW */
+.tag-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.tag { padding: 5px 12px; border-radius: 16px; font-size: 12px; background: var(--bg3); border: 1.5px solid var(--border); cursor: pointer; transition: all .15s; color: var(--text2); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.tag:hover { border-color: var(--border2); color: var(--text); }
+.tag.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent2); }
+
+/* RATIO BTNS */
+.ratio-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.ratio-btn { padding: 7px 18px; border-radius: 7px; font-size: 12px; background: var(--bg3); border: 1.5px solid var(--border); cursor: pointer; transition: all .15s; color: var(--text2); }
+.ratio-btn:hover { border-color: var(--border2); }
+.ratio-btn.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent2); font-weight: 600; }
+
+/* INPUT */
+.text-input { width: 100%; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 13px; outline: none; transition: border-color .15s; font-family: inherit; }
+.text-input:focus { border-color: var(--accent); }
+.text-input::placeholder { color: var(--text3); }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; border: none; font-family: inherit; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #6a5cf0; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,109,250,.35); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { background: var(--bg4); color: var(--text3); cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
+.btn-secondary:hover { background: var(--bg4); }
+.btn-full { width: 100%; }
+
+/* GENERATE RESULT */
+.gen-result { display: none; margin-top: 16px; }
+.gen-result.visible { display: block; }
+.gen-images { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 12px; }
+.gen-img-card { border-radius: 8px; overflow: hidden; border: 1.5px solid var(--border); position: relative; cursor: pointer; transition: all .15s; }
+.gen-img-card:hover { border-color: var(--accent); }
+.gen-img-preview { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: flex; align-items: center; justify-content: center; }
+.gen-img-actions { display: flex; gap: 6px; padding: 8px; background: var(--bg2); }
+.btn-save { flex: 1; padding: 6px; background: rgba(52,211,153,.1); color: var(--green); border: 1px solid rgba(52,211,153,.3); border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all .15s; }
+.btn-save:hover { background: rgba(52,211,153,.2); }
+.btn-discard { padding: 6px 10px; background: transparent; color: var(--text3); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; font-size: 12px; transition: all .15s; }
+.btn-discard:hover { color: var(--red); border-color: rgba(248,113,113,.4); }
+
+/* STEP 2 SLIDERS */
+.adjust-layout { display: grid; grid-template-columns: 200px 1fr 1fr; gap: 20px; align-items: start; }
+.img-select-list { display: flex; flex-direction: column; gap: 6px; }
+.img-select-item { width: 100%; aspect-ratio: 16/9; border-radius: 7px; background: var(--bg3); border: 1.5px solid var(--border); cursor: pointer; overflow: hidden; transition: all .15s; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.img-select-item:hover { border-color: var(--border2); }
+.img-select-item.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.img-select-item.empty { cursor: default; color: var(--text3); font-size: 13px; }
+.slider-group { display: flex; flex-direction: column; gap: 14px; }
+.slider-row { display: flex; flex-direction: column; gap: 6px; }
+.slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
+.slider-val { color: var(--accent2); font-weight: 600; }
+input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--bg4); border-radius: 2px; outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px rgba(124,109,250,.5); }
+.img-preview-wrap { border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); aspect-ratio: 16/9; background: var(--bg3); display: flex; align-items: center; justify-content: center; }
+#preview-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.preview-mock { width: 100%; height: 100%; background: linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%); display: flex; align-items: center; justify-content: center; font-size: 40px; }
+.temp-gradient-bar { height: 6px; border-radius: 3px; margin-top: 6px; background: linear-gradient(to right,#4fc3f7,#e0e0e0,#ff8f00); }
+
+/* STEP 3 PROMPT BUILDER */
+.prompt-builder { display: flex; flex-direction: column; gap: 14px; }
+.pb-step { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.pb-step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.pb-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.pb-step-title { font-size: 13px; font-weight: 600; }
+.pb-step-en { font-size: 11px; color: var(--text3); margin-left: auto; }
+.prompt-preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; line-height: 1.7; color: var(--text2); font-family: 'Menlo',monospace; min-height: 60px; position: relative; transition: border-color .15s; }
+.prompt-preview-box.editable { border-color: var(--accent); }
+.prompt-preview-box .en-prompt { color: var(--accent2); outline: none; }
+.prompt-preview-box .label { color: var(--text3); font-size: 11px; margin-bottom: 6px; }
+
+/* MODE TABS */
+.mode-tabs { display: flex; gap: 0; margin-bottom: 16px; border-radius: 8px; overflow: hidden; border: 1.5px solid var(--border2); }
+.mode-tab { flex: 1; padding: 9px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; color: var(--text2); background: var(--bg3); }
+.mode-tab.active { background: var(--accent); color: #fff; }
+.mode-panel { display: none; }
+.mode-panel.active { display: block; }
+.story-input { width: 100%; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; color: var(--text); font-size: 13px; outline: none; font-family: inherit; resize: vertical; min-height: 100px; }
+.story-input:focus { border-color: var(--accent); }
+
+/* CAMERA GROUPS */
+.cam-group-label { font-size: 10px; color: var(--text3); font-weight: 600; letter-spacing: .5px; margin: 10px 0 5px; text-transform: uppercase; }
+.cam-group-label:first-child { margin-top: 0; }
+
+/* OTHER INPUT */
+.other-wrap { display: none; margin-top: 8px; }
+.other-wrap.visible { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.other-input { flex: 1; min-width: 180px; max-width: 300px; background: var(--bg3); border: 1.5px solid var(--accent); border-radius: 8px; padding: 6px 12px; color: var(--text); font-size: 12px; outline: none; font-family: inherit; }
+.other-confirm { padding: 6px 14px; border-radius: 6px; background: var(--accent); color: #fff; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+/* PRESET ROW */
+.preset-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+.preset-chip { padding: 5px 13px; border-radius: 16px; font-size: 12px; background: rgba(124,109,250,.08); border: 1.5px solid rgba(124,109,250,.3); cursor: pointer; transition: all .15s; color: var(--accent2); }
+.preset-chip:hover { background: var(--accent-glow); border-color: var(--accent); }
+
+/* COUNT PILLS */
+.count-pills { display: flex; gap: 6px; align-items: center; }
+.count-pill { padding: 6px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; background: var(--bg3); border: 1.5px solid var(--border); cursor: pointer; color: var(--text2); transition: all .15s; }
+.count-pill.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent2); }
+
+/* SAVE GUIDANCE */
+.save-guide { font-size: 12px; color: var(--green); padding: 8px 12px; margin-top: 8px; background: rgba(52,211,153,.08); border-radius: 7px; border: 1px solid rgba(52,211,153,.2); display: none; }
+.save-guide.visible { display: block; }
+
+/* UNLOCK BTN */
+.unlock-btn { font-size: 11px; padding: 4px 10px; border-radius: 6px; background: var(--bg4); border: 1px solid var(--border2); color: var(--text3); cursor: pointer; transition: all .15s; margin-left: auto; }
+.unlock-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* COMPLIANCE NOTICE */
+.compliance-notice { display: flex; align-items: flex-start; gap: 10px; background: rgba(251,191,36,.07); border: 1px solid rgba(251,191,36,.3); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 12px; color: var(--text2); line-height: 1.5; }
+.compliance-notice strong { color: var(--yellow); }
+.compliance-hint { font-size: 11px; color: var(--yellow); display: flex; align-items: center; gap: 5px; margin-top: 6px; opacity: .85; }
+
+/* S1 MODE TOGGLE */
+.s1-mode-toggle { display: flex; gap: 0; margin-bottom: 20px; background: var(--bg3); border: 1px solid var(--border); border-radius: 9px; padding: 3px; }
+.s1-mode-btn { flex: 1; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; color: var(--text2); transition: all .15s; user-select: none; }
+.s1-mode-btn.active { background: var(--accent); color: #fff; }
+
+/* UPLOAD ZONE */
+.upload-zone { border: 2px dashed var(--border2); border-radius: 10px; padding: 44px 20px; text-align: center; cursor: pointer; transition: all .2s; color: var(--text3); }
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); color: var(--text2); background: var(--accent-glow); }
+.upload-zone .upload-icon { font-size: 38px; margin-bottom: 10px; }
+.upload-zone .upload-hint { font-size: 12px; margin-top: 6px; color: var(--text3); }
+
+/* ANNOTATION */
+.annot-wrapper { position: relative; display: block; border-radius: 8px; overflow: hidden; background: var(--bg4); line-height: 0; }
+.annot-wrapper img { display: block; width: 100%; max-height: 380px; object-fit: contain; }
+.annot-wrapper canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+.annot-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 28px; }
+.annot-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: var(--bg3); border-radius: 7px; border: 1px solid var(--border); }
+.annot-item-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.annot-item-label { flex: 1; font-size: 12px; color: var(--text); }
+.annot-item-del { color: var(--text3); cursor: pointer; font-size: 13px; padding: 2px 4px; }
+.annot-item-del:hover { color: var(--red); }
+.annot-pending { background: rgba(124,109,250,.13); border: 1.5px solid var(--accent); border-radius: 8px; padding: 10px 14px; display: none; align-items: center; gap: 10px; margin-top: 10px; }
+.annot-pending input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: 13px; font-family: inherit; }
+.annot-pending input::placeholder { color: var(--text3); }
+.annot-pending-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* STEP 1 WORKSPACE */
+.step1-workspace { padding: 0 !important; overflow: visible; }
+.ws-section { padding: 20px 22px; }
+.ws-section-title { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--text3); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.ws-section-title .ws-toggle-icon { font-size: 13px; color: var(--text3); transition: transform .2s; }
+.ws-section-title .ws-toggle-icon.collapsed { transform: rotate(-90deg); }
+.ws-divider { height: 1px; background: var(--border); margin: 0; }
+.ws-style-body { display: flex; flex-direction: column; gap: 18px; }
+.ws-section .s1-mode-toggle { margin-bottom: 0; }
+
+/* 两列布局 */
+.step1-workspace { display: grid !important; grid-template-columns: 1fr 270px; grid-template-rows: auto; gap: 0; }
+.ws-main { min-width: 0; border-right: 1px solid var(--border); }
+
+/* Prompt 面板 */
+.ws-prompt-panel { padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; position: sticky; top: 80px; align-self: start; }
+.ws-prompt-title { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--text3); text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; }
+.ws-prompt-textarea { width: 100%; min-height: 160px; resize: vertical; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-size: 12px; line-height: 1.6; padding: 10px 12px; font-family: inherit; outline: none; box-sizing: border-box; }
+.ws-prompt-textarea:focus { border-color: var(--accent); }
+.ws-prompt-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.ws-lock-list { display: flex; flex-direction: column; gap: 4px; }
+.ws-lock-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); background: var(--bg3); border-radius: 5px; padding: 4px 8px; }
+.ws-lock-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ws-download-btn { font-size: 10px; padding: 3px 8px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text3); border-radius: 5px; cursor: pointer; white-space: nowrap; }
+.ws-download-btn:hover { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+
+/* 素材盘下载按钮 */
+.mat-thumb .mat-dl { display: none; position: absolute; bottom: 3px; left: 3px; font-size: 9px; background: rgba(0,0,0,.65); color: #fff; border-radius: 4px; padding: 2px 5px; cursor: pointer; z-index: 2; }
+.mat-thumb:hover .mat-dl { display: block; }
+
+/* 素材盘 Prompt 弹窗 */
+#img-prompt-popup { position: fixed; z-index: 1200; width: 300px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.5); padding: 0; overflow: hidden; display: none; }
+#img-prompt-popup.visible { display: block; animation: popupIn .15s ease; }
+@keyframes popupIn { from { opacity:0; transform:scale(.95) translateY(4px); } to { opacity:1; transform:scale(1) translateY(0); } }
+.ipp-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 8px; border-bottom: 1px solid var(--border); }
+.ipp-name { font-size: 12px; font-weight: 600; color: var(--text2); }
+.ipp-close { font-size: 14px; color: var(--text3); cursor: pointer; padding: 2px 5px; border-radius: 4px; }
+.ipp-close:hover { color: var(--text); background: var(--bg3); }
+.ipp-body { padding: 12px 14px; }
+.ipp-label { font-size: 10px; font-weight: 600; letter-spacing: .06em; color: var(--text3); text-transform: uppercase; margin-bottom: 6px; }
+.ipp-text { font-size: 12px; line-height: 1.7; color: var(--text); background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 9px 11px; max-height: 200px; overflow-y: auto; user-select: text; cursor: text; white-space: pre-wrap; word-break: break-word; }
+.ipp-empty { font-size: 12px; color: var(--text3); font-style: italic; }
+.ipp-actions { display: flex; gap: 6px; margin-top: 10px; }
+.ipp-btn { flex: 1; font-size: 11px; padding: 6px 10px; border-radius: 7px; cursor: pointer; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); text-align: center; transition: all .15s; }
+.ipp-btn:hover { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+.ipp-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ipp-btn.primary:hover { opacity: .85; }
+
+/* 响应式：窄屏变单列 */
+@media (max-width: 700px) {
+  .step1-workspace { grid-template-columns: 1fr !important; }
+  .ws-main { border-right: none; border-bottom: 1px solid var(--border); }
+  .ws-prompt-panel { position: static; }
+}
+
+/* STEP 5 COST */
+.cost-display { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cost-items { display: flex; gap: 24px; }
+.cost-item { text-align: center; }
+.cost-item-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.cost-item-val { font-size: 16px; font-weight: 700; color: var(--text); }
+.cost-total { text-align: right; }
+.cost-total-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.cost-total-val { font-size: 24px; font-weight: 800; color: var(--accent2); }
+
+/* CONSTRAINT TOGGLES */
+.constraint-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.constraint-toggle { display: flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 16px; border: 1.5px solid var(--border); cursor: pointer; font-size: 12px; color: var(--text2); transition: all .15s; user-select: none; }
+.constraint-toggle.on { border-color: var(--green); background: rgba(52,211,153,.08); color: var(--green); }
+.constraint-toggle .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+.constraint-toggle.on .dot { background: var(--green); box-shadow: 0 0 4px var(--green); }
+
+/* SPEED SLIDER */
+.speed-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* OUTPUT PARAMS */
+.param-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.param-group label { font-size: 12px; color: var(--text2); margin-bottom: 8px; display: block; }
+.param-select { width: 100%; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 7px; padding: 9px 12px; color: var(--text); font-size: 13px; outline: none; font-family: inherit; appearance: none; cursor: pointer; }
+.param-select:focus { border-color: var(--accent); }
+
+/* ASSET SELECT */
+.asset-select-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.asset-card { border-radius: 8px; border: 2px solid var(--border); overflow: hidden; cursor: pointer; transition: all .15s; background: var(--bg3); position: relative; }
+.asset-card:hover { border-color: var(--border2); }
+.asset-card.selected { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+.asset-card.selected::after { content: '✓'; position: absolute; top: 5px; right: 5px; width: 18px; height: 18px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
+.asset-card-preview { aspect-ratio: 16/9; background: var(--bg4); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-direction: column; gap: 4px; }
+.asset-card-label { padding: 6px 8px; font-size: 11px; color: var(--text2); background: var(--bg2); }
+.asset-card.selected .asset-card-label { color: var(--accent2); }
+
+/* LOADING */
+.loading-bar { height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; margin-top: 12px; display: none; }
+.loading-bar.visible { display: block; }
+.loading-bar-inner { height: 100%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 2px; animation: loadbar 1.5s ease-in-out infinite; }
+@keyframes loadbar { 0%{width:0%;margin-left:0} 50%{width:70%;margin-left:15%} 100%{width:0%;margin-left:100%} }
+.loading-text { font-size: 12px; color: var(--text3); margin-top: 8px; display: none; }
+.loading-text.visible { display: block; }
+
+/* MISC */
+.row-gap { display: flex; flex-direction: column; gap: 10px; }
+.flex-row { display: flex; align-items: center; gap: 12px; }
+.warn-text { font-size: 11px; color: var(--yellow); display: flex; align-items: center; gap: 5px; }
+.section-gap { margin-bottom: 10px; }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.draft-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: rgba(251,191,36,.1); color: var(--yellow); border: 1px solid rgba(251,191,36,.3); margin-left: 8px; }
+.sync-top-card { border-color: rgba(124,109,250,.3) !important; background: var(--accent-glow) !important; }
+
+/* AUTH BUTTON in header */
+.auth-btn { padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; background: var(--accent-glow); border: 1.5px solid var(--accent); cursor: pointer; color: var(--accent2); transition: all .15s; white-space: nowrap; }
+.auth-btn:hover { background: rgba(124,109,250,.2); }
+.user-chip { display: flex; align-items: center; gap: 8px; padding: 4px 12px 4px 6px; border-radius: 20px; background: var(--bg3); border: 1.5px solid var(--border2); cursor: pointer; white-space: nowrap; transition: border-color .15s; }
+.user-chip:hover { border-color: var(--accent); }
+.user-avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg,var(--accent),var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.user-name { font-size: 12px; color: var(--text2); max-width: 100px; overflow: hidden; text-overflow: ellipsis; }
+.user-balance { font-size: 11px; color: var(--accent2); font-weight: 600; }
+.user-menu { position: absolute; top: 52px; right: 24px; background: var(--bg2); border: 1.5px solid var(--border2); border-radius: 10px; padding: 6px 0; min-width: 160px; box-shadow: 0 8px 32px rgba(0,0,0,.45); z-index: 200; display: none; }
+.user-menu.open { display: block; }
+.user-menu-item { padding: 9px 16px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background .1s; }
+.user-menu-item:hover { background: var(--bg3); color: var(--text); }
+.user-menu-item.danger { color: #f87171; }
+
+/* PRICING MODAL */
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0 4px; }
+.pkg-card { border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg3); padding: 18px 14px 16px; text-align: center; cursor: pointer; transition: all .18s; position: relative; }
+.pkg-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.pkg-card.popular { border-color: var(--accent); background: var(--accent-glow); }
+.pkg-popular-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 10px; white-space: nowrap; }
+.pkg-name { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+.pkg-price { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
+.pkg-credits { font-size: 11px; color: var(--text3); margin-top: 6px; }
+.pkg-buy { margin-top: 12px; padding: 7px 0; width: 100%; border-radius: 7px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; background: var(--accent); color: #fff; transition: opacity .15s; }
+.pkg-buy:hover { opacity: .85; }
+.pkg-card.popular .pkg-buy { background: var(--accent); box-shadow: 0 2px 12px rgba(124,109,250,.4); }
+.pricing-note { font-size: 11px; color: var(--text3); text-align: center; margin-top: 10px; }
+.balance-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg3); border-radius: 8px; margin-bottom: 4px; }
+.balance-label { font-size: 12px; color: var(--text3); }
+.balance-val { font-size: 18px; font-weight: 800; color: var(--accent2); }
+
+/* AUTH MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box { background: var(--bg2); border: 1.5px solid var(--border2); border-radius: 16px; padding: 32px 28px 28px; width: 380px; max-width: calc(100vw - 32px); box-shadow: 0 24px 64px rgba(0,0,0,.6); transform: translateY(16px); transition: transform .2s; position: relative; }
+.modal-overlay.open .modal-box { transform: translateY(0); }
+.modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: var(--text3); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color .15s; }
+.modal-close:hover { color: var(--text); }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.modal-sub { font-size: 12px; color: var(--text3); margin-bottom: 22px; }
+.modal-tabs { display: flex; gap: 0; background: var(--bg3); border-radius: 8px; padding: 3px; margin-bottom: 20px; }
+.modal-tab { flex: 1; text-align: center; padding: 7px 0; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; color: var(--text3); transition: all .15s; border: none; background: none; }
+.modal-tab.active { background: var(--bg4); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.auth-field { margin-bottom: 14px; }
+.auth-field label { font-size: 11px; color: var(--text3); font-weight: 600; letter-spacing: .4px; display: block; margin-bottom: 6px; }
+.auth-input { width: 100%; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 13px; color: var(--text); font-size: 13px; outline: none; font-family: inherit; box-sizing: border-box; }
+.auth-input:focus { border-color: var(--accent); }
+.auth-submit { width: 100%; padding: 11px 0; border-radius: 9px; background: var(--accent); border: none; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .15s; margin-top: 4px; }
+.auth-submit:hover { opacity: .9; }
+.auth-submit:disabled { opacity: .5; cursor: not-allowed; }
+.auth-err { font-size: 12px; color: #f87171; margin-top: 10px; min-height: 18px; }
+
+/* TOAST */
+#toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg4); border: 1.5px solid var(--border2); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: var(--text); max-width: 480px; width: max-content; box-shadow: 0 8px 32px rgba(0,0,0,.45); opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; z-index: 9999; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.warn { border-color: rgba(251,191,36,.5); background: rgba(251,191,36,.08); color: var(--yellow); }
+#toast.err { border-color: rgba(239,68,68,.4); background: rgba(239,68,68,.07); color: #f87171; }
+#toast.ok { border-color: rgba(52,211,153,.4); background: rgba(52,211,153,.07); color: var(--green); }
+
+/* ─── MOBILE / RESPONSIVE ─────────────────────────────────────────── */
+
+/* Tablet (≤900px) */
+@media (max-width: 900px) {
+  /* Header */
+  header { padding: 0 12px; height: auto; min-height: 48px; flex-wrap: wrap; gap: 6px; }
+  .logo { font-size: 14px; }
+  .step-nav { flex-wrap: wrap; gap: 2px; padding: 4px 0; order: 3; width: 100%; justify-content: center; }
+  .step-btn { padding: 4px 8px; font-size: 11px; gap: 4px; }
+  .step-num { width: 16px; height: 16px; font-size: 10px; }
+  .step-arrow { font-size: 10px; margin: 0; }
+  .lang-toggle-btn { font-size: 10px; padding: 4px 8px; }
+  .auth-btn { font-size: 10px; padding: 4px 10px; }
+  .user-chip { padding: 2px 8px 2px 4px; gap: 6px; }
+  .user-avatar { width: 22px; height: 22px; font-size: 10px; }
+  .user-name { font-size: 11px; max-width: 70px; }
+  .main-content { padding: 14px; }
+  .panel-title { font-size: 17px; }
+  .panel-subtitle { font-size: 12px; margin-bottom: 14px; }
+
+  /* Workspace: sidebar below */
+  .workspace { flex-direction: column; }
+  .material-panel { width: 100%; max-height: 200px; border-left: none; border-top: 2px solid var(--border); flex-shrink: 0; }
+  .mat-grid { grid-template-columns: repeat(4, 1fr); }
+
+  /* Step 1: collapse workspace columns */
+  .step1-workspace { grid-template-columns: 1fr !important; }
+  .ws-main { border-right: none; border-bottom: 1px solid var(--border); }
+  .ws-prompt-panel { position: static; padding: 14px 12px; }
+
+  /* Step 2: collapse adjust-layout */
+  .adjust-layout { grid-template-columns: 1fr !important; gap: 14px; }
+
+  /* Step 3 */
+  .mode-tabs { flex-direction: column; }
+  .mode-tab { padding: 8px; font-size: 12px; }
+
+  /* Step 5 */
+  .cost-display { flex-direction: column; gap: 12px; text-align: center; }
+  .cost-items { gap: 16px; justify-content: center; }
+  .cost-total { text-align: center; }
+  .param-row { grid-template-columns: 1fr; gap: 8px; }
+  .asset-select-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Grids */
+  .theme-grid { grid-template-columns: repeat(3, 1fr); }
+  .gen-images { grid-template-columns: repeat(2, 1fr); }
+  .pricing-grid { grid-template-columns: 1fr; gap: 8px; }
+
+  /* Cards & buttons */
+  .card { padding: 14px; }
+  .btn { padding: 8px 16px; font-size: 13px; }
+  .btn-primary[style*="width:220px"] { width: 100% !important; }
+  .s1-mode-toggle { flex-direction: column; gap: 4px; }
+  .s1-mode-btn { padding: 8px; font-size: 12px; }
+
+  /* Upload */
+  .upload-zone { padding: 28px 14px; }
+  .upload-zone .upload-icon { font-size: 28px; }
+
+  /* Annotations */
+  .annot-wrapper img { max-height: 240px; }
+}
+
+/* Small tablet / large phone (≤700px) */
+@media (max-width: 700px) {
+  header { padding: 0 10px; }
+  .logo { font-size: 13px; }
+  .step-btn { padding: 3px 6px; font-size: 10px; gap: 2px; }
+  .step-num { width: 14px; height: 14px; font-size: 9px; }
+  .main-content { padding: 10px; }
+  .panel-title { font-size: 15px; }
+  .card { padding: 10px; }
+  .mat-grid { grid-template-columns: repeat(3, 1fr); }
+  .theme-grid { grid-template-columns: repeat(2, 1fr); }
+  .gen-images { grid-template-columns: 1fr; }
+  .asset-select-grid { grid-template-columns: 1fr; }
+  .constraint-row { gap: 5px; }
+  .constraint-toggle { padding: 4px 8px; font-size: 11px; }
+
+  /* Prompt builder */
+  .prompt-preview-box { font-size: 11px; padding: 10px; }
+
+  /* Modals */
+  .modal-box { width: calc(100vw - 24px) !important; padding: 20px 16px; }
+  .pkg-price { font-size: 22px; }
+
+  /* Step 3 upload preview */
+  #s3-upload-preview video { max-width: 100%; height: auto; }
+}
+
+/* Phone portrait (≤480px) */
+@media (max-width: 480px) {
+  header { padding: 0 8px; min-height: 44px; }
+  .logo { font-size: 12px; }
+  .logo-dot { width: 6px; height: 6px; }
+  .step-btn { padding: 2px 4px; font-size: 9px; border-radius: 14px; }
+  .step-num { width: 13px; height: 13px; font-size: 8px; }
+  .main-content { padding: 8px; }
+  .panel-title { font-size: 14px; }
+  .panel-subtitle { font-size: 11px; }
+  .card { padding: 8px; border-radius: 7px; margin-bottom: 10px; }
+  .card-title { font-size: 12px; }
+
+  /* Material panel */
+  .material-panel { max-height: 160px; }
+  .mat-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+  .mat-thumb { border-radius: 3px; }
+  .mat-header { padding: 8px 10px; font-size: 10px; }
+  .mat-section-title { padding: 6px 10px; font-size: 11px; }
+  .mat-body { padding: 4px 8px 8px; }
+
+  /* Tags & pills */
+  .tag { padding: 3px 7px; font-size: 10px; }
+  .tag-row { gap: 3px; }
+  .count-pill { padding: 4px 10px; font-size: 11px; }
+  .ratio-btn { padding: 5px 12px; font-size: 11px; }
+
+  /* Sliders */
+  .slider-group { gap: 10px; }
+  .slider-label { font-size: 11px; }
+
+  /* Buttons */
+  .btn { padding: 7px 12px; font-size: 12px; border-radius: 6px; }
+
+  /* Upload zone */
+  .upload-zone { padding: 20px 10px; }
+  .upload-zone .upload-icon { font-size: 24px; }
+
+  /* Step 1 upload actions */
+  #s1-upload-actions { flex-direction: column; }
+
+  /* Step 3 source toggle */
+  #s3-gen-section .card, #s3-upload-section .card { padding: 8px; }
+
+  /* Cost display */
+  .cost-item-val { font-size: 14px; }
+  .cost-total-val { font-size: 20px; }
+
+  /* Toast */
+  #toast { left: 8px; right: 8px; transform: translateY(20px); max-width: none; width: auto; text-align: center; font-size: 12px; padding: 10px 14px; }
+  #toast.show { transform: translateY(0); }
+
+  /* Auth modal */
+  .modal-overlay { align-items: flex-end; }
+  .modal-box { border-radius: 16px 16px 0 0; max-height: 90vh; overflow-y: auto; }
+  .modal-overlay.open .modal-box { transform: translateY(0); }
+
+  /* User chip */
+  .user-name { max-width: 60px; }
+  .user-balance { font-size: 10px; }
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- HEADER -->
+<header>
+  <a href="/" class="logo" style="text-decoration:none"><div class="logo-dot"></div>Seedance Studio</a>
+  <nav class="step-nav">
+    <div class="step-btn active" onclick="goStep(1)" id="stepbtn-1"><div class="step-num">1</div> 原图</div>
+    <div class="step-arrow">›</div>
+    <div class="step-btn" onclick="goStep(2)" id="stepbtn-2"><div class="step-num">2</div> 调色</div>
+    <div class="step-arrow">›</div>
+    <div class="step-btn" onclick="goStep(3)" id="stepbtn-3"><div class="step-num">3</div> 视频草稿</div>
+    <div class="step-arrow">›</div>
+    <div class="step-btn" onclick="goStep(4)" id="stepbtn-4"><div class="step-num">4</div> 音乐草稿</div>
+    <div class="step-arrow">›</div>
+    <div class="step-btn" onclick="goStep(5)" id="stepbtn-5"><div class="step-num">5</div> 生成成片</div>
+  </nav>
+  <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <button class="lang-toggle-btn" id="lang-btn" onclick="toggleLang()">中 / EN</button>
+    <!-- 未登录 -->
+    <button class="auth-btn" id="auth-login-btn" onclick="openAuthModal('login')" style="display:none">登录 / 注册</button>
+    <!-- 已登录 -->
+    <div class="user-chip" id="user-chip" style="display:none" onclick="toggleUserMenu()">
+      <div class="user-avatar" id="user-avatar">U</div>
+      <div>
+        <div class="user-name" id="user-name">用户</div>
+        <div class="user-balance" id="user-balance"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- USER MENU -->
+<div class="user-menu" id="user-menu">
+  <div class="user-menu-item" onclick="openAuthModal('me')">👤 账户信息</div>
+  <div class="user-menu-item" onclick="closeUserMenu();openPricingModal()">💳 余额充值</div>
+  <div class="user-menu-item danger" onclick="doLogout()">退出登录</div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="modal-title">Seedance Studio</div>
+    <div class="modal-sub">创建账户以保存你的作品和余额</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')">登录</button>
+      <button class="modal-tab" id="tab-register" onclick="switchAuthTab('register')">注册</button>
+    </div>
+    <div class="auth-field">
+      <label>邮箱</label>
+      <input class="auth-input" id="auth-email" type="email" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>密码</label>
+      <input class="auth-input" id="auth-password" type="password" placeholder="至少 8 位" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+    </div>
+    <div id="auth-err" class="auth-err"></div>
+    <button class="auth-submit" id="auth-submit" onclick="submitAuth()">登录</button>
+    <div style="display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text3);font-size:12px">
+      <hr style="flex:1;border:none;border-top:1px solid var(--border)">
+      <span style="white-space:nowrap">或</span>
+      <hr style="flex:1;border:none;border-top:1px solid var(--border)">
+    </div>
+    <div id="g_id_signin_studio" style="display:flex;justify-content:center"></div>
+    <div id="github_signin_studio" style="display:flex;justify-content:center;margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- PRICING MODAL -->
+<div class="modal-overlay" id="pricing-modal" onclick="if(event.target===this)closePricingModal()">
+  <div class="modal-box" style="width:480px">
+    <button class="modal-close" onclick="closePricingModal()">✕</button>
+    <div class="modal-title">余额充值</div>
+    <div class="modal-sub">购买 Credits 用于生成图片与视频</div>
+    <div class="balance-row" id="pricing-balance-row" style="display:none">
+      <span class="balance-label">当前余额</span>
+      <span class="balance-val" id="pricing-balance-val">—</span>
+    </div>
+    <div class="pricing-grid" id="pricing-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">加载中…</div>
+    </div>
+    <div class="pricing-note" id="pricing-note"></div>
+  </div>
+</div>
+
+<div class="workspace">
+<div class="main-content">
+
+<!-- ═══ STEP 1 ═══ -->
+<div id="step1" class="step-panel active">
+  <div class="panel-title">第一步：参考原图工作台</div>
+  <div class="panel-subtitle">选择图片来源，配置风格，然后生成或处理原图。所有风格设置同时作用于 AI 生成、风格化和视频 Prompt。</div>
+
+  <div class="card step1-workspace">
+  <div class="ws-main">
+
+    <!-- ① 图片来源 -->
+    <div class="ws-section">
+      <div class="ws-section-title" style="cursor:default">① 图片来源</div>
+      <div class="s1-mode-toggle">
+        <div class="s1-mode-btn active" onclick="switchS1Mode('ai')" id="s1-mode-ai">✦ AI 生成</div>
+        <div class="s1-mode-btn" onclick="switchS1Mode('upload')" id="s1-mode-upload">📤 上传原图</div>
+      </div>
+      <!-- 上传区（切换到上传模式后立即显示） -->
+      <div id="s1-upload-zone-wrap" style="display:none;margin-top:16px">
+        <input type="file" id="upload-file-input" accept="image/*" style="display:none" onchange="processUploadFile(this.files[0])">
+        <div id="s1-upload-zone" class="upload-zone"
+             onclick="document.getElementById('upload-file-input').click()"
+             ondragover="event.preventDefault();this.classList.add('dragover')"
+             ondragleave="this.classList.remove('dragover')"
+             ondrop="handleUploadDrop(event)">
+          <div class="upload-icon">🖼️</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text2)">点击或拖拽上传客户原图</div>
+          <div class="upload-hint">支持 JPG / PNG / WEBP，最大 10MB</div>
+        </div>
+
+        <!-- 标注面板（上传后显示）-->
+        <div id="s1-annot-panel" style="display:none;margin-top:16px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px">
+            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">标注重要目标 <span style="font-weight:400;color:var(--text3)">可选 — 拖动框选画面中的关键主体</span></div>
+            <div class="annot-wrapper" id="annot-wrapper">
+              <img id="annot-img" alt="上传图片">
+              <canvas id="annot-canvas"
+                      onmousedown="onAnnotMouseDown(event)"
+                      onmousemove="onAnnotMouseMove(event)"
+                      onmouseup="onAnnotMouseUp(event)"
+                      onmouseleave="onAnnotMouseUp(event)"></canvas>
+            </div>
+            <div class="annot-pending" id="annot-pending">
+              <input type="text" id="annot-label-input" placeholder="标注名称，如"人物"、"产品"、"背景"…" maxlength="20">
+              <div class="annot-pending-btns">
+                <button class="btn btn-primary" style="padding:5px 14px;font-size:12px" id="annot-confirm-btn">确认</button>
+                <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" id="annot-cancel-btn">取消</button>
+              </div>
+            </div>
+            <div class="annot-list" id="annot-list">
+              <div style="font-size:12px;color:var(--text3);padding:4px 0">在图片上拖动框选重要区域，添加标注</div>
+            </div>
+          </div>
+
+          <!-- 隐藏的旧 describe/stylize 按钮（id 保留供 JS 兼容）-->
+          <div style="display:none">
+            <button id="describe-btn" onclick="describeImage()"></button>
+            <div id="describe-result"><textarea id="describe-prompt"></textarea></div>
+            <button id="stylize-btn" onclick="stylizeImage()"></button>
+          </div>
+
+          <!-- 风格化 loading + result -->
+          <div class="loading-bar" id="stylize-loading" style="margin-top:8px"><div class="loading-bar-inner"></div></div>
+          <div class="loading-text" id="stylize-loadtext">AI 风格化中，约 20-30 秒…</div>
+          <div id="stylize-result" style="display:none;margin-top:12px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:6px">生成结果 — 点击保存到素材盘</div>
+            <div class="gen-img-card" id="stylize-result-card" style="max-width:320px;cursor:pointer" onclick="saveStylizedImg()">
+              <div class="gen-img-preview" id="stylize-preview" style="min-height:160px;background-size:cover;background-position:center"></div>
+              <div class="gen-img-actions">
+                <button class="btn-save" onclick="event.stopPropagation();saveStylizedImg()">＋ 保存到素材盘</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 统一操作按钮 -->
+          <div style="display:none;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px" id="s1-upload-actions">
+            <button class="btn btn-primary" onclick="generateFromUpload()" style="flex:1;min-width:160px" id="s1-upload-gen-btn">✦ 生成新原图</button>
+            <button class="btn btn-secondary" onclick="saveUploadedImg()" style="font-size:12px;padding:8px 16px">＋ 保存原图</button>
+            <button class="btn btn-secondary" onclick="resetUploadZone()" style="font-size:12px;padding:8px 14px">↺ 换图</button>
+          </div>
+        </div><!-- /s1-annot-panel -->
+      </div><!-- /s1-upload-zone-wrap -->
+    </div>
+
+    <div class="ws-divider"></div>
+
+    <!-- ② 风格设置（可折叠） -->
+    <div class="ws-section">
+      <div class="ws-section-title" onclick="toggleStyleSettings()">
+        <span>② 风格设置</span>
+        <span class="ws-toggle-icon" id="style-toggle-icon">▾</span>
+      </div>
+      <div id="style-settings-body" class="ws-style-body">
+
+        <!-- 选择主题 -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px">选择主题 <span style="font-weight:400;opacity:.7">可多选</span></div>
+          <div class="theme-grid">
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="portrait"><div class="icon">👤</div><div class="label">人物<span class="lang-en-label">Portrait</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="product"><div class="icon">📦</div><div class="label">产品<span class="lang-en-label">Product</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="architecture"><div class="icon">🏛️</div><div class="label">建筑<span class="lang-en-label">Architecture</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="nature"><div class="icon">🌿</div><div class="label">自然<span class="lang-en-label">Nature</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="street"><div class="icon">🌆</div><div class="label">街景<span class="lang-en-label">Street</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="animal"><div class="icon">🐾</div><div class="label">动物<span class="lang-en-label">Animal</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="food"><div class="icon">🍜</div><div class="label">美食<span class="lang-en-label">Food</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="abstract"><div class="icon">✨</div><div class="label">抽象艺术<span class="lang-en-label">Abstract</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="tech"><div class="icon">⚙️</div><div class="label">机械/科技<span class="lang-en-label">Tech</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="fashion"><div class="icon">👗</div><div class="label">时尚<span class="lang-en-label">Fashion</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="sports"><div class="icon">🏋️</div><div class="label">运动<span class="lang-en-label">Sports</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="fantasy"><div class="icon">🔮</div><div class="label">奇幻<span class="lang-en-label">Fantasy</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="dance"><div class="icon">💃</div><div class="label">跳舞<span class="lang-en-label">Dance</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="ancient"><div class="icon">🏯</div><div class="label">古装历史<span class="lang-en-label">Ancient</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="wedding"><div class="icon">💍</div><div class="label">婚礼<span class="lang-en-label">Wedding</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="kids"><div class="icon">🧒</div><div class="label">萌宝<span class="lang-en-label">Kids</span></div></div>
+            <div class="theme-card" onclick="showOther('theme')" id="theme-other-card"><div class="icon">✏️</div><div class="label">其他<span class="lang-en-label">Other</span></div></div>
+          </div>
+          <div class="other-wrap" id="other-theme">
+            <input class="other-input" type="text" placeholder="输入自定义主题…" id="other-theme-input">
+            <button class="other-confirm" onclick="confirmOther('theme')">确认</button>
+          </div>
+          <div style="margin-top:12px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:7px">场景预设 <span style="opacity:.6">/ Quick Scene Presets</span></div>
+            <div class="preset-row">
+              <div class="preset-chip" onclick="applyPreset('cyberpunk')">赛博朋克美女</div>
+              <div class="preset-chip" onclick="applyPreset('ink')">水墨山水</div>
+              <div class="preset-chip" onclick="applyPreset('scifi')">科幻机甲</div>
+              <div class="preset-chip" onclick="applyPreset('miniature')">微缩景观</div>
+              <div class="preset-chip" onclick="applyPreset('vintage')">复古胶片人像</div>
+              <div class="preset-chip" onclick="applyPreset('aurora')">极光雪山</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 画面风格 -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px">画面风格</div>
+          <div class="row-gap">
+            <div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:7px">视觉风格 <span class="lang-en-label" style="display:inline">/ Visual Style</span></div>
+              <div class="tag-row" id="style-tags">
+                <div class="tag" onclick="toggleTag(this,'style')" data-val="cinematic film">电影质感<span class="lang-en-label">Cinematic</span></div>
+                <div class="tag" onclick="toggleTag(this,'style')" data-val="realistic photography">真实摄影<span class="lang-en-label">Photography</span></div>
+                <div class="tag" onclick="toggleTag(this,'style')" data-val="anime illustration">动漫插画<span class="lang-en-label">Anime</span></div>
+                <div class="tag" onclick="toggleTag(this,'style')" data-val="3D render">3D渲染<span class="lang-en-label">3D Render</span></div>
+                <div class="tag" onclick="toggleTag(this,'style')" data-val="ink painting">水墨国画<span class="lang-en-label">Ink Art</span></div>
+                <div class="tag" onclick="toggleTag(this,'style')" data-val="cyberpunk neon">赛博朋克<span class="lang-en-label">Cyberpunk</span></div>
+                <div class="tag" onclick="toggleTag(this,'style')" data-val="vintage film grain">复古胶片<span class="lang-en-label">Vintage</span></div>
+                <div class="tag" onclick="showOther('style1')">✏️ 其他<span class="lang-en-label">Other</span></div>
+              </div>
+              <div class="other-wrap" id="other-style1">
+                <input class="other-input" type="text" placeholder="自定义视觉风格…" id="other-style1-input">
+                <button class="other-confirm" onclick="confirmOtherTag('style','style-tags','style1')">确认</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:7px">光线 / Lighting</div>
+              <div class="tag-row" id="light-tags">
+                <div class="tag" onclick="toggleTag(this,'light')" data-val="golden hour">黄金时刻<span class="lang-en-label">Golden Hour</span></div>
+                <div class="tag" onclick="toggleTag(this,'light')" data-val="soft natural light">自然柔光<span class="lang-en-label">Soft Light</span></div>
+                <div class="tag" onclick="toggleTag(this,'light')" data-val="neon lights">霓虹灯光<span class="lang-en-label">Neon</span></div>
+                <div class="tag" onclick="toggleTag(this,'light')" data-val="backlit silhouette">逆光剪影<span class="lang-en-label">Backlit</span></div>
+                <div class="tag" onclick="toggleTag(this,'light')" data-val="overcast diffused light">阴天漫反射<span class="lang-en-label">Overcast</span></div>
+                <div class="tag" onclick="toggleTag(this,'light')" data-val="spotlight">聚光灯<span class="lang-en-label">Spotlight</span></div>
+                <div class="tag" onclick="showOther('light1')">✏️ 其他<span class="lang-en-label">Other</span></div>
+              </div>
+              <div class="other-wrap" id="other-light1">
+                <input class="other-input" type="text" placeholder="自定义光线描述…" id="other-light1-input">
+                <button class="other-confirm" onclick="confirmOtherTag('light','light-tags','light1')">确认</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:7px">情绪氛围 / Mood</div>
+              <div class="tag-row" id="mood-tags">
+                <div class="tag" onclick="toggleTag(this,'mood')" data-val="warm healing">温暖治愈<span class="lang-en-label">Warm</span></div>
+                <div class="tag" onclick="toggleTag(this,'mood')" data-val="mysterious dark">神秘黑暗<span class="lang-en-label">Dark</span></div>
+                <div class="tag" onclick="toggleTag(this,'mood')" data-val="fresh bright">清新明亮<span class="lang-en-label">Fresh</span></div>
+                <div class="tag" onclick="toggleTag(this,'mood')" data-val="epic grand">史诗壮阔<span class="lang-en-label">Epic</span></div>
+                <div class="tag" onclick="toggleTag(this,'mood')" data-val="dreamy ethereal">梦幻飘渺<span class="lang-en-label">Dreamy</span></div>
+                <div class="tag" onclick="toggleTag(this,'mood')" data-val="realistic documentary">写实纪录<span class="lang-en-label">Realistic</span></div>
+                <div class="tag" onclick="showOther('mood1')">✏️ 其他<span class="lang-en-label">Other</span></div>
+              </div>
+              <div class="other-wrap" id="other-mood1">
+                <input class="other-input" type="text" placeholder="自定义情绪氛围…" id="other-mood1-input">
+                <button class="other-confirm" onclick="confirmOtherTag('mood','mood-tags','mood1')">确认</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 画幅比例 -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px">画幅比例</div>
+          <div class="ratio-row" id="ratio-btns">
+            <div class="ratio-btn selected" onclick="selectRatio(this)" data-val="16:9">16:9 横屏</div>
+            <div class="ratio-btn" onclick="selectRatio(this)" data-val="9:16">9:16 竖屏</div>
+            <div class="ratio-btn" onclick="selectRatio(this)" data-val="1:1">1:1 方图</div>
+            <div class="ratio-btn" onclick="selectRatio(this)" data-val="4:3">4:3</div>
+          </div>
+        </div>
+
+        <!-- 关键词 -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px">关键词补充 <span style="font-weight:400;opacity:.7">可选，中文即可</span></div>
+          <input class="text-input" type="text" placeholder="例如：樱花树下、未来城市、温暖的咖啡馆…" id="extra-kw" oninput="buildS1Prompt()">
+        </div>
+
+      </div><!-- /style-settings-body -->
+    </div>
+
+    <div class="ws-divider"></div>
+
+    <!-- ③ 操作区 -->
+    <div class="ws-section">
+      <div class="ws-section-title" style="cursor:default">③ 生成 / 上传</div>
+
+      <!-- AI 生成操作 -->
+      <div id="s1-ai-section">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+          <div class="count-pills">
+            <span style="font-size:12px;color:var(--text3)">生成数量：</span>
+            <div class="count-pill" onclick="selectCount(this)" data-count="1">1 张</div>
+            <div class="count-pill selected" onclick="selectCount(this)" data-count="3">3 张</div>
+            <div class="count-pill" onclick="selectCount(this)" data-count="4">4 张</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+            <span style="font-size:12px;color:var(--text3)">模型:</span>
+            <select class="param-select" style="width:auto;min-width:170px;font-size:12px" id="s1-model-select" onchange="refreshAllCosts()"></select>
+          </div>
+        </div>
+        <div style="font-size:11px;margin-bottom:6px" id="s1-cost-info">约 ¥0.22/张 × 3张 = ¥0.66</div>
+        <button class="btn btn-primary" style="width:220px" onclick="genImagesFromPrompt()">✦ 生成原图（低分辨率）</button>
+        <div class="loading-bar" id="s1-loading"><div class="loading-bar-inner"></div></div>
+        <div class="loading-text" id="s1-loadtext">AI 正在生成中，约 15-25 秒…</div>
+        <div class="gen-result" id="s1-result">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:10px;" id="s1-result-hint">生成了 3 张原图，选择保存到素材盘 ↓</div>
+          <div class="gen-images" id="s1-gen-images">
+            <div class="gen-img-card">
+              <div class="gen-img-preview" style="background:linear-gradient(135deg,#1a1a3e,#0f3460,#533483)"><span style="font-size:32px">🌃</span></div>
+              <div class="gen-img-actions">
+                <button class="btn-save" onclick="saveImg(this,'原图 A','🌃')">＋ 保存</button>
+                <button class="btn-discard" onclick="discardImg(this)">✕</button>
+              </div>
+            </div>
+            <div class="gen-img-card">
+              <div class="gen-img-preview" style="background:linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)"><span style="font-size:32px">🌿</span></div>
+              <div class="gen-img-actions">
+                <button class="btn-save" onclick="saveImg(this,'原图 B','🌿')">＋ 保存</button>
+                <button class="btn-discard" onclick="discardImg(this)">✕</button>
+              </div>
+            </div>
+            <div class="gen-img-card">
+              <div class="gen-img-preview" style="background:linear-gradient(135deg,#4e0000,#ff6b35,#ffd700)"><span style="font-size:32px">🔥</span></div>
+              <div class="gen-img-actions">
+                <button class="btn-save" onclick="saveImg(this,'原图 C','🔥')">＋ 保存</button>
+                <button class="btn-discard" onclick="discardImg(this)">✕</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="genImages()" style="font-size:12px;padding:8px 16px">↺ 重新生成一批</button>
+        </div>
+      </div><!-- /s1-ai-section -->
+
+      <!-- 上传原图操作 -->
+
+    </div><!-- /ws-section ③ -->
+
+    <!-- 合规提示（内嵌卡片底部） -->
+    <div style="margin:0 22px 20px;padding:12px 14px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:8px;display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:14px;flex-shrink:0">⚠️</span>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6"><strong>合规提示：</strong>请勿使用真实人物面孔、明星肖像或他人版权图片。Seedance API 会自动拒绝含真实人脸的图片，且可能导致账号限制。</div>
+    </div>
+
+  </div><!-- /ws-main -->
+
+  <!-- Prompt 面板（右列）-->
+  <div class="ws-prompt-panel">
+    <div class="ws-prompt-title">
+      <span>📝 Prompt</span>
+      <span id="s1-prompt-status" style="font-size:10px;font-weight:400;color:var(--text3)"></span>
+    </div>
+    <textarea class="ws-prompt-textarea" id="s1-prompt-text" placeholder="AI 描述分析结果 + 风格设置将自动填充…&#10;也可以直接手动编辑"></textarea>
+    <div class="ws-prompt-actions">
+      <button class="ws-download-btn" onclick="rebuildS1Prompt()" style="flex:1">↺ 重建</button>
+      <button class="ws-download-btn" onclick="copyS1Prompt()" title="复制 Prompt">📋</button>
+    </div>
+    <div id="s1-lock-section" style="display:none">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">🔒 保留元素</div>
+      <div class="ws-lock-list" id="s1-lock-list"></div>
+    </div>
+  </div>
+
+  </div><!-- /card.step1-workspace -->
+
+  <div class="save-guide" id="save-guide">✓ 已保存到素材盘 — 继续去 <strong>步骤二调色</strong> →</div>
+
+</div>
+
+<!-- ═══ STEP 2 ═══ -->
+<div id="step2" class="step-panel">
+  <div class="panel-title">第二步：图片调色</div>
+  <div class="panel-subtitle">从素材盘选择一张原图进行调色。每张图的参数独立保存，调色结果将在生成视频时自动融入 Prompt。</div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="adjust-layout" style="padding:20px;gap:24px">
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px;font-weight:600">选择原图</div>
+        <div class="img-select-list" id="adj-img-list">
+          <div class="img-select-item empty" style="font-size:13px">← 先在步骤一保存原图</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:600">调节参数</div>
+        <div class="slider-group">
+          <div class="slider-row">
+            <div class="slider-label"><span>亮度 Brightness</span><span class="slider-val" id="val-bright">0</span></div>
+            <input type="range" min="-100" max="100" value="0" id="sl-bright" oninput="updateFilter()">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>对比度 Contrast</span><span class="slider-val" id="val-contrast">0</span></div>
+            <input type="range" min="-100" max="100" value="0" id="sl-contrast" oninput="updateFilter()">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>阴影 Shadows</span><span class="slider-val" id="val-shadow">0</span></div>
+            <input type="range" min="-100" max="100" value="0" id="sl-shadow" oninput="updateFilter()">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>高光 Highlights</span><span class="slider-val" id="val-hl">0</span></div>
+            <input type="range" min="-100" max="100" value="0" id="sl-hl" oninput="updateFilter()">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>饱和度 Saturation</span><span class="slider-val" id="val-sat">0</span></div>
+            <input type="range" min="-100" max="100" value="0" id="sl-sat" oninput="updateFilter()">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>色温 Color Temp</span><span class="slider-val" id="val-temp">0</span></div>
+            <input type="range" min="-100" max="100" value="0" id="sl-temp" oninput="updateFilter()">
+            <div class="temp-gradient-bar"></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:2px"><span>❄️ 冷色 Cool</span><span>🔥 暖色 Warm</span></div>
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px" onclick="resetSliders()">↺ 重置</button>
+          <button class="btn btn-primary" style="font-size:12px;padding:7px 18px" onclick="saveAdj()">✓ 保存调色</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px;font-weight:600;display:flex;justify-content:space-between;align-items:center">
+          <span>实时预览</span>
+          <button class="btn btn-secondary" style="font-size:10px;padding:3px 10px" onclick="toggleBeforeAfter()" id="ba-toggle-btn">👁 对比原图</button>
+        </div>
+        <div class="img-preview-wrap" id="adj-preview">
+          <div class="preview-mock" id="adj-mock-img">🌃</div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center" id="adj-preview-label">调节滑块即可实时预览调色效果</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 3 ═══ -->
+<div id="step3" class="step-panel">
+  <div class="panel-title">第三步：视频草稿生成</div>
+  <div class="panel-subtitle">选择参考原图，通过公式组合生成视频 Prompt。草稿固定为 <strong style="color:var(--yellow)">5秒 · 480p</strong>，快速验证风格后再生成成片。</div>
+
+  <!-- 视频来源选择 -->
+  <div class="s1-mode-toggle" style="margin-bottom:16px">
+    <div class="s1-mode-btn active" id="s3-src-ai" onclick="switchS3Source('gen')">✦ AI 生成草稿</div>
+    <div class="s1-mode-btn" id="s3-src-upload" onclick="switchS3Source('upload')">📤 上传已有视频</div>
+  </div>
+
+  <!-- AI 生成区 -->
+  <div id="s3-gen-section">
+  <div class="mode-tabs">
+    <div class="mode-tab active" onclick="switchMode('single')" id="tab-single">⚡ 单镜头模式（快速）</div>
+    <div class="mode-tab" onclick="switchMode('story')" id="tab-story">🎬 分镜 / 剧情模式</div>
+  </div>
+
+  <!-- 分镜/剧情模式 -->
+  <div class="mode-panel" id="mode-story">
+    <div class="card">
+      <div class="card-title">剧情 / 分镜描述</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">用中文描述视频剧情，AI 将自动转换为 Seedance 英文 Prompt。支持描述多个连续动作，用逗号分隔。</div>
+      <textarea class="story-input" id="story-input" placeholder="例如：镜头从远处慢慢推进，一个穿白裙的女孩在樱花树下转身回眸，花瓣随风飘落，最后定格在她微笑的面部特写。"></textarea>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+        <button class="btn btn-primary" style="font-size:12px;padding:7px 16px" onclick="storyToPrompt()">✨ 转换为英文 Prompt</button>
+        <span style="font-size:11px;color:var(--text3)">自动填充到 Prompt 预览，再生成视频</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 单镜头模式 -->
+  <div class="mode-panel active" id="mode-single">
+
+  <!-- 参考图选择 -->
+  <div class="card">
+    <div class="card-title">绑定参考原图 <span style="font-size:11px;font-weight:400;color:var(--text3)">选择将作为视频起始画面的原图</span></div>
+    <div class="compliance-hint">⚠️ 所选原图不得含真实人物面孔，否则 API 将拒绝请求</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div style="display:flex;gap:8px" id="ref-img-row">
+        <div class="mat-thumb selected" style="width:80px;border-color:var(--accent)" onclick="selectRefImg(this,'🌃')">
+          <div style="font-size:22px">🌃</div>
+          <div style="position:absolute;top:3px;right:3px;width:14px;height:14px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">✓</div>
+        </div>
+        <div class="mat-thumb" style="width:80px" onclick="selectRefImg(this,'🌿')"><div style="font-size:22px">🌿</div></div>
+        <div class="mat-thumb" style="width:80px" onclick="selectRefImg(this,'🔥')"><div style="font-size:22px">🔥</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--text3)">已绑定 @Image1</div>
+    </div>
+  </div>
+
+  <!-- Prompt Builder -->
+  <div class="card">
+    <div class="card-title">Prompt 构建器 <span style="font-size:11px;font-weight:400;color:var(--text3)">选择后自动拼接英文 Prompt</span></div>
+    <div class="prompt-builder">
+
+      <!-- 1 Subject -->
+      <div class="pb-step">
+        <div class="pb-step-head"><div class="pb-num">1</div><div class="pb-step-title">主体描述</div><div class="pb-step-en">Subject</div></div>
+        <div class="tag-row" id="pb-subject">
+          <div class="tag selected" onclick="pbSelect(this,'subject','A young woman in white dress')">白裙女性<span class="lang-en-label">White Dress</span></div>
+          <div class="tag" onclick="pbSelect(this,'subject','A man in dark suit')">深色西装男<span class="lang-en-label">Dark Suit</span></div>
+          <div class="tag" onclick="pbSelect(this,'subject','A product on display')">产品展示<span class="lang-en-label">Product</span></div>
+          <div class="tag" onclick="pbSelect(this,'subject','An animal in nature')">自然动物<span class="lang-en-label">Animal</span></div>
+          <div class="tag" onclick="pbSelect(this,'subject','A futuristic robot')">未来机器人<span class="lang-en-label">Robot</span></div>
+          <div class="tag" onclick="pbSelect(this,'subject','Abstract elements')">抽象元素<span class="lang-en-label">Abstract</span></div>
+          <div class="tag" onclick="showOther('subject')">✏️ 其他<span class="lang-en-label">Other</span></div>
+        </div>
+        <div class="other-wrap" id="other-subject">
+          <input class="other-input" type="text" placeholder="描述主体（可中英文）…" id="other-subject-input">
+          <button class="other-confirm" onclick="confirmOtherPb('subject','pb-subject','other-subject')">确认</button>
+        </div>
+      </div>
+
+      <!-- 2 Action -->
+      <div class="pb-step">
+        <div class="pb-step-head"><div class="pb-num">2</div><div class="pb-step-title">动作</div><div class="pb-step-en">Action</div></div>
+        <div class="tag-row" id="pb-action">
+          <div class="tag" onclick="pbSelect(this,'action','slowly turns around, gentle breeze')">缓慢回眸<span class="lang-en-label">Turn</span></div>
+          <div class="tag" onclick="pbSelect(this,'action','walks forward with natural stride')">自然行走<span class="lang-en-label">Walk</span></div>
+          <div class="tag" onclick="pbSelect(this,'action','takes a deep breath, adjusts expression')">深吸一口气<span class="lang-en-label">Breathe</span></div>
+          <div class="tag" onclick="pbSelect(this,'action','stands still, chest rises and falls with breathing')">静止呼吸<span class="lang-en-label">Still</span></div>
+          <div class="tag" onclick="pbSelect(this,'action','slowly rotates 360 degrees')">慢速旋转<span class="lang-en-label">Rotate</span></div>
+          <div class="tag" onclick="pbSelect(this,'action','liquid spray in ultra slow motion')">液体喷出<span class="lang-en-label">Spray</span></div>
+          <div class="tag" onclick="pbSelect(this,'action','petals and dust float gently')">飘散粒子<span class="lang-en-label">Float</span></div>
+          <div class="tag" onclick="showOther('action')">✏️ 其他<span class="lang-en-label">Other</span></div>
+        </div>
+        <div class="other-wrap" id="other-action">
+          <input class="other-input" type="text" placeholder="描述动作（英文）…" id="other-action-input">
+          <button class="other-confirm" onclick="confirmOtherPb('action','pb-action','other-action')">确认</button>
+        </div>
+      </div>
+
+      <!-- 3 Environment -->
+      <div class="pb-step">
+        <div class="pb-step-head"><div class="pb-num">3</div><div class="pb-step-title">环境</div><div class="pb-step-en">Environment</div></div>
+        <div class="tag-row" id="pb-env">
+          <div class="tag" onclick="pbSelect(this,'env','in an empty dawn parking lot, rain-slicked surface')">雨后停车场<span class="lang-en-label">Rainy Lot</span></div>
+          <div class="tag" onclick="pbSelect(this,'env','in a sunlit minimalist studio')">极简摄影棚<span class="lang-en-label">Studio</span></div>
+          <div class="tag" onclick="pbSelect(this,'env','on a matte black obsidian surface')">黑曜石台面<span class="lang-en-label">Obsidian</span></div>
+          <div class="tag selected" onclick="pbSelect(this,'env','in a seaside at dusk, golden glow')">黄昏海边<span class="lang-en-label">Seaside</span></div>
+          <div class="tag" onclick="pbSelect(this,'env','in a neon-lit rainy street at night')">霓虹雨夜<span class="lang-en-label">Neon Night</span></div>
+          <div class="tag" onclick="pbSelect(this,'env','in ancient forest, morning mist')">晨雾森林<span class="lang-en-label">Forest</span></div>
+          <div class="tag" onclick="showOther('env')">✏️ 其他<span class="lang-en-label">Other</span></div>
+        </div>
+        <div class="other-wrap" id="other-env">
+          <input class="other-input" type="text" placeholder="描述环境/场景（英文）…" id="other-env-input">
+          <button class="other-confirm" onclick="confirmOtherPb('env','pb-env','other-env')">确认</button>
+        </div>
+      </div>
+
+      <!-- 4 Camera -->
+      <div class="pb-step">
+        <div class="pb-step-head"><div class="pb-num">4</div><div class="pb-step-title">镜头运动</div><div class="pb-step-en">Camera</div></div>
+        <div id="pb-camera-wrap">
+          <div class="cam-group-label">基础 / Basic</div>
+          <div class="tag-row pb-camera-row">
+            <div class="tag cam-tag selected" onclick="pbSelectCam(this,'fixed camera, locked-off')">⚪ 固定<span class="lang-en-label">Fixed</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'camera slow dolly in')">🔵 推进<span class="lang-en-label">Dolly In</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'camera slow pull-out')">🟢 拉远<span class="lang-en-label">Pull Out</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'camera lateral pan')">🟡 横移<span class="lang-en-label">Pan</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'tracking shot follows subject')">🟠 跟踪<span class="lang-en-label">Track</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'orbit arc around subject 360')">🔴 环绕<span class="lang-en-label">Orbit</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'aerial drone top-down shot')">🟣 航拍<span class="lang-en-label">Aerial</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'handheld natural movement')">⚫ 手持<span class="lang-en-label">Handheld</span></div>
+          </div>
+          <div class="cam-group-label">特效 / Special FX</div>
+          <div class="tag-row pb-camera-row">
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'extreme zoom in macro close-up')">🔍 超级特写<span class="lang-en-label">Macro</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'whip pan fast swipe transition')">⚡ 甩镜<span class="lang-en-label">Whip Pan</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'dutch angle tilted camera')">↗ 斜角<span class="lang-en-label">Dutch</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'slow zoom in with slight rotation')">🌀 旋转推进<span class="lang-en-label">Spiral</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'vertigo dolly zoom effect')">🎭 眩晕变焦<span class="lang-en-label">Vertigo</span></div>
+          </div>
+          <div class="cam-group-label">情绪叙事 / Cinematic</div>
+          <div class="tag-row pb-camera-row">
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'slow push with shallow depth of field bokeh')">💫 景深推进<span class="lang-en-label">Bokeh Push</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'subtle camera drift slight movement')">🌊 微漂移<span class="lang-en-label">Drift</span></div>
+            <div class="tag cam-tag" onclick="pbSelectCam(this,'camera rises up crane shot reveal')">🏗️ 升降<span class="lang-en-label">Crane</span></div>
+            <div class="tag" onclick="showOther('camera')">✏️ 其他<span class="lang-en-label">Other</span></div>
+          </div>
+          <div class="other-wrap" id="other-camera">
+            <input class="other-input" type="text" placeholder="输入自定义镜头运动（英文）…" id="other-camera-input">
+            <button class="other-confirm" onclick="confirmOtherCam()">确认</button>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">运动速度 / Speed</div>
+          <input type="range" min="0" max="3" value="1" id="speed-sl" oninput="updateSpeedLabel()" style="width:200px">
+          <div class="speed-labels" style="width:200px"><span>极缓慢</span><span>缓慢</span><span>中等</span><span>⚠️快速</span></div>
+          <div style="font-size:11px;color:var(--accent2);margin-top:4px" id="speed-label">当前：slow, gentle</div>
+        </div>
+      </div>
+
+      <!-- 5 Style -->
+      <div class="pb-step">
+        <div class="pb-step-head"><div class="pb-num">5</div><div class="pb-step-title">风格与光线</div><div class="pb-step-en">Style</div></div>
+        <div class="row-gap">
+          <div class="tag-row" id="pb-style">
+            <div class="tag selected" onclick="pbSelect(this,'style','35mm film tone, cinematic')">35mm胶片<span class="lang-en-label">35mm Film</span></div>
+            <div class="tag" onclick="pbSelect(this,'style','4K ultra sharp, high detail')">4K超清<span class="lang-en-label">4K Sharp</span></div>
+            <div class="tag" onclick="pbSelect(this,'style','film grain, analog, vintage')">复古模拟<span class="lang-en-label">Analog</span></div>
+            <div class="tag" onclick="pbSelect(this,'style','documentary, realistic, natural')">纪录片<span class="lang-en-label">Documentary</span></div>
+            <div class="tag" onclick="pbSelect(this,'style','anime style, illustrated')">动漫风格<span class="lang-en-label">Anime</span></div>
+            <div class="tag" onclick="showOther('pbstyle')">✏️ 其他<span class="lang-en-label">Other</span></div>
+          </div>
+          <div class="other-wrap" id="other-pbstyle">
+            <input class="other-input" type="text" placeholder="自定义视频风格…" id="other-pbstyle-input">
+            <button class="other-confirm" onclick="confirmOtherPb('style','pb-style','other-pbstyle')">确认</button>
+          </div>
+          <div class="tag-row" id="pb-light">
+            <div class="tag" onclick="pbToggle(this,'light','soft golden hour lighting')" data-val="soft golden hour lighting">🌅 黄金时刻光<span class="lang-en-label">Golden Hour</span></div>
+            <div class="tag" onclick="pbToggle(this,'light','single focused spotlight, tungsten warm')" data-val="single focused spotlight, tungsten warm">💡 钨丝聚光灯<span class="lang-en-label">Spotlight</span></div>
+            <div class="tag" onclick="pbToggle(this,'light','dramatic rim light, backlit')" data-val="dramatic rim light, backlit">✨ 轮廓逆光<span class="lang-en-label">Rim Light</span></div>
+            <div class="tag" onclick="pbToggle(this,'light','soft natural window light')" data-val="soft natural window light">🪟 自然窗光<span class="lang-en-label">Window</span></div>
+            <div class="tag" onclick="pbToggle(this,'light','neon-lit, colorful reflections')" data-val="neon-lit, colorful reflections">🌈 霓虹<span class="lang-en-label">Neon</span></div>
+            <div class="tag" onclick="showOther('pblight')">✏️ 其他<span class="lang-en-label">Other</span></div>
+          </div>
+          <div class="other-wrap" id="other-pblight">
+            <input class="other-input" type="text" placeholder="自定义光线（英文）…" id="other-pblight-input">
+            <button class="other-confirm" onclick="confirmOtherPbLight()">确认</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 Constraints -->
+      <div class="pb-step">
+        <div class="pb-step-head"><div class="pb-num">6</div><div class="pb-step-title">负面约束</div><div class="pb-step-en">Constraints</div></div>
+        <div class="constraint-row">
+          <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid jitter"><div class="dot"></div>防抖 <span style="color:var(--text3);font-size:10px">/ avoid jitter</span></div>
+          <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid bent limbs"><div class="dot"></div>防肢体变形 <span style="color:var(--text3);font-size:10px">/ avoid bent limbs</span></div>
+          <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid temporal flicker"><div class="dot"></div>防闪烁 <span style="color:var(--text3);font-size:10px">/ avoid temporal flicker</span></div>
+          <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid identity drift"><div class="dot"></div>防人物漂移 <span style="color:var(--text3);font-size:10px">/ avoid identity drift</span></div>
+          <div class="constraint-toggle" onclick="this.classList.toggle('on')" data-val="avoid chaotic composition"><div class="dot"></div>防构图混乱 <span style="color:var(--text3);font-size:10px">/ avoid chaotic composition</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt Preview -->
+  <div class="card">
+    <div class="card-title">当前 Prompt 预览
+      <button class="unlock-btn" id="unlock-btn" onclick="unlockPrompt()">🔓 解锁编辑</button>
+    </div>
+    <div class="prompt-preview-box" id="prompt-preview-box">
+      <div class="label">自动拼接结果</div>
+      <div class="en-prompt" id="prompt-preview" style="outline:none">Animate the provided @Image1, preserve composition and colors. A young woman in white dress, slowly turns around, gentle breeze, in a seaside at dusk, golden glow, camera fixed camera locked-off slow, gentle, 35mm film tone, cinematic, soft golden hour lighting, avoid jitter, avoid bent limbs, avoid temporal flicker, avoid identity drift.</div>
+    </div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="warn-text" id="s3-draft-info">⚡ 草稿：480p · 5秒 · <span id="s3-draft-provider">第三方API</span> · <strong id="s3-draft-price">—</strong></div>
+    </div>
+    <details style="margin-top:10px">
+      <summary style="font-size:12px;color:var(--accent2);cursor:pointer;user-select:none">✏️ 我想直接输入英文 Prompt</summary>
+      <textarea class="text-input" rows="3" id="direct-prompt-input" style="margin-top:8px" placeholder="直接在此输入完整英文 Prompt…"></textarea>
+      <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px;margin-top:6px" onclick="applyDirectPrompt()">↑ 同步到预览</button>
+    </details>
+  </div>
+
+  </div><!-- /mode-single -->
+
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px">
+    <span style="font-size:12px;color:var(--text3)">模型:</span>
+    <select class="param-select" style="width:auto;min-width:200px;font-size:12px" id="s3-model-select" onchange="refreshAllCosts()"></select>
+  </div>
+  <div style="font-size:11px;margin-bottom:6px" id="s3-cost-info">约 ¥2.70/个</div>
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <button class="btn btn-primary" style="width:200px" onclick="genVideo()">▶ 生成视频草稿</button>
+    <span style="font-size:12px;color:var(--text3)">（最多保留3个草稿）</span>
+  </div>
+  <div class="loading-bar" id="s3-loading"><div class="loading-bar-inner"></div></div>
+  <div class="loading-text" id="s3-loadtext">Seedance 2.0 渲染中，约 30-60 秒…</div>
+  </div><!-- /s3-gen-section -->
+
+  <!-- 上传视频区 -->
+  <div id="s3-upload-section" style="display:none">
+    <div class="card">
+      <div class="card-title">上传视频文件</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">支持 mp4 / mov / webm，上传后直接加入素材盘作为视频草稿，可在步骤五直接使用</div>
+      <input type="file" id="s3-video-file" accept="video/mp4,video/quicktime,video/webm" style="display:none" onchange="handleVideoUpload(event)">
+      <div class="upload-zone" id="s3-video-zone"
+           onclick="document.getElementById('s3-video-file').click()"
+           ondragover="event.preventDefault();this.classList.add('dragover')"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="handleVideoDrop(event)">
+        <div class="upload-icon">🎬</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:4px">点击或拖拽视频文件到此处</div>
+        <div class="upload-hint">mp4 / mov / webm · 建议不超过 500MB</div>
+      </div>
+      <div id="s3-upload-preview" style="display:none;margin-top:14px">
+        <video id="s3-preview-video" controls style="width:100%;border-radius:8px;background:#000;max-height:240px"></video>
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+          <button class="btn btn-primary" style="padding:8px 20px" onclick="saveUploadedVideo()">＋ 保存到素材盘</button>
+          <span style="font-size:12px;color:var(--text3)" id="s3-upload-filename"></span>
+        </div>
+      </div>
+    </div>
+    <div class="loading-bar" id="s3-upload-loading" style="display:none"><div class="loading-bar-inner"></div></div>
+    <div class="loading-text" id="s3-upload-loadtext" style="display:none">处理中…</div>
+  </div>
+</div>
+
+<!-- ═══ STEP 4 ═══ -->
+<div id="step4" class="step-panel">
+  <div class="panel-title">第四步：音乐草稿生成</div>
+  <div class="panel-subtitle">选择音乐情绪和风格，生成与视频匹配的背景音乐。草稿最长 <strong style="color:var(--yellow)">30秒 · 低码率</strong>，最多保留3个。</div>
+
+  <!-- 快速匹配按钮置顶 -->
+  <div class="card sync-top-card">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-secondary" style="font-size:13px;padding:8px 20px" onclick="syncMusicStyle()">⟳ 一键匹配步骤三视频风格</button>
+      <span style="font-size:12px;color:var(--text2)">自动根据视频情绪填充匹配的音乐参数</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">音乐情绪 / Mood</div>
+    <div class="tag-row" id="music-mood">
+      <div class="tag" onclick="pbSelect(this,'music-mood','epic, intense, powerful')">热血/高能<span class="lang-en-label">Epic</span></div>
+      <div class="tag selected" onclick="pbSelect(this,'music-mood','gentle, soothing, calm')">温柔舒缓<span class="lang-en-label">Gentle</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-mood','dark, mysterious, ominous')">神秘暗黑<span class="lang-en-label">Dark</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-mood','upbeat, playful, cheerful')">欢快轻松<span class="lang-en-label">Upbeat</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-mood','cinematic, orchestral, grand')">史诗磅礴<span class="lang-en-label">Cinematic</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-mood','ambient, ethereal, healing')">空灵治愈<span class="lang-en-label">Ambient</span></div>
+      <div class="tag" onclick="showOther('music-mood')">✏️ 其他<span class="lang-en-label">Other</span></div>
+    </div>
+    <div class="other-wrap" id="other-music-mood">
+      <input class="other-input" type="text" placeholder="自定义音乐情绪…" id="other-music-mood-input">
+      <button class="other-confirm" onclick="confirmOtherTag('music-mood','music-mood','music-mood')">确认</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">音乐流派 / Genre</div>
+    <div class="tag-row" id="music-genre">
+      <div class="tag" onclick="pbSelect(this,'music-genre','electronic synth')">电子合成<span class="lang-en-label">Electronic</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-genre','classical orchestral')">古典管弦<span class="lang-en-label">Classical</span></div>
+      <div class="tag selected" onclick="pbSelect(this,'music-genre','jazz')">爵士<span class="lang-en-label">Jazz</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-genre','folk acoustic')">民谣<span class="lang-en-label">Folk</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-genre','rock')">摇滚<span class="lang-en-label">Rock</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-genre','hip-hop')">嘻哈<span class="lang-en-label">Hip-hop</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-genre','Chinese traditional guqin')">国风古典<span class="lang-en-label">Guqin</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-genre','solo piano')">纯钢琴<span class="lang-en-label">Piano</span></div>
+      <div class="tag" onclick="showOther('music-genre')">✏️ 其他<span class="lang-en-label">Other</span></div>
+    </div>
+    <div class="other-wrap" id="other-music-genre">
+      <input class="other-input" type="text" placeholder="自定义音乐流派…" id="other-music-genre-input">
+      <button class="other-confirm" onclick="confirmOtherTag('music-genre','music-genre','music-genre')">确认</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">主要乐器 <span style="font-size:11px;font-weight:400;color:var(--text3)">可多选 / Instruments</span></div>
+    <div class="tag-row" id="music-inst">
+      <div class="tag" onclick="this.classList.toggle('selected')">🎹 钢琴<span class="lang-en-label">Piano</span></div>
+      <div class="tag selected" onclick="this.classList.toggle('selected')">🎸 吉他<span class="lang-en-label">Guitar</span></div>
+      <div class="tag" onclick="this.classList.toggle('selected')">🎻 提琴<span class="lang-en-label">Violin</span></div>
+      <div class="tag" onclick="this.classList.toggle('selected')">🎹 合成器<span class="lang-en-label">Synth</span></div>
+      <div class="tag" onclick="this.classList.toggle('selected')">🥁 鼓点<span class="lang-en-label">Drums</span></div>
+      <div class="tag" onclick="this.classList.toggle('selected')">🪈 笛/箫<span class="lang-en-label">Flute</span></div>
+      <div class="tag" onclick="this.classList.toggle('selected')">🎤 人声哼鸣<span class="lang-en-label">Vocal</span></div>
+      <div class="tag" onclick="showOther('music-inst')">✏️ 其他<span class="lang-en-label">Other</span></div>
+    </div>
+    <div class="other-wrap" id="other-music-inst">
+      <input class="other-input" type="text" placeholder="自定义乐器…" id="other-music-inst-input">
+      <button class="other-confirm" onclick="confirmOtherTag('music-inst','music-inst','music-inst')">确认</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">节奏速度 / Tempo</div>
+    <div class="tag-row" id="music-tempo">
+      <div class="tag" onclick="pbSelect(this,'music-tempo','very slow, meditative, ASMR pace')">极慢（冥想）<span class="lang-en-label">Very Slow</span></div>
+      <div class="tag selected" onclick="pbSelect(this,'music-tempo','slow, relaxed tempo')">缓慢<span class="lang-en-label">Slow</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-tempo','medium tempo, natural rhythm')">中等<span class="lang-en-label">Medium</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-tempo','fast, energetic, driving')">快速<span class="lang-en-label">Fast</span></div>
+      <div class="tag" onclick="showOther('music-tempo')">✏️ 其他<span class="lang-en-label">Other</span></div>
+    </div>
+    <div class="other-wrap" id="other-music-tempo">
+      <input class="other-input" type="text" placeholder="自定义节奏描述…" id="other-music-tempo-input">
+      <button class="other-confirm" onclick="confirmOtherTag('music-tempo','music-tempo','music-tempo')">确认</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">草稿时长 / Duration</div>
+    <div class="tag-row" id="music-dur">
+      <div class="tag" onclick="pbSelect(this,'music-dur','10')">10 秒</div>
+      <div class="tag selected" onclick="pbSelect(this,'music-dur','20')">20 秒</div>
+      <div class="tag" onclick="pbSelect(this,'music-dur','30')">30 秒</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+    <span style="font-size:12px;color:var(--text3)">模型:</span>
+    <select class="param-select" style="width:auto;min-width:170px;font-size:12px" id="s4-model-select" onchange="refreshAllCosts()"></select>
+  </div>
+  <div style="font-size:11px;margin-bottom:6px" id="s4-cost-info">约 ¥0.10/个</div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <button class="btn btn-primary" style="width:200px" onclick="genMusic()">♫ 生成音乐草稿</button>
+  </div>
+  <div class="loading-bar" id="s4-loading"><div class="loading-bar-inner"></div></div>
+  <div class="loading-text" id="s4-loadtext">音乐生成中，约 20-40 秒…</div>
+</div>
+
+<!-- ═══ STEP 5 ═══ -->
+<div id="step5" class="step-panel">
+  <div class="panel-title">第五步：生成最终成片</div>
+  <div class="panel-subtitle">从素材盘选择原图、视频草稿和音乐，确认最终 Prompt，设置分辨率和时长后生成高质量成片。</div>
+
+  <div class="card" id="s5-imgs-card">
+    <div class="card-title">选择参考原图 <span style="color:var(--text3);font-size:11px">可选 · 最多2张</span></div>
+    <div class="asset-select-grid" id="s5-imgs">
+      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤一保存原图，即可在此选择</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">选择视频草稿 <span style="color:var(--red);font-size:11px">必选</span></div>
+    <div class="asset-select-grid" id="s5-videos">
+      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三生成或上传视频草稿</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">选择音乐 <span style="font-size:11px;font-weight:400;color:var(--text3)">可选</span></div>
+    <div class="asset-select-grid" id="s5-music">
+      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四生成音乐草稿（可跳过）</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">最终 Prompt <span style="font-size:11px;font-weight:400;color:var(--text3)">可在此最终修改</span></div>
+    <textarea class="text-input" rows="4" id="final-prompt" placeholder="从步骤三 Prompt 自动同步，或手动输入。建议 60–100 词，聚焦主体动作与镜头运动。"></textarea>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button class="btn btn-secondary" style="font-size:12px;padding:5px 14px;position:relative" id="s5-sync-btn" onclick="syncPromptFromS3()">⟳ 同步步骤三 Prompt<span id="s5-sync-dot" style="display:none;position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:var(--yellow);border-radius:50%;border:1.5px solid var(--bg2)"></span></button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px">每次修改只改一个变量，多个动作用逗号分隔。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">输出参数</div>
+    <div class="param-row" style="margin-bottom:12px">
+      <div class="param-group">
+        <label>分辨率</label>
+        <select class="param-select" id="res-select" onchange="updateCost()">
+          <option value="720">720p（快）</option>
+          <option value="1080" selected>1080p（推荐）</option>
+          <option value="2k">2K（慢，贵）</option>
+        </select>
+      </div>
+      <div class="param-group">
+        <label>时长</label>
+        <select class="param-select" id="dur-select" onchange="updateCost()">
+          <option value="6">6 秒</option>
+          <option value="8">8 秒</option>
+          <option value="10">10 秒</option>
+          <option value="12" selected>12 秒</option>
+          <option value="15">15 秒</option>
+        </select>
+      </div>
+    </div>
+    <div class="cost-display">
+      <div class="cost-items">
+        <div class="cost-item"><div class="cost-item-label">分辨率</div><div class="cost-item-val" id="cost-res">1080p</div></div>
+        <div class="cost-item"><div class="cost-item-label">时长</div><div class="cost-item-val" id="cost-dur">12s</div></div>
+        <div class="cost-item"><div class="cost-item-label">API</div><div class="cost-item-val" style="font-size:13px">火山引擎官方</div></div>
+      </div>
+      <div class="cost-total">
+        <div class="cost-total-label">预估费用</div>
+        <div class="cost-total-val" id="cost-total">¥25.6</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;align-items:center">
+    <button class="btn btn-primary btn-full" style="font-size:16px;padding:14px;flex:1" onclick="genFinal()" id="s5-gen-btn">🚀 生成最终成片</button>
+    <button class="btn btn-secondary" style="padding:14px 18px;display:none;font-size:14px" id="s5-cancel-btn" onclick="cancelFinal()">✕ 取消</button>
+  </div>
+  <div class="loading-bar" id="s5-loading"><div class="loading-bar-inner"></div></div>
+  <div class="loading-text" id="s5-loadtext"></div>
+
+  <div id="s5-done" style="display:none;margin-top:20px">
+    <div class="card" style="border-color:var(--green)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div style="width:36px;height:36px;background:rgba(52,211,153,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid var(--green)">✓</div>
+        <div><div style="font-weight:700;color:var(--green)">成片生成完成！</div><div style="font-size:12px;color:var(--text3);margin-top:2px" id="s5-done-meta">Seedance 2.0</div></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" style="padding:9px 20px" id="dl-btn">⬇ 下载视频</button>
+        <button class="btn btn-secondary" style="padding:9px 20px">↗ 分享链接</button>
+        <button class="btn btn-secondary" style="padding:9px 20px" onclick="goStep(1)">+ 新建创作</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+
+<!-- RIGHT: 素材盘 -->
+<aside class="material-panel">
+  <div class="mat-header">素材盘</div>
+  <div class="mat-section">
+    <div class="mat-section-title" onclick="toggleMatSection('imgs')">
+      原图区 <span class="mat-count" id="img-count">0 / 9</span>
+    </div>
+    <div class="mat-body" id="imgs-body">
+      <div class="mat-grid" id="imgs-grid">
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+        <div class="mat-thumb empty"><div class="mat-thumb-placeholder">＋</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="mat-section">
+    <div class="mat-section-title">
+      视频草稿 <span class="mat-count" id="vid-count">0 / 3</span>
+      <span class="draft-badge">480p · 5s</span>
+    </div>
+    <div class="mat-body">
+      <div class="mat-list" id="vid-list">
+        <div class="mat-placeholder">暂无草稿，在步骤三生成</div>
+      </div>
+    </div>
+  </div>
+  <div class="mat-section">
+    <div class="mat-section-title">
+      音乐草稿 <span class="mat-count" id="mus-count">0 / 3</span>
+    </div>
+    <div class="mat-body">
+      <div class="mat-list" id="mus-list">
+        <div class="mat-placeholder">暂无音乐，在步骤四生成</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- 视频预览弹窗 -->
+<div class="modal-overlay" id="vid-preview-overlay" onclick="if(event.target===this)closeVidPreview()">
+  <div class="modal-box" style="width:680px;padding:24px 24px 20px">
+    <button class="modal-close" onclick="closeVidPreview()">✕</button>
+    <div class="modal-title" id="vid-preview-title" style="font-size:16px;margin-bottom:2px">草稿预览</div>
+    <div class="modal-sub" id="vid-preview-meta" style="margin-bottom:14px"></div>
+    <video id="vid-preview-player" controls playsinline
+           style="width:100%;border-radius:10px;background:#000;aspect-ratio:16/9;display:block"></video>
+    <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
+      <button class="btn btn-secondary" style="font-size:12px;padding:7px 16px" onclick="openVidInTab()">↗ 新标签页打开</button>
+      <span style="font-size:11px;color:var(--text3)" id="vid-preview-prompt-hint"></span>
+    </div>
+  </div>
+</div>
+
+<!-- 原图 Prompt 弹窗 -->
+<div id="img-prompt-popup">
+  <div class="ipp-header">
+    <span class="ipp-name" id="ipp-name">原图</span>
+    <span class="ipp-close" onclick="hideImgPromptPopup()">✕</span>
+  </div>
+  <div class="ipp-body">
+    <div class="ipp-label">Prompt</div>
+    <div class="ipp-text" id="ipp-text"></div>
+    <div class="ipp-actions">
+      <div class="ipp-btn" onclick="copyIppPrompt()">📋 复制全部</div>
+      <div class="ipp-btn primary" onclick="applyIppToS1()">→ 填入步骤一</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /workspace -->
+
+<script>
+// ── XSS 防护 ──
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── TOAST ──
+let _toastTimer;
+function showToast(msg, type = 'info', duration = 4000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (type !== 'info' ? ' ' + type : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { t.className = ''; }, duration);
+}
+
+// ── API 配置 ──
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:8000'
+  : '';
+
+// ── 用户认证 ──
+let AUTH_TOKEN = localStorage.getItem('seedance_token') || null;
+let CURRENT_USER = null;
+let MODEL_CATALOG = { image: [], video_draft: [], music: [], final_video: [] };
+let _authTab = 'login';
+
+function openAuthModal(tab = 'login') {
+  _authTab = tab;
+  switchAuthTab(tab);
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-err').textContent = '';
+  document.getElementById('auth-modal').classList.add('open');
+  setTimeout(() => document.getElementById('auth-email').focus(), 120);
+}
+function closeAuthModal() {
+  document.getElementById('auth-modal').classList.remove('open');
+}
+function switchAuthTab(tab) {
+  _authTab = tab;
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('auth-submit').textContent = tab === 'login' ? '登录' : '创建账户';
+  document.getElementById('auth-password').placeholder = tab === 'register' ? '至少 8 位' : '密码';
+  document.getElementById('auth-err').textContent = '';
+}
+function toggleUserMenu() {
+  document.getElementById('user-menu').classList.toggle('open');
+}
+function closeUserMenu() {
+  document.getElementById('user-menu').classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  const chip = document.getElementById('user-chip');
+  if (menu && !menu.contains(e.target) && chip && !chip.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+function applyUserUI(user) {
+  CURRENT_USER = user;
+  const initial = (user.email || user.phone || 'U')[0].toUpperCase();
+  document.getElementById('user-avatar').textContent = initial;
+  document.getElementById('user-name').textContent = user.email || user.phone || '用户';
+  const bal = user.balance_subunit != null
+    ? (user.currency === 'CNY' ? '¥' : '$') + (user.balance_subunit / 100).toFixed(2)
+    : '';
+  document.getElementById('user-balance').textContent = bal;
+  document.getElementById('user-chip').style.display = 'flex';
+  document.getElementById('auth-login-btn').style.display = 'none';
+}
+function showLoginBtn() {
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('auth-login-btn').style.display = '';
+  document.querySelector('.main-content').style.display = 'none';
+  document.getElementById('auth-modal').classList.add('open');
+}
+
+async function fetchMe() {
+  if (!AUTH_TOKEN) { showLoginBtn(); return; }
+  try {
+    const r = await fetch(`${API_BASE}/api/auth/me`, {
+      headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+    });
+    if (!r.ok) { AUTH_TOKEN = null; localStorage.removeItem('seedance_token'); showLoginBtn(); return; }
+    const d = await r.json();
+    CURRENT_USER = d.user;
+    applyUserUI(d.user);
+    // Show main content, hide auth modal
+    document.querySelector('.main-content').style.display = '';
+    document.getElementById('auth-modal').classList.remove('open');
+  } catch(_) { showLoginBtn(); }
+}
+
+// ── Google OAuth ──
+(function loadStudioGIS() {
+  const script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.async = true;
+  script.onload = initStudioGIS;
+  document.head.appendChild(script);
+})();
+
+function initStudioGIS() {
+  fetch(`${API_BASE}/api/auth/config`).then(r => r.json()).then(d => {
+    if (!d.google_client_id || !window.google) return;
+    window.google.accounts.id.initialize({
+      client_id: d.google_client_id,
+      callback: handleStudioGoogleCredential,
+      auto_select: false,
+      context: 'signin',
+    });
+    window.google.accounts.id.renderButton(
+      document.getElementById('g_id_signin_studio'),
+      { theme: 'filled_black', size: 'large', width: 320, text: 'continue_with' }
+    );
+    // GitHub button
+    if (d.github_client_id) {
+      window._githubCid = d.github_client_id;
+      initStudioGitHub();
+    }
+  }).catch(() => {});
+}
+
+async function handleStudioGoogleCredential(response) {
+  const errEl = document.getElementById('auth-err');
+  errEl.textContent = '';
+  try {
+    const r = await fetch(`${API_BASE}/api/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: response.credential }),
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.detail || 'Google auth failed'; return; }
+    AUTH_TOKEN = d.token;
+    localStorage.setItem('seedance_token', AUTH_TOKEN);
+    closeAuthModal();
+    await fetchMe();
+    showToast(d.is_new ? 'Welcome! Account created.' : 'Welcome back!', 'ok');
+  } catch(e) {
+    errEl.textContent = '网络错误，请稍后重试';
+  }
+}
+
+// ── GitHub OAuth ──
+function initStudioGitHub() {
+  const div = document.getElementById('github_signin_studio');
+  if (!div || !window._githubCid) return;
+  div.innerHTML = `<button type="button" onclick="handleStudioGitHubLogin()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:320px;padding:10px 0;background:#24292f;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Continue with GitHub</button>`;
+}
+
+async function handleStudioGitHubLogin() {
+  try {
+    const r = await fetch(API_BASE + '/api/auth/github');
+    const d = await r.json();
+    if (d.url) window.location.href = d.url;
+  } catch (err) {
+    const errEl = document.getElementById('auth-err');
+    if (errEl) errEl.textContent = 'GitHub login failed';
+  }
+}
+
+(function handleStudioTokenFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const isNew = params.get('new');
+  if (token) {
+    AUTH_TOKEN = token;
+    localStorage.setItem('seedance_token', token);
+    window.history.replaceState({}, '', '/');
+    showToast(isNew ? 'Welcome! Account created.' : 'Welcome back!', 'ok');
+  }
+})();
+
+async function submitAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-err');
+  const btn = document.getElementById('auth-submit');
+  errEl.textContent = '';
+  if (!email) { errEl.textContent = '请输入邮箱'; return; }
+  if (!password || password.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
+  btn.disabled = true;
+  btn.textContent = '请稍候…';
+  try {
+    const endpoint = _authTab === 'login' ? '/api/auth/login' : '/api/auth/register';
+    const body = _authTab === 'login'
+      ? { email, password }
+      : { email, password, auth_provider: 'email' };
+    const r = await fetch(`${API_BASE}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.detail || '操作失败'; return; }
+    AUTH_TOKEN = d.token;
+    localStorage.setItem('seedance_token', AUTH_TOKEN);
+    closeAuthModal();
+    showToast(_authTab === 'login' ? '✓ 登录成功' : '✓ 注册成功，欢迎！', 'ok');
+    await fetchMe();
+  } catch(e) {
+    errEl.textContent = '网络错误，请稍后重试';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = _authTab === 'login' ? '登录' : '创建账户';
+  }
+}
+
+function doLogout() {
+  AUTH_TOKEN = null;
+  CURRENT_USER = null;
+  localStorage.removeItem('seedance_token');
+  closeUserMenu();
+  showLoginBtn();
+  showToast('已退出登录', 'info');
+}
+
+// ── 定价 / 充值 ──
+async function openPricingModal() {
+  document.getElementById('pricing-modal').classList.add('open');
+  // 显示余额（已登录时）
+  const balRow = document.getElementById('pricing-balance-row');
+  const balVal = document.getElementById('pricing-balance-val');
+  if (CURRENT_USER && CURRENT_USER.balance_subunit != null) {
+    const sym = CURRENT_USER.currency === 'CNY' ? '¥' : '$';
+    balVal.textContent = sym + (CURRENT_USER.balance_subunit / 100).toFixed(2);
+    balRow.style.display = 'flex';
+  } else {
+    balRow.style.display = 'none';
+  }
+  // 拉取套餐
+  try {
+    const r = await fetch(`${API_BASE}/api/payment/pricing`);
+    const d = await r.json();
+    renderPricing(d);
+  } catch(_) {
+    document.getElementById('pricing-grid').innerHTML =
+      `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3)">无法加载套餐，请检查网络</div>`;
+  }
+}
+function closePricingModal() {
+  document.getElementById('pricing-modal').classList.remove('open');
+}
+function renderPricing(data) {
+  const grid = document.getElementById('pricing-grid');
+  const note = document.getElementById('pricing-note');
+  note.textContent = data.note || '';
+  if (!data.packages || !data.packages.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3)">暂无套餐</div>`;
+    return;
+  }
+  grid.innerHTML = data.packages.map(p => `
+    <div class="pkg-card${p.popular ? ' popular' : ''}">
+      ${p.popular ? `<div class="pkg-popular-badge">最受欢迎</div>` : ''}
+      <div class="pkg-name">${escapeHtml(p.name)}</div>
+      <div class="pkg-price">${escapeHtml(p.display)}</div>
+      <div class="pkg-credits">${escapeHtml(p.credits_display)}</div>
+      <button class="pkg-buy" data-pkg-id="${escapeHtml(p.id)}" data-pkg-name="${escapeHtml(p.name)}" data-pkg-price="${escapeHtml(p.display)}">立即购买</button>
+    </div>`).join('');
+  document.querySelectorAll('.pkg-buy').forEach(btn => {
+    btn.onclick = function() {
+      buyPackage(this.dataset.pkgId, this.dataset.pkgName, this.dataset.pkgPrice);
+    };
+  });
+}
+async function buyPackage(id, name, price) {
+  if (!AUTH_TOKEN) {
+    closePricingModal();
+    openAuthModal('login');
+    showToast('请先登录后再购买', 'warn');
+    return;
+  }
+  // 尝试创建支付会话（当前返回 501）
+  try {
+    const r = await fetch(`${API_BASE}/api/payment/create-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${AUTH_TOKEN}` },
+      body: JSON.stringify({ package_id: id })
+    });
+    const d = await r.json();
+    if (r.ok && d.checkout_url) {
+      window.open(d.checkout_url, '_blank');
+    } else {
+      showToast(`💳 ${name} ${price} — 支付功能即将上线，敬请期待`, 'info', 5000);
+    }
+  } catch(_) {
+    showToast('💳 支付功能即将上线，敬请期待', 'info', 5000);
+  }
+}
+
+// ── SESSION ──
+let SESSION_ID = sessionStorage.getItem('seedance_session_id') || null;
+
+async function initSession() {
+  if (SESSION_ID) {
+    try {
+      const r = await fetch(`${API_BASE}/api/session/${SESSION_ID}`);
+      if (r.ok) return;
+    } catch(e) {}
+  }
+  try {
+    const r = await fetch(`${API_BASE}/api/session/new`, { method: 'POST' });
+    if (r.ok) {
+      const d = await r.json();
+      SESSION_ID = d.session_id;
+      sessionStorage.setItem('seedance_session_id', SESSION_ID);
+    }
+  } catch(e) { console.warn('后端未启动，使用Mock模式'); }
+}
+
+// ── MODEL CATALOG ──
+async function loadModelCatalog() {
+  const steps = ['image', 'video_draft', 'music', 'final_video'];
+  for (const step of steps) {
+    try {
+      const r = await fetch(`${API_BASE}/api/models?step=${step}`);
+      if (r.ok) {
+        const d = await r.json();
+        MODEL_CATALOG[step] = d.models || [];
+      }
+    } catch(e) { console.warn(`Model catalog ${step} unavailable`); }
+  }
+  populateModelSelects();
+}
+
+function populateModelSelects() {
+  const isEn = document.body.classList.contains('lang-en');
+  const steps = [
+    { step: 'image', selId: 's1-model-select' },
+    { step: 'video_draft', selId: 's3-model-select' },
+    { step: 'music', selId: 's4-model-select' },
+  ];
+  steps.forEach(({ step, selId }) => {
+    const models = MODEL_CATALOG[step] || [];
+    if (!models.length) return;
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    sel.innerHTML = '';
+    models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.key;
+      opt.textContent = (isEn ? m.display_name_en : m.display_name) + (m.is_default ? ' ★' : '');
+      if (m.is_default) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+  refreshAllCosts();
+}
+
+function getModelPrice(step) {
+  const models = MODEL_CATALOG[step] || [];
+  const selId = step === 'image' ? 's1-model-select' : step === 'video_draft' ? 's3-model-select' : 's4-model-select';
+  const sel = document.getElementById(selId);
+  if (!sel) return { price: 0, display: '' };
+  const model = models.find(m => m.key === sel.value);
+  if (!model) return { price: 0, display: '' };
+  return model;
+}
+
+function getSym() {
+  return CURRENT_USER?.currency === 'CNY' ? '¥' : '$';
+}
+
+function refreshAllCosts() {
+  // Step 1 (image): unit price × count
+  const imgModel = getModelPrice('image');
+  const countPill = document.querySelector('#step1 .count-pill.selected');
+  const count = countPill ? parseInt(countPill.dataset.count) : 3;
+  const imgTotal = imgModel.price * count;
+  const sym = getSym();
+  const imgPriceEl = document.getElementById('s1-cost-info');
+  if (imgPriceEl && imgModel.price) {
+    imgPriceEl.innerHTML = `<span style="color:var(--text2)">${imgModel.display_name || imgModel.display_name_en || ''}</span> · <span style="color:var(--accent2)">${sym}${imgModel.price.toFixed(2)}/张 × ${count}张 = <b>${sym}${imgTotal.toFixed(2)}</b></span>`;
+  }
+
+  // Step 3 (video draft): per-second pricing
+  const vidModel = getModelPrice('video_draft');
+  const vidPriceEl = document.getElementById('s3-cost-info');
+  if (vidPriceEl && vidModel.price_per_sec) {
+    const perSec720 = vidModel.price_per_sec['720p'] || vidModel.price;
+    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${perSec720.toFixed(2)}/秒</b> (720p)</span>`;
+  } else if (vidPriceEl && vidModel.price) {
+    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${vidModel.price.toFixed(2)}/个</b></span>`;
+  }
+  // Update draft info line (provider + estimated price)
+  const draftPriceEl = document.getElementById('s3-draft-price');
+  const draftProvEl = document.getElementById('s3-draft-provider');
+  if (draftPriceEl && vidModel.price_per_sec) {
+    const perSec720 = vidModel.price_per_sec['720p'] || vidModel.price;
+    draftPriceEl.textContent = `${sym}${(perSec720 * 5).toFixed(1)}/个`;
+  }
+  if (draftProvEl && vidModel.provider) {
+    draftProvEl.textContent = vidModel.provider === 'volcengine' ? '火山引擎直连' : '第三方API';
+  }
+
+  // Step 4 (music): unit price
+  const musModel = getModelPrice('music');
+  const musPriceEl = document.getElementById('s4-cost-info');
+  if (musPriceEl && musModel.price) {
+    musPriceEl.innerHTML = `<span style="color:var(--text2)">${musModel.display_name || musModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${musModel.price.toFixed(2)}/个</b></span>`;
+  }
+}
+
+function getSelectedModelKey(selId) {
+  const sel = document.getElementById(selId);
+  return sel?.value || null;
+}
+
+// ── STATE ──
+const state = {
+  imgs: [], videos: [], musics: [],
+  pbData: {
+    subject: 'A young woman in white dress',
+    action: '',
+    env: 'in a seaside at dusk, golden glow',
+    camera: 'fixed camera, locked-off',
+    style: '35mm film tone, cinematic',
+    light: '',
+    speed: 'slow, gentle',
+  }
+};
+const speedMap = ['imperceptible, barely','slow, gentle','smooth, controlled','dynamic, swift'];
+
+// ── STEP NAV ──
+function goStep(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step'+n).classList.add('active');
+  document.getElementById('stepbtn-'+n).classList.add('active');
+  if (n === 5) {
+    updateS5();
+    // 自动同步：若步骤五 Prompt 为空则填入步骤三；否则只检测是否有更新
+    const s5ta = document.getElementById('final-prompt');
+    if (s5ta && !s5ta.value.trim()) syncPromptFromS3();
+    else checkS5PromptStale();
+  }
+}
+
+// ── LANGUAGE TOGGLE ──
+function toggleLang() {
+  document.body.classList.toggle('lang-en');
+  document.getElementById('lang-btn').classList.toggle('active');
+}
+
+// ── IMAGE COUNT ──
+function selectCount(el) {
+  document.querySelectorAll('.count-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  refreshAllCosts();
+}
+
+// ── MODE SWITCH ──
+function switchMode(mode) {
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+mode).classList.add('active');
+  document.getElementById('mode-'+mode).classList.add('active');
+}
+
+// ── OTHER INPUT ──
+function showOther(group) {
+  const wrap = document.getElementById('other-'+group);
+  if (!wrap) return;
+  // Close others
+  document.querySelectorAll('.other-wrap').forEach(w => { if(w !== wrap) w.classList.remove('visible'); });
+  wrap.classList.toggle('visible');
+  if (wrap.classList.contains('visible')) {
+    const inp = wrap.querySelector('input');
+    if (inp) inp.focus();
+  }
+}
+
+// Confirm custom value for Step 1 tag groups (style/light/mood)
+function confirmOtherTag(key, rowId, wrpId) {
+  const inp = document.getElementById('other-'+wrpId+'-input');
+  if (!inp || !inp.value.trim()) return;
+  const val = inp.value.trim();
+  // Add as a new selected tag
+  const row = document.getElementById(rowId);
+  if (row) {
+    row.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+    // Create temp tag
+    const t = document.createElement('div');
+    t.className = 'tag selected';
+    t.dataset.val = val;
+    t.textContent = val;
+    t.onclick = function() {
+      row.querySelectorAll('.tag').forEach(x => x.classList.remove('selected'));
+      this.classList.add('selected');
+    };
+    // Insert before the 其他 tag
+    const otherTag = row.querySelector('[onclick*="showOther"]');
+    if (otherTag) row.insertBefore(t, otherTag);
+    else row.appendChild(t);
+  }
+  document.getElementById('other-'+wrpId).classList.remove('visible');
+  inp.value = '';
+}
+
+function confirmOther(group) {
+  const inp = document.getElementById('other-'+group+'-input');
+  if (!inp || !inp.value.trim()) return;
+  const card = document.getElementById('theme-other-card');
+  if (card) card.classList.add('selected');
+  document.getElementById('other-'+group).classList.remove('visible');
+}
+
+// Confirm custom for PB single-select
+function confirmOtherPb(key, rowId, wrpId) {
+  const inp = document.getElementById('other-'+wrpId+'-input');
+  if (!inp || !inp.value.trim()) return;
+  state.pbData[key] = inp.value.trim();
+  // Deselect all in row
+  const row = document.getElementById(rowId);
+  if (row) row.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+  document.getElementById('other-'+wrpId).classList.remove('visible');
+  inp.value = '';
+  buildPrompt();
+}
+
+// Confirm custom for camera
+function confirmOtherCam() {
+  const inp = document.getElementById('other-camera-input');
+  if (!inp || !inp.value.trim()) return;
+  state.pbData.camera = inp.value.trim();
+  document.querySelectorAll('.cam-tag').forEach(t => t.classList.remove('selected'));
+  document.getElementById('other-camera').classList.remove('visible');
+  inp.value = '';
+  buildPrompt();
+}
+
+// Confirm custom for pb-light (multi-select)
+function confirmOtherPbLight() {
+  const inp = document.getElementById('other-pblight-input');
+  if (!inp || !inp.value.trim()) return;
+  const val = inp.value.trim();
+  const row = document.getElementById('pb-light');
+  if (row) {
+    const t = document.createElement('div');
+    t.className = 'tag selected';
+    t.dataset.val = val;
+    t.textContent = '✏️ ' + val;
+    t.onclick = function() { this.classList.toggle('selected'); rebuildLight(); };
+    const otherTag = row.querySelector('[onclick*="showOther"]');
+    if (otherTag) row.insertBefore(t, otherTag);
+    else row.appendChild(t);
+  }
+  document.getElementById('other-pblight').classList.remove('visible');
+  inp.value = '';
+  rebuildLight();
+}
+function rebuildLight() {
+  const allLights = [];
+  document.querySelectorAll('#pb-light .tag.selected').forEach(t => {
+    const val = t.dataset.val || t.textContent.trim();
+    if (val && !val.includes('其他') && !val.includes('Other')) allLights.push(val);
+  });
+  state.pbData.light = allLights.join(', ');
+  buildPrompt();
+}
+
+// ── PRESET APPLY ──
+const presets = {
+  cyberpunk: { style: 'cyberpunk neon', light: 'neon lights', mood: 'mysterious dark', kw: '赛博朋克都市、霓虹女孩' },
+  ink:       { style: 'ink painting', light: 'soft natural light', mood: 'dreamy ethereal', kw: '水墨山水、意境' },
+  scifi:     { style: '3D render', light: 'spotlight', mood: 'epic grand', kw: '未来机甲、科幻战场' },
+  miniature: { style: 'realistic photography', light: 'soft natural light', mood: 'fresh bright', kw: '微缩模型城市景观' },
+  vintage:   { style: 'vintage film grain', light: 'golden hour', mood: 'warm healing', kw: '复古胶片人像、怀旧' },
+  aurora:    { style: 'realistic photography', light: 'soft natural light', mood: 'epic grand', kw: '北极光、雪山极地' },
+};
+function applyPreset(name) {
+  const p = presets[name];
+  if (!p) return;
+  document.querySelectorAll('#style-tags .tag').forEach(t => {
+    t.classList.toggle('selected', t.dataset.val === p.style);
+  });
+  document.querySelectorAll('#light-tags .tag').forEach(t => {
+    t.classList.toggle('selected', t.dataset.val === p.light);
+  });
+  document.querySelectorAll('#mood-tags .tag').forEach(t => {
+    t.classList.toggle('selected', t.dataset.val === p.mood);
+  });
+  document.getElementById('extra-kw').value = p.kw;
+  buildS1Prompt();
+}
+
+// ── TOGGLE HELPERS ──
+function toggleTheme(el) { el.classList.toggle('selected'); buildS1Prompt(); }
+function toggleTag(el, group) {
+  document.querySelectorAll(`#${group}-tags .tag`).forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  buildS1Prompt();
+}
+function selectRatio(el) {
+  document.querySelectorAll('#ratio-btns .ratio-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  buildS1Prompt();
+}
+
+// ── PROMPT BUILDER ──
+function pbSelect(el, key, val) {
+  const group = el.closest('.tag-row') || el.parentElement;
+  group.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  state.pbData[key] = val;
+  buildPrompt();
+}
+
+function pbSelectCam(el, val) {
+  document.querySelectorAll('.cam-tag').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  state.pbData.camera = val;
+  buildPrompt();
+}
+
+function pbToggle(el, key, val) {
+  el.setAttribute('data-val', val);
+  el.classList.toggle('selected');
+  rebuildLight();
+}
+
+function updateSpeedLabel() {
+  const v = document.getElementById('speed-sl').value;
+  const labels = ['imperceptible, barely','slow, gentle','smooth, controlled','⚠️ dynamic, swift'];
+  document.getElementById('speed-label').textContent = '当前：' + labels[v];
+  state.pbData.speed = speedMap[v];
+  buildPrompt();
+}
+
+function buildPrompt() {
+  const d = state.pbData;
+  const constraints = [];
+  document.querySelectorAll('.constraint-toggle.on').forEach(c => {
+    if (c.dataset.val) constraints.push(c.dataset.val);
+  });
+  let p = `Animate the provided @Image1, preserve composition and colors. `;
+  if (d.subject) p += d.subject + ', ';
+  if (d.action) p += d.action + ', ';
+  if (d.env) p += d.env + ', ';
+  if (d.camera) p += `camera ${d.camera} ${d.speed}, `;
+  if (d.style) p += d.style + ', ';
+  if (d.light) p += d.light + ', ';
+  if (constraints.length) p += constraints.join(', ') + '.';
+  else p = p.replace(/,\s*$/, '.');
+  document.getElementById('prompt-preview').textContent = p;
+  // 仅检测步骤五是否需要同步提示（不自动覆盖，让用户主动同步）
+  checkS5PromptStale();
+}
+
+// ── STORY TO PROMPT ──
+function storyToPrompt() {
+  const story = document.getElementById('story-input').value.trim();
+  if (!story) { alert('请先输入剧情描述'); return; }
+  const prompt = `Animate the provided @Image1, preserve composition and colors. ${story} Shot in cinematic style, smooth motion, avoid jitter, avoid temporal flicker.`;
+  document.getElementById('prompt-preview').textContent = prompt;
+  switchMode('single');
+  checkS5PromptStale();
+}
+
+// ── UNLOCK PROMPT EDIT ──
+function unlockPrompt() {
+  const box = document.getElementById('prompt-preview-box');
+  const preview = document.getElementById('prompt-preview');
+  const btn = document.getElementById('unlock-btn');
+  box.classList.toggle('editable');
+  if (box.classList.contains('editable')) {
+    preview.contentEditable = 'true';
+    preview.focus();
+    btn.textContent = '🔒 锁定编辑';
+  } else {
+    preview.contentEditable = 'false';
+    btn.textContent = '🔓 解锁编辑';
+    const fp = document.getElementById('final-prompt');
+    if (fp) fp.value = preview.textContent;
+  }
+}
+
+function applyDirectPrompt() {
+  const val = document.getElementById('direct-prompt-input').value.trim();
+  if (!val) return;
+  document.getElementById('prompt-preview').textContent = val;
+  const fp = document.getElementById('final-prompt');
+  if (fp) fp.value = val;
+}
+
+// ── STEP 2: FILTERS ──
+let _showBeforeAfter = false;
+
+function updateFilter() {
+  const b = document.getElementById('sl-bright').value;
+  const c = document.getElementById('sl-contrast').value;
+  const s = document.getElementById('sl-sat').value;
+  const t = document.getElementById('sl-temp').value;
+  document.getElementById('val-bright').textContent = b;
+  document.getElementById('val-contrast').textContent = c;
+  document.getElementById('val-shadow').textContent = document.getElementById('sl-shadow').value;
+  document.getElementById('val-hl').textContent = document.getElementById('sl-hl').value;
+  document.getElementById('val-sat').textContent = s;
+  document.getElementById('val-temp').textContent = t;
+  const brightness = 1 + Number(b)/200;
+  const contrast = 1 + Number(c)/150;
+  const saturation = 1 + Number(s)/150;
+  const hue = Number(t) * 0.3;
+  const preview = document.getElementById('adj-mock-img');
+  if (_showBeforeAfter) {
+    preview.style.filter = 'none';
+  } else {
+    preview.style.filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation}) hue-rotate(${hue}deg)`;
+  }
+  const label = document.getElementById('adj-preview-label');
+  if (label) {
+    const hasAdj = b != 0 || c != 0 || s != 0 || t != 0 || document.getElementById('sl-shadow').value != 0 || document.getElementById('sl-hl').value != 0;
+    label.textContent = hasAdj ? '调节滑块即可实时预览调色效果' : 'CSS 滤镜实时预览，最终效果以实际生成为准';
+  }
+}
+
+function toggleBeforeAfter() {
+  _showBeforeAfter = !_showBeforeAfter;
+  const btn = document.getElementById('ba-toggle-btn');
+  if (_showBeforeAfter) {
+    btn.textContent = '🎨 查看调色';
+    btn.style.borderColor = 'var(--green)';
+    btn.style.color = 'var(--green)';
+  } else {
+    btn.textContent = '👁 对比原图';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+  updateFilter();
+}
+function resetSliders() {
+  ['sl-bright','sl-contrast','sl-shadow','sl-hl','sl-sat','sl-temp'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  ['val-bright','val-contrast','val-shadow','val-hl','val-sat','val-temp'].forEach(id => {
+    document.getElementById(id).textContent = 0;
+  });
+  _showBeforeAfter = false;
+  const btn = document.getElementById('ba-toggle-btn');
+  if (btn) { btn.textContent = '👁 对比原图'; btn.style.borderColor = ''; btn.style.color = ''; }
+  document.getElementById('adj-mock-img').style.filter = '';
+  document.getElementById('adj-preview-label').textContent = 'CSS 滤镜实时预览，最终效果以实际生成为准';
+}
+let _adjImgId = null;
+
+function selectAdjImg(el, imgIdx) {
+  document.querySelectorAll('#adj-img-list .img-select-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  const img = state.imgs[imgIdx];
+  if (!img) return;
+  _adjImgId = img.id;
+  _showBeforeAfter = false;
+  const baBtn = document.getElementById('ba-toggle-btn');
+  if (baBtn) { baBtn.textContent = '👁 对比原图'; baBtn.style.borderColor = ''; baBtn.style.color = ''; }
+  const mock = document.getElementById('adj-mock-img');
+  if (img.url) {
+    mock.style.backgroundImage = `url(${img.url})`;
+    mock.style.backgroundSize = 'cover';
+    mock.style.backgroundPosition = 'center';
+    mock.textContent = '';
+  } else {
+    mock.style.backgroundImage = '';
+    mock.textContent = img.icon || '🖼️';
+  }
+  // 恢复已保存的调色参数
+  const cp = img.color_params;
+  if (cp) {
+    document.getElementById('sl-bright').value = cp.brightness || 0;
+    document.getElementById('sl-contrast').value = cp.contrast || 0;
+    document.getElementById('sl-shadow').value = cp.shadows || 0;
+    document.getElementById('sl-hl').value = cp.highlights || 0;
+    document.getElementById('sl-sat').value = cp.saturation || 0;
+    document.getElementById('sl-temp').value = cp.color_temp || 0;
+  } else {
+    resetSliders();
+  }
+  updateFilter();
+}
+
+async function saveAdj() {
+  if (!_adjImgId) { showToast('请先选择一张原图', 'warn'); return; }
+  const params = {
+    brightness: +document.getElementById('sl-bright').value,
+    contrast: +document.getElementById('sl-contrast').value,
+    shadows: +document.getElementById('sl-shadow').value,
+    highlights: +document.getElementById('sl-hl').value,
+    saturation: +document.getElementById('sl-sat').value,
+    color_temp: +document.getElementById('sl-temp').value,
+  };
+  // 保存到本地 state
+  const img = state.imgs.find(i => i.id === _adjImgId);
+  if (img) img.color_params = params;
+  // 同步到后端（有 session 时）
+  if (SESSION_ID && _adjImgId) {
+    try {
+      await apiPost('/api/image/color', {
+        session_id: SESSION_ID, image_id: _adjImgId, ...params
+      });
+    } catch(_) {}
+  }
+  showToast('✓ 调色参数已保存', 'ok');
+}
+
+// ── STEP 3: REF IMG ──
+function selectRefImg(el, icon) {
+  document.querySelectorAll('#ref-img-row .mat-thumb').forEach(t => {
+    t.classList.remove('selected'); t.style.borderColor = '';
+    const chk = t.querySelector('[style*="background:var(--accent)"]');
+    // remove inline check badge
+    t.querySelectorAll('[style*="position:absolute"]').forEach(x => x.remove());
+  });
+  el.classList.add('selected');
+  el.style.borderColor = 'var(--accent)';
+}
+
+// ── STEP 5: COST ──
+// Dynamic: from MODEL_CATALOG seedance-2.0, fallback to hardcoded
+const COST_PER_SEC_USD_FALLBACK = { '720': 0.12, '1080': 0.18, '2k': 0.36 };
+const CNY_RATE = 7.2;
+
+function updateCost() {
+  const res = document.getElementById('res-select').value;
+  const dur = parseInt(document.getElementById('dur-select').value) || 5;
+  const isCNY = CURRENT_USER?.currency === 'CNY';
+  const sym = isCNY ? '¥' : '$';
+
+  // Dynamic from model catalog (seedance-2.0, already in display currency)
+  let perSec = null;
+  const vidModels = MODEL_CATALOG['video_draft'] || [];
+  const sd20 = vidModels.find(m => m.key === 'seedance-2.0');
+  if (sd20 && sd20.price_per_sec) {
+    perSec = sd20.price_per_sec[res + 'p'] || sd20.price_per_sec[res];
+  }
+  if (!perSec) perSec = COST_PER_SEC_USD_FALLBACK[res] || 0.20;
+
+  const cost = perSec * dur;
+  document.getElementById('cost-res').textContent = res + 'p';
+  document.getElementById('cost-dur').textContent = dur + 's';
+  document.getElementById('cost-total').textContent = sym + cost.toFixed(1);
+}
+
+function toggleAsset(el, type) {
+  if (type !== 'mus') {
+    el.closest('.asset-select-grid').querySelectorAll('.asset-card').forEach(c => c.classList.remove('selected'));
+  }
+  el.classList.toggle('selected');
+}
+
+// ── API HELPERS ──
+async function apiPost(path, body) {
+  const r = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(`API错误 ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+async function apiGet(path) {
+  const r = await fetch(`${API_BASE}${path}`);
+  if (!r.ok) throw new Error(`API错误 ${r.status}`);
+  return r.json();
+}
+// ── 轮询（降级备用） ──
+async function pollTask(pollPath, onProgress, maxMs = 120000) {
+  const start = Date.now();
+  while (Date.now() - start < maxMs) {
+    await new Promise(res => setTimeout(res, 3000));
+    try {
+      const d = await apiGet(pollPath);
+      if (typeof onProgress === 'function') onProgress(d);
+      if (d.status === 'completed' || d.status === 'succeeded') return d;
+      if (d.status === 'failed') throw new Error(d.error || '生成失败');
+    } catch(e) {
+      if (e.message.includes('生成失败')) throw e;
+    }
+  }
+  throw new Error('等待超时，请稍后查看结果');
+}
+
+// ── SSE 实时推送（优先）── 失败自动降级轮询
+function watchTask(taskId, pollPath, onProgress, maxMs = 120000) {
+  return new Promise((resolve, reject) => {
+    if (!SESSION_ID || !taskId || !window.EventSource) {
+      pollTask(pollPath, onProgress, maxMs).then(resolve).catch(reject);
+      return;
+    }
+    const url = `${API_BASE}/api/sse/task/${taskId}?session_id=${encodeURIComponent(SESSION_ID)}`;
+    let es;
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) { settled = true; es && es.close(); reject(new Error('等待超时，请稍后查看结果')); }
+    }, maxMs);
+
+    const done = (data, err) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      es && es.close();
+      err ? reject(err) : resolve(data);
+    };
+
+    try {
+      es = new EventSource(url);
+      es.onmessage = (e) => {
+        try {
+          const d = JSON.parse(e.data);
+          if (typeof onProgress === 'function') onProgress(d);
+          if (d.status === 'completed' || d.status === 'succeeded') done(d, null);
+          else if (d.status === 'failed') done(null, new Error(d.error || '生成失败'));
+        } catch(_) {}
+      };
+      es.addEventListener('done', (e) => {
+        try {
+          const d = JSON.parse(e.data);
+          if (d.status === 'failed') done(null, new Error(d.error || '生成失败'));
+          else done(d, null);
+        } catch(_) {}
+      });
+      es.onerror = () => {
+        // SSE 连接失败 → 降级轮询
+        if (!settled) { es.close(); pollTask(pollPath, onProgress, maxMs - 2000).then(d => done(d, null)).catch(err => done(null, err)); }
+      };
+    } catch(_) {
+      pollTask(pollPath, onProgress, maxMs).then(resolve).catch(reject);
+    }
+  });
+}
+
+// ── 合规关键词检测 ──
+const BANNED_KW = ['真实人物','明星','名人','网红','celebrity','idol','偶像','艺人','演员',
+  '歌手','主播','博主','范冰冰','杨幂','肖战','王一博','易烊千玺','吴亦凡','鹿晗',
+  'Taylor Swift','Elon Musk','Obama','Trump','马斯克','奥巴马','特朗普'];
+function checkCompliance(text) {
+  const lower = text.toLowerCase();
+  return BANNED_KW.find(k => lower.includes(k.toLowerCase()));
+}
+
+// ── 图片生成 ──
+async function genImages() {
+  showLoading('s1');
+  document.getElementById('save-guide').classList.remove('visible');
+  try {
+    const themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').join('/');
+    const styleEl = document.querySelector('#style-tags .tag.selected');
+    const style = styleEl?.dataset.val || styleEl?.firstChild?.textContent?.trim() || '电影质感';
+    const lightEl = document.querySelector('#light-tags .tag.selected');
+    const lighting = lightEl?.dataset.val || lightEl?.firstChild?.textContent?.trim() || '自然柔光';
+    const moodEl = document.querySelector('#mood-tags .tag.selected');
+    const mood = moodEl?.dataset.val || moodEl?.firstChild?.textContent?.trim() || '温暖治愈';
+    const ratio = document.querySelector('#ratio-btns .ratio-btn.selected')?.dataset.val || '16:9';
+    const kw = document.getElementById('extra-kw')?.value || '';
+    const countPill = document.querySelector('.count-pill.selected');
+    const count = countPill ? parseInt(countPill.dataset.count) : 3;
+
+    // 合规检测
+    const allText = [kw, themes].join(' ');
+    const hit = checkCompliance(allText);
+    if (hit) {
+      hideLoading('s1');
+      showToast(`⚠️ 提示词包含敏感词"${hit}"，请修改后重试。请勿使用真实人物/明星相关词汇。`, 'warn');
+      return;
+    }
+
+    // 使用 Prompt 面板覆盖（来自 genImagesFromPrompt）
+    let promptText = kw || themes || '人物';
+    if (s1State.overridePrompt) {
+      promptText = s1State.overridePrompt;
+      s1State.overridePrompt = '';
+    }
+
+    document.getElementById('s1-result-hint').textContent = `生成了 ${count} 张原图，选择保存到素材盘 ↓`;
+
+    if (SESSION_ID) {
+      const data = await apiPost('/api/image/generate', {
+        session_id: SESSION_ID,
+        prompt_cn: promptText,
+        style, lighting, mood,
+        theme: themes.split('/')[0] || '人物',
+        ratio, count,
+        model_key: getSelectedModelKey('s1-model-select')
+      });
+      hideLoading('s1');
+      document.getElementById('s1-result').classList.add('visible');
+      if (data.images && data.images.length) {
+        // Rebuild image cards dynamically
+        const grid = document.getElementById('s1-gen-images');
+        grid.innerHTML = '';
+        data.images.forEach((url, i) => {
+          const labels = ['A','B','C','D'];
+          const card = document.createElement('div');
+          card.className = 'gen-img-card';
+          card.dataset.url = url;
+          card.innerHTML = `
+            <div class="gen-img-preview" style="background-image:url(${url});background-size:cover;background-position:center;min-height:120px"></div>
+            <div class="gen-img-actions">
+              <button class="btn-save" onclick="saveImg(this,'原图 ${labels[i]||i+1}','🖼️')">＋ 保存</button>
+              <button class="btn-discard" onclick="discardImg(this)">✕</button>
+            </div>`;
+          grid.appendChild(card);
+        });
+      }
+    } else {
+      await new Promise(res => setTimeout(res, 2000));
+      hideLoading('s1');
+      document.getElementById('s1-result').classList.add('visible');
+    }
+  } catch(e) {
+    hideLoading('s1');
+    alert('图片生成失败：' + e.message);
+  }
+}
+
+async function saveImg(btn, name, icon) {
+  const card = btn.closest('.gen-img-card');
+  if (state.imgs.length >= 9) { alert('素材盘已满（最多9张原图）'); return; }
+  const url = card.dataset.url || '';
+  let imgId = null;
+  if (SESSION_ID && url) {
+    try {
+      const data = await apiPost('/api/image/save', {
+        session_id: SESSION_ID, task_id: '', image_urls: [url]
+      });
+      imgId = data.image_ids?.[0];
+    } catch(e) { console.warn('保存到后端失败，仅本地保存'); }
+  }
+  state.imgs.push({ id: imgId, name, icon, url, prompt: document.getElementById('s1-prompt-text')?.value?.trim() || '' });
+  updateMat();
+  card.style.opacity = '0.4';
+  card.style.pointerEvents = 'none';
+  btn.textContent = '✓ 已保存';
+  btn.style.opacity = '0.5';
+  document.getElementById('save-guide').classList.add('visible');
+}
+
+function discardImg(btn) { btn.closest('.gen-img-card').style.display = 'none'; }
+
+// ── 步骤一：模式切换 ──
+function switchS1Mode(mode) {
+  document.getElementById('s1-mode-ai').classList.toggle('active', mode === 'ai');
+  document.getElementById('s1-mode-upload').classList.toggle('active', mode === 'upload');
+  document.getElementById('s1-ai-section').style.display = mode === 'ai' ? '' : 'none';
+  // 上传区（拖拽框 + 标注面板）跟随模式切换
+  const wrap = document.getElementById('s1-upload-zone-wrap');
+  if (wrap) wrap.style.display = mode === 'upload' ? '' : 'none';
+}
+
+let _styleSettingsOpen = true;
+function toggleStyleSettings() {
+  _styleSettingsOpen = !_styleSettingsOpen;
+  const body = document.getElementById('style-settings-body');
+  const icon = document.getElementById('style-toggle-icon');
+  if (_styleSettingsOpen) {
+    body.style.display = '';
+    icon.classList.remove('collapsed');
+  } else {
+    body.style.display = 'none';
+    icon.classList.add('collapsed');
+  }
+}
+
+// ── S1 Prompt 状态 ──
+const s1State = {
+  baseDesc: '',      // AI describe 结果（原始英文描述）
+  descLoading: false, // 是否正在自动描述中
+  overridePrompt: ''  // genImagesFromPrompt 临时覆盖用
+};
+
+// ── 上传原图 + 标注 ──
+const annotState = {
+  url: '', imgId: null, annotations: [],
+  drawing: false, startX: 0, startY: 0, currentRect: null
+};
+const ANNOT_COLORS = ['#7c6dfa','#34d399','#fbbf24','#f87171','#60a5fa','#f472b6'];
+function getAnnotColor(i) { return ANNOT_COLORS[i % ANNOT_COLORS.length]; }
+
+function handleUploadDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processUploadFile(file);
+}
+
+async function processUploadFile(file) {
+  if (!file) return;
+  const zone = document.getElementById('s1-upload-zone');
+  zone.innerHTML = '<div class="upload-icon">⏳</div><div style="font-size:14px;font-weight:600;color:var(--text2)">上传中…</div>';
+  try {
+    let url, imgId = null;
+    if (SESSION_ID) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('session_id', SESSION_ID);
+      const res = await fetch('/api/image/upload', { method: 'POST', body: formData });
+      if (!res.ok) { const t = await res.text(); throw new Error(t); }
+      const data = await res.json();
+      url = data.url; imgId = data.image_id;
+    } else {
+      url = URL.createObjectURL(file);
+    }
+    annotState.url = url; annotState.imgId = imgId;
+    annotState.annotations = [];
+    showAnnotPanel(url);
+    autoDescribeAfterUpload();
+  } catch(e) {
+    zone.innerHTML = `<div class="upload-icon">❌</div><div style="font-size:13px;color:var(--red)">上传失败：${escapeHtml(e.message.slice(0,80))}</div><div class="upload-hint">点击重试</div>`;
+    zone.onclick = () => document.getElementById('upload-file-input').click();
+  }
+}
+
+function showAnnotPanel(imgUrl) {
+  // 上传成功后只收起拖拽框本身（不藏整个 wrap，标注面板是 wrap 的子元素）
+  const zone = document.getElementById('s1-upload-zone');
+  if (zone) zone.style.display = 'none';
+  const panel = document.getElementById('s1-annot-panel');
+  panel.style.display = '';
+  const actEl = document.getElementById('s1-upload-actions');
+  if (actEl) actEl.style.display = 'flex';
+  const img = document.getElementById('annot-img');
+  img.onload = () => {
+    const canvas = document.getElementById('annot-canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    renderAnnotOverlays();
+  };
+  img.src = imgUrl;
+}
+
+function getCanvasPos(canvas, e) {
+  const r = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / r.width;
+  const scaleY = canvas.height / r.height;
+  const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+  const cy = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+  return { x: cx * scaleX, y: cy * scaleY };
+}
+
+function onAnnotMouseDown(e) {
+  e.preventDefault();
+  const pos = getCanvasPos(e.currentTarget, e);
+  annotState.drawing = true; annotState.startX = pos.x; annotState.startY = pos.y; annotState.currentRect = null;
+}
+
+function onAnnotMouseMove(e) {
+  if (!annotState.drawing) return;
+  e.preventDefault();
+  const canvas = e.currentTarget;
+  const pos = getCanvasPos(canvas, e);
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawAnnotations(ctx, canvas.width, canvas.height);
+  const x = Math.min(annotState.startX, pos.x), y = Math.min(annotState.startY, pos.y);
+  const w = Math.abs(pos.x - annotState.startX), h = Math.abs(pos.y - annotState.startY);
+  ctx.strokeStyle = '#7c6dfa'; ctx.lineWidth = 2; ctx.setLineDash([6,3]);
+  ctx.strokeRect(x, y, w, h);
+  annotState.currentRect = { x, y, w, h };
+}
+
+function onAnnotMouseUp(e) {
+  if (!annotState.drawing) return;
+  annotState.drawing = false;
+  const rect = annotState.currentRect;
+  if (!rect || rect.w < 15 || rect.h < 15) { renderAnnotOverlays(); return; }
+  // show label input
+  const pending = document.getElementById('annot-pending');
+  pending.style.display = 'flex';
+  const input = document.getElementById('annot-label-input');
+  input.value = '';
+  input.placeholder = `如 "人物 ${annotState.annotations.length+1}"、"产品"、"背景"…`;
+  input.focus();
+  input.onkeydown = ev => { if(ev.key==='Enter') confirmAnnot(rect); if(ev.key==='Escape') cancelAnnot(); };
+  document.getElementById('annot-confirm-btn').onclick = () => confirmAnnot(rect);
+  document.getElementById('annot-cancel-btn').onclick = cancelAnnot;
+}
+
+function confirmAnnot(rect) {
+  const input = document.getElementById('annot-label-input');
+  const label = input.value.trim() || `主体 ${annotState.annotations.length+1}`;
+  annotState.annotations.push({ label, rect });
+  document.getElementById('annot-pending').style.display = 'none';
+  renderAnnotOverlays();
+  buildS1Prompt();
+}
+
+function cancelAnnot() {
+  document.getElementById('annot-pending').style.display = 'none';
+  renderAnnotOverlays();
+}
+
+function removeAnnotation(idx) {
+  annotState.annotations.splice(idx, 1);
+  renderAnnotOverlays();
+  buildS1Prompt();
+}
+
+function drawAnnotations(ctx, cw, ch) {
+  annotState.annotations.forEach((ann, i) => {
+    const color = getAnnotColor(i);
+    ctx.setLineDash([]);
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+    ctx.strokeRect(ann.rect.x, ann.rect.y, ann.rect.w, ann.rect.h);
+    // label bg
+    ctx.font = 'bold 12px -apple-system,PingFang SC,sans-serif';
+    const tw = ctx.measureText(ann.label).width;
+    const lx = ann.rect.x, ly = ann.rect.y - 24;
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.roundRect(lx, Math.max(ly,0), tw+16, 20, 3); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.fillText(ann.label, lx+8, Math.max(ly,0)+14);
+  });
+}
+
+function renderAnnotOverlays() {
+  const canvas = document.getElementById('annot-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawAnnotations(ctx, canvas.width, canvas.height);
+  // update list
+  const list = document.getElementById('annot-list');
+  if (!list) return;
+  if (annotState.annotations.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0">在图片上拖动框选重要区域，添加标注（可选）</div>';
+    return;
+  }
+  list.innerHTML = annotState.annotations.map((a,i) => `
+    <div class="annot-item">
+      <div class="annot-item-dot" style="background:${getAnnotColor(i)}"></div>
+      <div class="annot-item-label">${escapeHtml(a.label)}</div>
+      <div class="annot-item-del" onclick="removeAnnotation(${i})">✕</div>
+    </div>`).join('');
+}
+
+async function saveUploadedImg() {
+  if (!annotState.url) { showToast('请先上传图片','warn'); return; }
+  if (state.imgs.length >= 9) { alert('素材盘已满（最多9张）'); return; }
+  const n = state.imgs.filter(i => i.uploaded).length + 1;
+  const _themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').filter(Boolean).join(', ');
+  const _kw = document.getElementById('extra-kw')?.value?.trim() || '';
+  const _style = document.querySelector('#style-tags .tag.selected')?.dataset.val || '';
+  const _light = document.querySelector('#light-tags .tag.selected')?.dataset.val || '';
+  const _mood = document.querySelector('#mood-tags .tag.selected')?.dataset.val || '';
+  const _ctxPrompt = [_themes, _style, _light, _mood, _kw].filter(Boolean).join(', ');
+  state.imgs.push({
+    id: annotState.imgId, name: `上传图 ${n}`, icon: '📤',
+    url: annotState.url, uploaded: true,
+    annotations: [...annotState.annotations],
+    ai_prompt: _ctxPrompt || undefined,
+    prompt: document.getElementById('s1-prompt-text')?.value?.trim() || ''
+  });
+  updateMat();
+  showToast('✓ 已保存到素材盘', 'success');
+  document.getElementById('save-guide').classList.add('visible');
+  annotState.annotations = [];
+  renderAnnotOverlays();
+}
+
+function resetUploadZone() {
+  // 恢复拖拽框（wrap 保持显示，只需让 zone 本身重新出现）
+  const zone = document.getElementById('s1-upload-zone');
+  zone.style.display = '';
+  zone.innerHTML = `<div class="upload-icon">🖼️</div>
+    <div style="font-size:14px;font-weight:600;color:var(--text2)">点击或拖拽上传客户原图</div>
+    <div class="upload-hint">支持 JPG / PNG / WEBP，最大 10MB</div>`;
+  zone.onclick = () => document.getElementById('upload-file-input').click();
+  document.getElementById('s1-annot-panel').style.display = 'none';
+  document.getElementById('describe-result').style.display = 'none';
+  document.getElementById('stylize-result').style.display = 'none';
+  document.getElementById('stylize-loading').style.display = 'none';
+  annotState.url = ''; annotState.imgId = null; annotState.annotations = [];
+  s1State.baseDesc = '';
+  const statusEl = document.getElementById('s1-prompt-status');
+  if (statusEl) statusEl.textContent = '';
+  const actEl = document.getElementById('s1-upload-actions');
+  if (actEl) actEl.style.display = 'none';
+}
+
+// ── AI 描述分析 ──
+async function describeImage() {
+  if (!annotState.url) { showToast('请先上传图片','warn'); return; }
+  const btn = document.getElementById('describe-btn');
+  btn.disabled = true; btn.textContent = '分析中…';
+  try {
+    const themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').filter(Boolean).join(', ');
+    const keywords = document.getElementById('extra-kw')?.value?.trim() || '';
+    const data = await apiPost('/api/image/describe', {
+      session_id: SESSION_ID || 'demo',
+      image_url: annotState.url,
+      context_hint: [themes, keywords].filter(Boolean).join('; ')
+    });
+    document.getElementById('describe-prompt').value = data.prompt_en || '';
+    document.getElementById('describe-result').style.display = '';
+    if (data.note) showToast(data.note, 'warn');
+  } catch(e) {
+    showToast('AI 描述失败：' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '✦ 分析图片';
+  }
+}
+
+function applyDescribePrompt() {
+  const prompt = document.getElementById('describe-prompt').value.trim();
+  if (!prompt) return;
+  // 注入到步骤三的 prompt 输入框（如有）或存到 annotState
+  annotState.describePrompt = prompt;
+  showToast('✓ Prompt 已记录，保存图片后在步骤三可见', 'success');
+}
+
+async function saveUploadedImgWithPrompt() {
+  if (!annotState.url) { showToast('请先上传图片','warn'); return; }
+  if (state.imgs.length >= 9) { alert('素材盘已满（最多9张）'); return; }
+  const prompt = document.getElementById('describe-prompt').value.trim();
+  const n = state.imgs.filter(i => i.uploaded).length + 1;
+  state.imgs.push({
+    id: annotState.imgId, name: `上传图 ${n}`, icon: '📤',
+    url: annotState.url, uploaded: true,
+    annotations: [...annotState.annotations],
+    ai_prompt: prompt   // 供步骤三默认使用
+  });
+  updateMat();
+  showToast('✓ 已保存到素材盘（含 AI Prompt）', 'success');
+  document.getElementById('save-guide').classList.add('visible');
+}
+
+// ── AI 风格化 ──
+const stylizeState = { imageUrl: '', imageId: null };
+
+async function stylizeImage() {
+  if (!annotState.url) { showToast('请先上传图片','warn'); return; }
+  const styleEl = document.querySelector('#style-tags .tag.selected');
+  const style = styleEl?.dataset.val || 'cinematic film';
+  const lightEl = document.querySelector('#light-tags .tag.selected');
+  const lighting = lightEl?.dataset.val || 'soft natural light';
+  const moodEl = document.querySelector('#mood-tags .tag.selected');
+  const mood = moodEl?.dataset.val || 'warm healing';
+  const btn = document.getElementById('stylize-btn');
+  btn.disabled = true;
+  document.getElementById('stylize-loading').style.display = '';
+  document.getElementById('stylize-loadtext').style.display = '';
+  document.getElementById('stylize-result').style.display = 'none';
+  try {
+    const themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').filter(Boolean).join(', ');
+    const keywords = document.getElementById('extra-kw')?.value?.trim() || '';
+    const data = await apiPost('/api/image/stylize', {
+      session_id: SESSION_ID || 'demo',
+      image_url: annotState.url,
+      style, lighting, mood,
+      ratio: document.querySelector('#ratio-btns .ratio-btn.selected')?.dataset.val || '16:9',
+      extra_prompt: [themes, keywords].filter(Boolean).join(', ')
+    });
+    stylizeState.imageUrl = data.image_url;
+    stylizeState.imageId = data.image_id || null;
+    document.getElementById('stylize-preview').style.backgroundImage = `url(${data.image_url})`;
+    document.getElementById('stylize-result').style.display = '';
+    if (data.note) showToast(data.note, 'warn');
+  } catch(e) {
+    showToast('AI 风格化失败：' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('stylize-loading').style.display = 'none';
+    document.getElementById('stylize-loadtext').style.display = 'none';
+  }
+}
+
+async function saveStylizedImg() {
+  if (!stylizeState.imageUrl) return;
+  if (state.imgs.length >= 9) { alert('素材盘已满（最多9张）'); return; }
+  const styleEl = document.querySelector('#stylize-style-tags .tag.selected');
+  const styleName = styleEl?.firstChild?.textContent?.trim() || '风格化';
+  const n = state.imgs.filter(i => i.stylized).length + 1;
+  // 若已有 image_id（后端已保存）直接用，否则调保存接口
+  let imgId = stylizeState.imageId;
+  if (!imgId && SESSION_ID) {
+    try {
+      const d = await apiPost('/api/image/save', {
+        session_id: SESSION_ID, task_id: '', image_urls: [stylizeState.imageUrl]
+      });
+      imgId = d.image_ids?.[0];
+    } catch(e) { console.warn('保存风格化图失败', e); }
+  }
+  state.imgs.push({ id: imgId, name: `${styleName} ${n}`, icon: '🎨',
+                    url: stylizeState.imageUrl, stylized: true });
+  updateMat();
+  showToast(`✓ 已保存"${styleName}"到素材盘`, 'success');
+  document.getElementById('save-guide').classList.add('visible');
+}
+
+// ── 视频草稿生成 ──
+async function genVideo() {
+  if (state.videos.length >= 3) { alert('视频草稿已满（最多3个），请先删除旧草稿'); return; }
+  showLoading('s3');
+  try {
+    let prompt = document.getElementById('prompt-preview')?.textContent || '';
+    const selRef = document.querySelector('#ref-img-row .mat-thumb.selected');
+    const refImgId = selRef?.dataset.imgId || null;
+    // 若参考图有 AI 描述 Prompt 且当前 prompt 为空，自动使用
+    if (refImgId) {
+      const refImg = state.imgs.find(im => im.id === refImgId);
+      if (!prompt && refImg?.ai_prompt) {
+        prompt = refImg.ai_prompt;
+      }
+      // 若参考图有标注，将标注目标追加到 prompt
+      if (refImg?.annotations?.length) {
+        const subjects = refImg.annotations.map(a => a.label).join(', ');
+        prompt = `${prompt}, focus on: ${subjects}`;
+      }
+    }
+    let videoUrl = null;
+    if (SESSION_ID) {
+      const data = await apiPost('/api/video-draft/generate', {
+        session_id: SESSION_ID, prompt_en: prompt,
+        reference_image_id: refImgId, resolution: '480p', duration: 5,
+        model_key: getSelectedModelKey('s3-model-select')
+      });
+      if (data.status === 'completed') {
+        videoUrl = data.video_url;
+      } else {
+        const result = await watchTask(
+          data.task_id,
+          `/api/video-draft/task/${data.task_id}?session_id=${SESSION_ID}`,
+          d => { const el = document.getElementById('s3-loadtext'); if(el) el.textContent = `视频生成中 ${d.progress||0}%…`; },
+          120000
+        );
+        videoUrl = result.video_url;
+      }
+    } else {
+      await new Promise(res => setTimeout(res, 2500));
+    }
+    hideLoading('s3');
+    const n = state.videos.length + 1;
+    state.videos.push({ name: `草稿 ${n}`, meta: '480p · 5s', url: videoUrl });
+    updateMat();
+    if (SESSION_ID && videoUrl) {
+      await apiPost('/api/video-draft/save', {
+        session_id: SESSION_ID, task_id: '', video_url: videoUrl, prompt_en: prompt
+      }).catch(()=>{});
+    }
+  } catch(e) {
+    hideLoading('s3');
+    alert('视频草稿生成失败：' + e.message);
+  }
+}
+
+// ── 音乐生成 ──
+async function genMusic() {
+  if (state.musics.length >= 3) { alert('音乐草稿已满（最多3个）'); return; }
+  showLoading('s4');
+  try {
+    const mood = document.querySelector('#music-mood .tag.selected')?.firstChild?.textContent?.trim() || '温柔舒缓';
+    const genre = document.querySelector('#music-genre .tag.selected')?.firstChild?.textContent?.trim() || '纯钢琴';
+    const durEl = document.querySelector('#music-dur .tag.selected')?.textContent?.trim() || '20 秒';
+    const dur = parseInt(durEl) || 20;
+    const instruments = [...document.querySelectorAll('#music-inst .tag.selected')].map(t => t.firstChild?.textContent?.trim() || t.textContent.trim());
+    let audioUrl = null;
+    if (SESSION_ID) {
+      const data = await apiPost('/api/music/generate', {
+        session_id: SESSION_ID, mood, genre, instruments, tempo: 'medium', duration: dur,
+        model_key: getSelectedModelKey('s4-model-select')
+      });
+      if (data.status === 'completed') {
+        audioUrl = data.audio_url;
+      } else {
+        const result = await watchTask(
+          data.task_id,
+          `/api/music/task/${data.task_id}?session_id=${SESSION_ID}`,
+          d => { const el = document.getElementById('s4-loadtext'); if(el) el.textContent = `音乐生成中 ${d.progress||0}%…`; },
+          60000
+        );
+        audioUrl = result.audio_url;
+      }
+    } else {
+      await new Promise(res => setTimeout(res, 2000));
+    }
+    hideLoading('s4');
+    state.musics.push({ name: `音乐 ${state.musics.length + 1}`, meta: dur + 's · ' + mood, url: audioUrl });
+    updateMat();
+    if (SESSION_ID && audioUrl) {
+      await apiPost('/api/music/save', {
+        session_id: SESSION_ID, task_id: '', audio_url: audioUrl, mood, genre, duration: dur
+      }).catch(()=>{});
+    }
+  } catch(e) {
+    hideLoading('s4');
+    alert('音乐生成失败：' + e.message);
+  }
+}
+
+// ── 最终成片生成 ──
+async function genFinal() {
+  const prompt = document.getElementById('final-prompt')?.value?.trim() || '';
+  const res = document.getElementById('res-select').value;
+  const dur = parseInt(document.getElementById('dur-select').value);
+
+  // 读取用户在步骤五选择的素材
+  const selImgCards = document.querySelectorAll('#s5-imgs .asset-card.selected');
+  const selVidCard  = document.querySelector('#s5-videos .asset-card.selected');
+  const selMusCards = document.querySelectorAll('#s5-music .asset-card.selected');
+
+  // 必须选视频草稿
+  if (!selVidCard && state.videos.length > 0) {
+    showToast('请先选择一个视频草稿', 'error'); return;
+  }
+  if (!prompt) {
+    showToast('请填写最终 Prompt', 'error'); return;
+  }
+
+  // 获取选中的实际 state 对象
+  const selVid  = selVidCard ? state.videos[parseInt(selVidCard.dataset.idx)] : null;
+  const selImgs = [...selImgCards].map(c => state.imgs[parseInt(c.dataset.idx)]).filter(Boolean);
+  const selMus  = selMusCards.length > 0 ? state.musics[parseInt(selMusCards[0].dataset.idx)] : null;
+
+  _s5Cancelled = false;
+  document.getElementById('s5-cancel-btn').style.display = '';
+  document.getElementById('s5-gen-btn').style.display = 'none';
+  document.getElementById('s5-loadtext').textContent = '正在提交任务…';
+  showLoading('s5');
+  try {
+    if (SESSION_ID) {
+      const payload = {
+        session_id: SESSION_ID,
+        prompt_en: prompt,
+        resolution: res === '2k' ? '2k' : res + 'p',
+        duration: dur,
+        reference_image_urls: selImgs.map(img => img.url).filter(Boolean),
+        reference_image_ids:  selImgs.map(img => img.id).filter(Boolean),
+        video_draft_url: selVid?.url || null,
+        video_draft_id:  selVid?.id  || null,
+        music_url: selMus?.url || null,
+        music_id:  selMus?.id  || null,
+      };
+      const data = await apiPost('/api/final-video/generate', payload);
+      if (_s5Cancelled) return;
+      const loadtext = document.getElementById('s5-loadtext');
+      const result = await watchTask(
+        data.task_id,
+        `/api/final-video/task/${data.task_id}?session_id=${SESSION_ID}`,
+        d => {
+          if (_s5Cancelled) return;
+          const pct = d.progress || 0;
+          const minsLeft = Math.max(0, Math.round((100 - pct) / 18));
+          if (loadtext) loadtext.textContent = pct > 0
+            ? `渲染中 ${pct}%${minsLeft > 0 ? `，预计还需约 ${minsLeft} 分钟` : '，即将完成…'}`
+            : '火山引擎排队中，请稍候…';
+        },
+        600000
+      );
+      if (_s5Cancelled) return;
+      hideLoading('s5');
+      document.getElementById('s5-cancel-btn').style.display = 'none';
+      document.getElementById('s5-gen-btn').style.display = '';
+      const resLabel = res === '2k' ? '2K' : res + 'p';
+      document.getElementById('s5-done-meta').textContent = `${resLabel} · ${dur}秒 · Seedance 2.0`;
+      const doneDiv = document.getElementById('s5-done');
+      doneDiv.style.display = 'block';
+      doneDiv.scrollIntoView({ behavior: 'smooth' });
+      if (result.video_url) {
+        document.getElementById('dl-btn').onclick = () => window.open(result.video_url, '_blank');
+        // 在完成区插入视频预览
+        const existVid = document.getElementById('s5-result-video');
+        if (!existVid) {
+          const vid = document.createElement('video');
+          vid.id = 's5-result-video';
+          vid.controls = true;
+          vid.src = result.video_url;
+          vid.style.cssText = 'width:100%;border-radius:8px;background:#000;max-height:300px;margin-bottom:12px';
+          const btnRow = doneDiv.querySelector('.card > div:last-child');
+          doneDiv.querySelector('.card').insertBefore(vid, btnRow);
+        } else {
+          existVid.src = result.video_url;
+        }
+      }
+    } else {
+      // 无 SESSION_ID — 演示模式
+      await new Promise(r => setTimeout(r, 3000));
+      if (_s5Cancelled) return;
+      hideLoading('s5');
+      document.getElementById('s5-cancel-btn').style.display = 'none';
+      document.getElementById('s5-gen-btn').style.display = '';
+      const resLabel = res === '2k' ? '2K' : res + 'p';
+      document.getElementById('s5-done-meta').textContent = `${resLabel} · ${dur}秒 · Seedance 2.0`;
+      document.getElementById('s5-done').style.display = 'block';
+      document.getElementById('s5-done').scrollIntoView({ behavior: 'smooth' });
+    }
+  } catch(e) {
+    if (_s5Cancelled) return; // 取消后的异常忽略
+    hideLoading('s5');
+    document.getElementById('s5-cancel-btn').style.display = 'none';
+    document.getElementById('s5-gen-btn').style.display = '';
+    showToast('成片生成失败：' + e.message, 'error');
+  }
+}
+
+// ── 步骤三：视频来源切换 ──
+function switchS3Source(mode) {
+  document.getElementById('s3-src-ai').classList.toggle('active', mode === 'gen');
+  document.getElementById('s3-src-upload').classList.toggle('active', mode === 'upload');
+  document.getElementById('s3-gen-section').style.display = mode === 'gen' ? '' : 'none';
+  document.getElementById('s3-upload-section').style.display = mode === 'upload' ? '' : 'none';
+}
+
+let _s3UploadedVideoFile = null;
+
+function handleVideoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  _previewS3Video(file);
+}
+
+function handleVideoDrop(event) {
+  event.preventDefault();
+  document.getElementById('s3-video-zone').classList.remove('dragover');
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('video/')) { showToast('请上传视频文件（mp4/mov/webm）', 'error'); return; }
+  _previewS3Video(file);
+}
+
+function _previewS3Video(file) {
+  _s3UploadedVideoFile = file;
+  const url = URL.createObjectURL(file);
+  const video = document.getElementById('s3-preview-video');
+  video.src = url;
+  document.getElementById('s3-upload-preview').style.display = '';
+  document.getElementById('s3-upload-filename').textContent = file.name;
+}
+
+async function saveUploadedVideo() {
+  if (!_s3UploadedVideoFile) return;
+  if (state.videos.length >= 3) { showToast('视频草稿已满（最多3个），请先删除旧草稿', 'error'); return; }
+
+  const loadingEl = document.getElementById('s3-upload-loading');
+  const loadTextEl = document.getElementById('s3-upload-loadtext');
+  loadingEl.style.display = ''; loadTextEl.style.display = '';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', _s3UploadedVideoFile);
+    const r = await fetch(`${API_BASE}/api/upload/video`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.detail || 'Upload failed');
+    }
+    const d = await r.json();
+    const name = _s3UploadedVideoFile.name || `上传 ${state.videos.length + 1}`;
+    const sizeMB = (_s3UploadedVideoFile.size / 1024 / 1024).toFixed(1);
+    state.videos.push({ name, meta: `上传 · ${sizeMB}MB`, url: d.url, uploaded: true });
+    updateMat();
+    showToast(`✓ 已上传并保存"${name}"到素材盘`, 'success');
+  } catch(e) {
+    showToast('视频上传失败：' + e.message, 'error');
+  } finally {
+    loadingEl.style.display = 'none'; loadTextEl.style.display = 'none';
+    _s3UploadedVideoFile = null;
+    document.getElementById('s3-upload-preview').style.display = 'none';
+    document.getElementById('s3-video-file').value = '';
+  }
+}
+
+// ── 步骤五：动态渲染素材列表 ──
+function updateS5() {
+  // 原图
+  const imgsGrid = document.getElementById('s5-imgs');
+  if (imgsGrid) {
+    if (state.imgs.length === 0) {
+      imgsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤一保存原图，即可在此选择</div>';
+    } else {
+      imgsGrid.innerHTML = state.imgs.map((img, i) => {
+        const previewBg = img.url
+          ? `style="background-image:url(${img.url});background-size:cover;background-position:center"`
+          : '';
+        const safeName = escapeHtml(img.name || ('原图 '+(i+1)));
+        const colorTag = img.color_params ? '<span style="position:absolute;top:5px;left:5px;font-size:9px;background:var(--green);color:#fff;padding:1px 6px;border-radius:4px">已调色</span>' : '';
+        return `<div class="asset-card${i===0?' selected':''}" data-idx="${i}" onclick="toggleAssetS5(this,'img')">
+          <div class="asset-card-preview" ${previewBg}>
+            ${img.url ? colorTag : `<span style="font-size:22px">${img.icon||'🖼️'}</span>${colorTag}`}
+          </div>
+          <div class="asset-card-label">${safeName}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // 视频草稿
+  const vidsGrid = document.getElementById('s5-videos');
+  if (vidsGrid) {
+    if (state.videos.length === 0) {
+      vidsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三生成或上传视频草稿</div>';
+    } else {
+      vidsGrid.innerHTML = state.videos.map((v, i) => {
+        const icon = v.uploaded ? '📤' : '▶';
+        const safeName = escapeHtml(v.name);
+        const safeMeta = escapeHtml(v.meta);
+        return `<div class="asset-card${i===0?' selected':''}" data-idx="${i}" onclick="toggleAssetS5(this,'vid')">
+          <div class="asset-card-preview" style="flex-direction:column;gap:4px">
+            <span style="font-size:28px">${icon}</span>
+            <span style="font-size:12px;color:var(--text2)">${safeName}</span>
+            <span style="font-size:10px;color:var(--text3)">${safeMeta}</span>
+          </div>
+          <div class="asset-card-label">${safeName}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // 音乐草稿
+  const musGrid = document.getElementById('s5-music');
+  if (musGrid) {
+    if (state.musics.length === 0) {
+      musGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四生成音乐草稿（可跳过）</div>';
+    } else {
+      musGrid.innerHTML = state.musics.map((m, i) => {
+        const safeName = escapeHtml(m.name);
+        const safeMeta = escapeHtml(m.meta);
+        return `<div class="asset-card" data-idx="${i}" onclick="toggleAssetS5(this,'mus')">
+          <div class="asset-card-preview" style="flex-direction:column;gap:4px">
+            <span style="font-size:28px">♫</span>
+            <span style="font-size:12px;color:var(--text2)">${safeName}</span>
+            <span style="font-size:10px;color:var(--text3)">${safeMeta}</span>
+          </div>
+          <div class="asset-card-label">${safeName}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+// 步骤五 asset 选择（图片可多选最多2张，视频单选，音乐可取消选择）
+function toggleAssetS5(el, type) {
+  if (type === 'img') {
+    // 图片最多2张
+    const selected = el.closest('.asset-select-grid').querySelectorAll('.asset-card.selected');
+    if (!el.classList.contains('selected') && selected.length >= 2) {
+      showToast('最多选择2张参考原图', 'error'); return;
+    }
+    el.classList.toggle('selected');
+  } else if (type === 'vid') {
+    el.closest('.asset-select-grid').querySelectorAll('.asset-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  } else if (type === 'mus') {
+    el.classList.toggle('selected');
+  }
+}
+
+// 同步步骤三 Prompt 到步骤五
+// 同步步骤三 Prompt → 步骤五，并清除"已更新"小圆点
+function syncPromptFromS3() {
+  const s3prompt = document.getElementById('prompt-preview')?.textContent?.trim() || '';
+  const ta = document.getElementById('final-prompt');
+  if (ta && s3prompt) {
+    ta.value = s3prompt;
+    _s5LastSyncedPrompt = s3prompt;
+    document.getElementById('s5-sync-dot').style.display = 'none';
+    showToast('✓ 已同步步骤三 Prompt', 'success');
+  } else {
+    showToast('步骤三尚无 Prompt，请先配置', 'error');
+  }
+}
+
+// 记录上次同步的 Prompt，用于检测步骤三是否有更新
+let _s5LastSyncedPrompt = '';
+
+// 检查步骤三 Prompt 是否比步骤五的更新 → 显示黄点提示
+function checkS5PromptStale() {
+  const s3prompt = document.getElementById('prompt-preview')?.textContent?.trim() || '';
+  if (!s3prompt) return;
+  const dot = document.getElementById('s5-sync-dot');
+  if (!dot) return;
+  // 若步骤五当前内容与步骤三不同，且步骤三有更新（与上次同步的不同）
+  const s5val = document.getElementById('final-prompt')?.value?.trim() || '';
+  const stale = s3prompt !== s5val && s3prompt !== _s5LastSyncedPrompt;
+  dot.style.display = stale ? 'block' : 'none';
+  // 更新 title tooltip
+  if (dot.parentElement) {
+    dot.parentElement.title = stale ? '步骤三 Prompt 已更新，点击同步' : '';
+  }
+}
+
+// ── 步骤五取消生成 ──
+let _s5Cancelled = false;
+
+function cancelFinal() {
+  _s5Cancelled = true;
+  hideLoading('s5');
+  document.getElementById('s5-cancel-btn').style.display = 'none';
+  document.getElementById('s5-gen-btn').style.display = '';
+  showToast('已取消生成', 'error');
+}
+
+// ── 匹配视频风格 ──
+function syncMusicStyle() {
+  const styleTag = document.querySelector('#pb-style .tag.selected');
+  const styleVal = styleTag?.firstChild?.textContent?.trim() || '';
+  const moodTags = document.querySelectorAll('#music-mood .tag');
+  moodTags.forEach(t => t.classList.remove('selected'));
+  let idx = 1; // default: 温柔舒缓
+  if (styleVal.includes('35mm') || styleVal.includes('复古')) idx = 1;
+  else if (styleVal.includes('4K') || styleVal.includes('纪录')) idx = 0;
+  else if (styleVal.includes('动漫')) idx = 3;
+  if (moodTags[idx]) moodTags[idx].classList.add('selected');
+  alert('✓ 已根据步骤三视频风格匹配音乐参数');
+}
+
+// ── MATERIAL PANEL ──
+function updateMat() {
+  document.getElementById('img-count').textContent = state.imgs.length + ' / 9';
+  const grid = document.getElementById('imgs-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const div = document.createElement('div');
+    div.className = 'mat-thumb' + (i >= state.imgs.length ? ' empty' : '');
+    if (i < state.imgs.length) {
+      const img = state.imgs[i];
+      if (img.url) {
+        div.style.backgroundImage = `url(${img.url})`;
+        div.style.backgroundSize = 'cover';
+        div.style.backgroundPosition = 'center';
+      } else {
+        div.innerHTML = `<div style="font-size:20px">${img.icon}</div>`;
+      }
+      div.title = img.name;
+      div.innerHTML += `<div class="check-badge">✓</div>`;
+      div.innerHTML += `<div class="mat-dl" onclick="event.stopPropagation();downloadAssetPack(${i})" title="下载素材包">📥</div>`;
+      div.addEventListener('click', (e) => {
+        if (e.target.classList.contains('mat-dl')) return;
+        showImgPromptPopup(i, div);
+      });
+    } else {
+      div.innerHTML = `<div class="mat-thumb-placeholder">＋</div>`;
+    }
+    grid.appendChild(div);
+  }
+
+  // ── 同步更新 Step 2 图片选择列表 ──
+  const adjList = document.getElementById('adj-img-list');
+  if (adjList) {
+    if (state.imgs.length === 0) {
+      adjList.innerHTML = '<div class="img-select-item empty" style="font-size:13px">← 先在步骤一保存原图</div>';
+    } else {
+      adjList.innerHTML = state.imgs.map((img, i) => {
+        const bg = img.url ? `style="background-image:url(${img.url});background-size:cover;background-position:center"` : '';
+        const isSelected = img.id === _adjImgId;
+        return `<div class="img-select-item${isSelected ? ' selected' : ''}" onclick="selectAdjImg(this,${i})" ${bg}>
+          ${img.url ? '' : `<span style="font-size:24px">${img.icon||'🖼️'}</span>`}
+          ${img.color_params ? '<div style="position:absolute;bottom:3px;right:4px;font-size:9px;background:var(--green);color:#fff;padding:1px 5px;border-radius:4px">已调色</div>' : ''}
+        </div>`;
+      }).join('');
+      // 若无选中图，自动选第一张
+      if (!_adjImgId && state.imgs.length > 0) {
+        const first = adjList.querySelector('.img-select-item:not(.empty)');
+        if (first) selectAdjImg(first, 0);
+      }
+    }
+  }
+
+  // ── 同步更新 Step 3 参考图行 ──
+  const refRow = document.getElementById('ref-img-row');
+  if (refRow && state.imgs.length > 0) {
+    refRow.innerHTML = state.imgs.map((img, i) => {
+      const bg = img.url ? `style="background-image:url(${img.url});background-size:cover;background-position:center;width:80px"` : `style="width:80px"`;
+      const refSafeName = escapeHtml(img.name || '原图');
+      return `<div class="mat-thumb${i===0?' selected':''}" ${bg} data-img-id="${img.id}" data-img-name="${refSafeName}" onclick="selectRefImg(this, this.dataset.imgName)">
+        ${img.url ? '' : `<div style="font-size:22px">${img.icon||'🖼️'}</div>`}
+        ${i===0?'<div style="position:absolute;top:3px;right:3px;width:14px;height:14px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">✓</div>':''}
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('vid-count').textContent = state.videos.length + ' / 3';
+  const vl = document.getElementById('vid-list');
+  if (state.videos.length === 0) {
+    vl.innerHTML = '<div class="mat-placeholder">暂无草稿，在步骤三生成</div>';
+  } else {
+    vl.innerHTML = state.videos.map((v,i) => `
+      <div class="mat-item">
+        <div class="mat-item-icon" onclick="previewVid(${i})" title="点击播放">▶</div>
+        <div class="mat-item-info">
+          <div class="mat-item-name">${escapeHtml(v.name)}</div>
+          <div class="mat-item-meta">${escapeHtml(v.meta)}</div>
+        </div>
+        <div class="mat-item-del" onclick="delVid(${i})">✕</div>
+      </div>`).join('');
+  }
+  document.getElementById('mus-count').textContent = state.musics.length + ' / 3';
+  const ml = document.getElementById('mus-list');
+  if (state.musics.length === 0) {
+    ml.innerHTML = '<div class="mat-placeholder">暂无音乐，在步骤四生成</div>';
+  } else {
+    ml.innerHTML = state.musics.map((m,i) => `
+      <div class="mat-item">
+        <div class="mat-item-icon" onclick="previewMus(${i})" title="点击播放">♫</div>
+        <div class="mat-item-info">
+          <div class="mat-item-name">${escapeHtml(m.name)}</div>
+          <div class="mat-item-meta">${escapeHtml(m.meta)}</div>
+        </div>
+        <div class="mat-item-del" onclick="delMus(${i})">✕</div>
+      </div>`).join('');
+  }
+}
+
+function delVid(i) { state.videos.splice(i,1); updateMat(); }
+function delMus(i) { state.musics.splice(i,1); updateMat(); }
+
+// ── 视频预览弹窗 ──
+let _previewingVidIdx = null;
+
+function previewVid(i) {
+  const v = state.videos[i];
+  if (!v || !v.url) { showToast('视频 URL 未获取（Mock 模式）', 'error'); return; }
+  _previewingVidIdx = i;
+  document.getElementById('vid-preview-title').textContent = v.name || `草稿 ${i + 1}`;
+  document.getElementById('vid-preview-meta').textContent = v.meta || (v.uploaded ? '上传视频' : '');
+  const player = document.getElementById('vid-preview-player');
+  player.src = v.url;
+  player.load();
+  document.getElementById('vid-preview-overlay').classList.add('open');
+}
+
+function closeVidPreview() {
+  document.getElementById('vid-preview-overlay').classList.remove('open');
+  const player = document.getElementById('vid-preview-player');
+  player.pause();
+  player.removeAttribute('src');
+  player.load();
+  _previewingVidIdx = null;
+}
+
+function openVidInTab() {
+  if (_previewingVidIdx !== null) {
+    const v = state.videos[_previewingVidIdx];
+    if (v?.url) window.open(v.url, '_blank');
+  }
+}
+function previewMus(i) {
+  const m = state.musics[i];
+  if (m && m.url) {
+    const a = document.createElement('audio');
+    a.src = m.url; a.controls = true; a.autoplay = true;
+    a.style.cssText = 'position:fixed;bottom:16px;right:280px;z-index:999;background:#13131a;border-radius:8px;';
+    document.body.appendChild(a);
+    a.onended = () => a.remove();
+  } else alert('音乐URL未获取（Mock模式）');
+}
+
+function toggleMatSection(section) {
+  const body = document.getElementById(section+'-body');
+  if (body) body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
+// ── LOADING ──
+function showLoading(prefix) {
+  document.getElementById(prefix+'-loading').classList.add('visible');
+  const lt = document.getElementById(prefix+'-loadtext');
+  if (lt) lt.classList.add('visible');
+}
+function hideLoading(prefix) {
+  document.getElementById(prefix+'-loading').classList.remove('visible');
+  const lt = document.getElementById(prefix+'-loadtext');
+  if (lt) lt.classList.remove('visible');
+}
+
+// ── S1 PROMPT BUILDER ──
+function buildS1Prompt() {
+  const themes = [...document.querySelectorAll('.theme-card.selected')]
+    .map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '')
+    .filter(Boolean).join(', ');
+  const style = document.querySelector('#style-tags .tag.selected')?.dataset.val || '';
+  const light = document.querySelector('#light-tags .tag.selected')?.dataset.val || '';
+  const mood  = document.querySelector('#mood-tags .tag.selected')?.dataset.val || '';
+  const ratio = document.querySelector('#ratio-btns .ratio-btn.selected')?.dataset.val || '';
+  const kw    = document.getElementById('extra-kw')?.value?.trim() || '';
+  const locks = annotState.annotations.map(a => a.label);
+
+  const parts = [];
+  if (s1State.baseDesc)   parts.push(s1State.baseDesc);
+  if (themes)             parts.push(themes);
+  if (style)              parts.push(style);
+  if (light)              parts.push(light);
+  if (mood)               parts.push(mood);
+  if (ratio)              parts.push('aspect ratio ' + ratio);
+  if (kw)                 parts.push(kw);
+  if (locks.length)       parts.push('preserve: ' + locks.join(', '));
+
+  const prompt = parts.join(', ');
+  const el = document.getElementById('s1-prompt-text');
+  if (el) el.value = prompt;
+  updateS1LockList();
+  return prompt;
+}
+
+function rebuildS1Prompt() { buildS1Prompt(); }
+
+function copyS1Prompt() {
+  const t = document.getElementById('s1-prompt-text')?.value;
+  if (!t) return;
+  navigator.clipboard.writeText(t).then(() => showToast('✓ Prompt 已复制', 'ok'));
+}
+
+function updateS1LockList() {
+  const section = document.getElementById('s1-lock-section');
+  const list    = document.getElementById('s1-lock-list');
+  if (!section || !list) return;
+  if (annotState.annotations.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  list.innerHTML = annotState.annotations.map((a, i) =>
+    `<div class="ws-lock-item">
+      <div class="ws-lock-dot" style="background:${getAnnotColor(i)}"></div>
+      <span>${escapeHtml(a.label)}</span>
+    </div>`
+  ).join('');
+}
+
+async function autoDescribeAfterUpload() {
+  if (!annotState.url) return;
+  s1State.descLoading = true;
+  const statusEl = document.getElementById('s1-prompt-status');
+  const promptEl = document.getElementById('s1-prompt-text');
+  if (statusEl) statusEl.textContent = '⏳ AI 分析中…';
+  if (promptEl) promptEl.placeholder = 'AI 正在分析图片内容，稍候…';
+  try {
+    const themes   = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').filter(Boolean).join(', ');
+    const keywords = document.getElementById('extra-kw')?.value?.trim() || '';
+    const data = await apiPost('/api/image/describe', {
+      session_id: SESSION_ID || 'demo',
+      image_url: annotState.url,
+      context_hint: [themes, keywords].filter(Boolean).join('; ')
+    });
+    s1State.baseDesc = data.prompt_en || '';
+    buildS1Prompt();
+    if (statusEl) statusEl.textContent = '✓ AI 已分析';
+  } catch(e) {
+    if (statusEl) statusEl.textContent = '⚠️ 分析失败';
+    if (promptEl) promptEl.placeholder = 'AI 分析失败，可手动填写 Prompt…';
+    console.warn('自动描述失败:', e.message);
+  } finally {
+    s1State.descLoading = false;
+  }
+}
+
+// ── generateFromUpload — 上传模式统一生成按钮 ──
+async function generateFromUpload() {
+  if (!annotState.url) { showToast('请先上传图片','warn'); return; }
+  const prompt = document.getElementById('s1-prompt-text')?.value?.trim() || '';
+  if (!prompt) { showToast('Prompt 为空，请先配置风格或等待 AI 分析完成','warn'); return; }
+
+  const btn = document.getElementById('s1-upload-gen-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '生成中…'; }
+
+  // 生成 mask（若有标注）
+  let maskB64 = null;
+  if (annotState.annotations.length > 0) {
+    try { maskB64 = generateAnnotMask(); } catch(e) { console.warn('mask生成失败', e); }
+  }
+
+  try {
+    const styleEl = document.querySelector('#style-tags .tag.selected');
+    const style   = styleEl?.dataset.val || 'cinematic film';
+    const lightEl = document.querySelector('#light-tags .tag.selected');
+    const lighting = lightEl?.dataset.val || 'soft natural light';
+    const moodEl   = document.querySelector('#mood-tags .tag.selected');
+    const mood     = moodEl?.dataset.val || 'warm healing';
+    const payload = {
+      session_id: SESSION_ID || 'demo',
+      image_url:  annotState.url,
+      style, lighting, mood,
+      ratio: document.querySelector('#ratio-btns .ratio-btn.selected')?.dataset.val || '16:9',
+      extra_prompt: prompt
+    };
+    if (maskB64) payload.mask_b64 = maskB64;
+    const data = await apiPost('/api/image/stylize', payload);
+
+    // 展示结果，复用 stylize 结果卡片逻辑
+    stylizeState.imageUrl = data.image_url;
+    stylizeState.imageId  = data.image_id || null;
+    const previewEl = document.getElementById('stylize-preview');
+    const resultEl  = document.getElementById('stylize-result');
+    if (previewEl) previewEl.style.backgroundImage = `url(${data.image_url})`;
+    if (resultEl)  resultEl.style.display = '';
+    if (data.note) showToast(data.note, 'warn');
+  } catch(e) {
+    showToast('生成失败：' + e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✦ 生成新原图'; }
+  }
+}
+
+function generateAnnotMask() {
+  // 生成 mask：annotated 区域=黑(保留)，其余=白(可修改)
+  const canvas = document.getElementById('annot-canvas');
+  if (!canvas || annotState.annotations.length === 0) return null;
+  const mc = document.createElement('canvas');
+  mc.width  = canvas.width;
+  mc.height = canvas.height;
+  const ctx = mc.getContext('2d');
+  // 白底
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, mc.width, mc.height);
+  // 标注区域填黑
+  ctx.fillStyle = '#000000';
+  annotState.annotations.forEach(a => {
+    ctx.fillRect(a.rect.x, a.rect.y, a.rect.w, a.rect.h);
+  });
+  return mc.toDataURL('image/png').split(',')[1]; // base64
+}
+
+// ── genImagesFromPrompt — AI 模式生成按钮，用 Prompt 面板文字 ──
+async function genImagesFromPrompt() {
+  const prompt = document.getElementById('s1-prompt-text')?.value?.trim() || '';
+  if (prompt) {
+    s1State.overridePrompt = prompt;
+  }
+  await genImages();
+}
+
+// ── downloadAssetPack — 素材包下载 ──
+// ── 素材盘 Prompt 弹窗 ──
+let _ippImgIdx = -1;
+
+function showImgPromptPopup(imgIdx, thumbEl) {
+  const img = state.imgs[imgIdx];
+  if (!img) return;
+  _ippImgIdx = imgIdx;
+
+  const popup  = document.getElementById('img-prompt-popup');
+  const nameEl = document.getElementById('ipp-name');
+  const textEl = document.getElementById('ipp-text');
+
+  nameEl.textContent = img.name || '原图';
+  const prompt = img.prompt || img.ai_prompt || '';
+  if (prompt) {
+    textEl.textContent = prompt;
+    textEl.className = 'ipp-text';
+  } else {
+    textEl.textContent = '（未记录 Prompt）';
+    textEl.className = 'ipp-text ipp-empty';
+  }
+
+  // 定位：弹窗出现在缩略图左侧，若空间不够则右侧
+  popup.style.display = 'block';
+  popup.classList.remove('visible');
+  const rect   = thumbEl.getBoundingClientRect();
+  const pw     = popup.offsetWidth;   // 300
+  const ph     = popup.offsetHeight;
+  const vw     = window.innerWidth;
+  const vh     = window.innerHeight;
+
+  let left = rect.left - pw - 8;
+  if (left < 8) left = rect.right + 8;
+  if (left + pw > vw - 8) left = vw - pw - 8;
+
+  let top = rect.top + rect.height / 2 - ph / 2;
+  if (top < 8) top = 8;
+  if (top + ph > vh - 8) top = vh - ph - 8;
+
+  popup.style.left = left + 'px';
+  popup.style.top  = top  + 'px';
+  popup.classList.add('visible');
+}
+
+function hideImgPromptPopup() {
+  const popup = document.getElementById('img-prompt-popup');
+  popup.classList.remove('visible');
+  popup.style.display = 'none';
+  _ippImgIdx = -1;
+}
+
+function copyIppPrompt() {
+  const text = document.getElementById('ipp-text')?.textContent || '';
+  if (!text || text === '（未记录 Prompt）') { showToast('暂无 Prompt 可复制', 'warn'); return; }
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Prompt 已复制', 'success'));
+}
+
+function applyIppToS1() {
+  const text = document.getElementById('ipp-text')?.textContent || '';
+  if (!text || text === '（未记录 Prompt）') { showToast('暂无 Prompt', 'warn'); return; }
+  const el = document.getElementById('s1-prompt-text');
+  if (el) { el.value = text; showToast('✓ 已填入步骤一 Prompt', 'success'); }
+  hideImgPromptPopup();
+}
+
+// 点击弹窗外部关闭
+document.addEventListener('click', (e) => {
+  const popup = document.getElementById('img-prompt-popup');
+  if (popup && popup.classList.contains('visible') && !popup.contains(e.target)) {
+    hideImgPromptPopup();
+  }
+}, true);
+
+async function downloadAssetPack(imgIdx) {
+  const img = state.imgs[imgIdx];
+  if (!img) return;
+  const safeName = (img.name || 'image').replace(/\s+/g, '_');
+  const prompt   = img.prompt || img.ai_prompt || '';
+
+  const txt = [
+    `# ${img.name}`,
+    '',
+    '## Prompt',
+    prompt || '（无）',
+    img.annotations?.length
+      ? '\n## 标注保留元素\n' + img.annotations.map(a => `- ${a.label}`).join('\n')
+      : '',
+    '',
+    `## 生成时间`,
+    new Date().toLocaleString('zh-CN')
+  ].join('\n');
+
+  // 若有图片 URL，打包成 zip（图片 + prompt.txt）；否则仅下载 txt
+  if (img.url && typeof JSZip !== 'undefined') {
+    try {
+      showToast('正在打包…', 'success');
+      let imgBlob;
+      try {
+        const res = await fetch(img.url);
+        imgBlob = await res.blob();
+      } catch {
+        imgBlob = null; // CORS 时只打包 txt
+      }
+      const zip  = new JSZip();
+      const ext  = imgBlob?.type?.includes('png') ? 'png' : 'jpg';
+      const imgFilename = safeName + (imgBlob ? ('.' + ext) : '');
+      if (imgBlob) zip.file(imgFilename, imgBlob);
+      zip.file(safeName + '_prompt.txt', txt);
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href     = URL.createObjectURL(zipBlob);
+      a.download = safeName + '.zip';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast(`✓ 已下载「${safeName}.zip」（图片 + Prompt）`, 'success');
+      return;
+    } catch(e) {
+      // 打包失败则降级为分开下载
+    }
+  }
+
+  // 降级：图片直接链接 + txt 分开下载
+  if (img.url) {
+    const a = document.createElement('a');
+    a.href = img.url; a.download = safeName + '.jpg'; a.target = '_blank'; a.click();
+  }
+  setTimeout(() => {
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = safeName + '_prompt.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }, 400);
+  showToast(`✓ 已下载「${img.name}」（图片 + Prompt 分开）`, 'success');
+}
+
+// ── AUTH GATE ──
+if (!AUTH_TOKEN) {
+  document.getElementById('auth-modal').classList.add('open');
+  document.querySelector('.main-content').style.display = 'none';
+}
+
+// ── INIT ──
+updateCost();
+buildPrompt();
+// Set data-val on pb-light tags
+document.querySelectorAll('#pb-light .tag[data-val]').forEach(t => {
+  if (!t.getAttribute('data-val')) {
+    const m = t.getAttribute('onclick')?.match(/'([^']+)'\)$/);
+    if (m) t.setAttribute('data-val', m[1]);
+  }
+});
+initSession().then(() => {
+  if (SESSION_ID) console.log('Session已初始化:', SESSION_ID);
+  else console.log('后端未连接，使用Mock模式');
+});
+fetchMe();
+loadModelCatalog();
+</script>
+</body>
+</html>

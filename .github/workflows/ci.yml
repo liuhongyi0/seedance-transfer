@@ -1,0 +1,57 @@
+name: CI — Security & Lint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Seedance/backend/**'
+      - 'comfyui-seedance-wizard/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Seedance/backend/**'
+      - 'comfyui-seedance-wizard/**'
+
+jobs:
+  bandit:
+    name: bandit — Python Security Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install bandit
+      - name: bandit (Seedance backend)
+        run: bandit -r Seedance/backend/ -x ./test_api.py -f txt
+      - name: bandit (ComfyUI plugin)
+        run: bandit comfyui-seedance-wizard/nodes.py -f txt
+
+  semgrep:
+    name: semgrep — SAST
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: semgrep (Python + Secrets + OWASP)
+        run: |
+          semgrep ci \
+            --config "p/python" \
+            --config "p/secrets" \
+            --config "p/owasp-top-ten" \
+            --config "p/cwe-top-25" \
+            --include "Seedance/backend/**/*.py" \
+            --include "comfyui-seedance-wizard/**/*.py" \
+            --error
+
+  ruff:
+    name: ruff — Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          src: 'Seedance/backend'
+          args: 'check --select E,F,N,S,B,PLC,PLE,ISC,RUF --ignore S101,S104,N802,RUF002,RUF003,PLC0415,E501'

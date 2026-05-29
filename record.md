@@ -1053,3 +1053,48 @@ Railway 验证所需 TXT 记录：
 - 显示当前语言：`中` / `EN`
 - 切换逻辑：设置 `NEXT_LOCALE` cookie → `window.location.reload()`
 - 构建错误：初始文件放在 `src/components/` 但项目 `@/*` 别名指向 `./*`（非 `src/*`），移到 `components/` 修复
+
+---
+
+## Phase 17: ComfyUI Wizard i18n（2026-05-16）
+
+### 背景
+
+ComfyUI Wizard (wizard.html) 所有 UI 文本硬编码中文，海外版用户需要英文界面。
+
+### 核心设计
+
+- **轻量 i18n 引擎**：`i18n.js`（227 行，零依赖，纯 vanilla JS）
+  - `navigator.language` 自动检测语言
+  - `localStorage` 持久化用户选择
+  - `fetch` 加载 locale JSON
+  - `data-i18n` / `data-i18n-placeholder` / `data-i18n-title` 属性驱动 DOM 替换
+  - `window.__t(key, ...args)` 供 JS 动态字符串使用
+  - `window.__setLocale(lang)` 运行时切换语言
+- **权威配置源**：Python `seedance_config.json` 中的 `language` 字段
+  - Wizard 启动时调用 `GET /seedance/locale` 同步
+  - 用户通过设置弹窗修改后，同时保存到 Python 配置 + 前端 localStorage
+
+### 文件变更
+
+| 文件 | 操作 | 说明 |
+|------|------|------|
+| `web/i18n/zh.json` | 重写 | 77 个中文翻译 key（v2 参数驱动向导） |
+| `web/i18n/en.json` | 重写 | 77 个英文翻译 key |
+| `web/wizard.html` | 修改 | ~50 元素加 `data-i18n` 属性，~15 处 JS 字符串转 `__t()`，语言切换联动 |
+
+### 覆盖范围
+
+- **Step 1**：上传区提示、创意想法 placeholder、宽高比选项、分析按钮、费用提示
+- **Step 2**：分析标题、三个子步骤文本
+- **Step 3**：预览占位、创意说明、5 个分类下拉（25 个选项）、4 个滑块标签、Prompt 标签、操作按钮
+- **Step 4**：视频生成状态、完成提示、复制/重做按钮
+- **设置弹窗**：所有标签、按钮、提示信息
+- **状态栏**：余额标签、Key 状态文本
+- **错误消息**：RPC 超时、分析/预览/视频失败提示
+
+### 验证
+
+- TypeScript 编译零错误
+- HTML/CSS/JS 语法检查通过
+- `nodes.py` `/seedance/locale` 路由已存在，无需修改

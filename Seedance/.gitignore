@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.venv/
+venv/
+
+# Secrets (set via Railway / env)
+backend/.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.bak
+*.tmp
+
+# Reference materials (not code)
+提示词/
+提示词清单.md
+
+# Standalone i18n (embedded in seedance-studio.html already)
+i18n.js
+
+# Docker
+*.log
+/tmp/

@@ -25,8 +25,19 @@ dialogue.md
 # 旧版 ComfyUI 节点（已被 comfyui-seedance-wizard/ 取代）
 comfyui-node/
 
-# 设计草稿
-Seedance/
+# Seedance 后端 —— 排除非代码资源
+Seedance/提示词/
+Seedance/docs/
+Seedance/*.bak
+Seedance/.DS_Store
+Seedance/backend/.env
+Seedance/backend/.ruff_cache/
+Seedance/backend/__pycache__/
+Seedance/railway.json
+Seedance/i18n.js
+Seedance/HTML页面设计方案.md
+Seedance/memory.md
+Seedance/提示词清单.md
 
 # 根目录 config/（冗余副本，正式配置在 backend/config/）
 /config/
@@ -43,3 +54,6 @@ deploy/.env.production
 !/todo-list.md
 !/memory.md
 !/dialogue.md
+!Seedance/CLAUDE.md
+!Seedance/backend/*.md
+!deploy/*.md

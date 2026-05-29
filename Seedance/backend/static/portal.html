@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seedance Studio · AI 视频创作平台</title>
+<style>
+:root {
+  --bg: #0a0a0f; --bg2: #13131a; --bg3: #1c1c26; --bg4: #252535;
+  --border: #2a2a3a; --border2: #383850;
+  --accent: #7c6dfa; --accent2: #9d91fc; --accent-glow: rgba(124,109,250,0.15);
+  --text: #e8e8f0; --text2: #9090a8; --text3: #55556a;
+  --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+  --radius: 10px; --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; font-size: 14px; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* HEADER */
+header { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 56px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 100; gap: 16px; }
+.logo { font-size: 16px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; text-decoration: none; cursor: pointer; }
+.logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+/* LANG TOGGLE */
+.lang-btn { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; background: var(--bg3); border: 1.5px solid var(--border2); cursor: pointer; color: var(--text2); transition: all .15s; }
+.lang-btn.active { border-color: var(--accent); color: var(--accent2); background: var(--accent-glow); }
+.lang-en-label { display: none; }
+body.lang-en .lang-en-label { display: inline; }
+body.lang-en .lang-zh-label { display: none; }
+
+/* AUTH BUTTONS */
+.auth-btn { padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; background: var(--accent); color: #fff; border: none; }
+.auth-btn:hover { background: var(--accent2); }
+.auth-btn.ghost { background: transparent; border: 1.5px solid var(--border2); color: var(--text2); }
+.auth-btn.ghost:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* USER CHIP */
+.user-chip { display: flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 20px; background: var(--bg3); border: 1px solid var(--border); cursor: pointer; position: relative; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.user-name { font-size: 13px; color: var(--text); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-balance { font-size: 12px; color: var(--accent2); font-weight: 600; }
+.user-dropdown { display: none; position: absolute; top: 100%; right: 0; margin-top: 6px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); min-width: 160px; padding: 4px; z-index: 200; }
+.user-dropdown.show { display: block; }
+.user-dropdown button { display: block; width: 100%; padding: 8px 14px; text-align: left; background: none; border: none; color: var(--text); font-size: 13px; border-radius: var(--radius-sm); cursor: pointer; }
+.user-dropdown button:hover { background: var(--bg4); }
+.user-dropdown hr { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+.user-dropdown .logout-btn { color: var(--red); }
+
+/* MAIN CONTENT */
+main { flex: 1; display: flex; flex-direction: column; }
+
+/* HERO (Landing state) */
+.hero { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 24px 60px; flex: 1; }
+.hero-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--accent-glow); color: var(--accent2); border: 1px solid rgba(124,109,250,0.3); margin-bottom: 24px; }
+.hero h1 { font-size: 42px; font-weight: 800; line-height: 1.25; margin-bottom: 16px; letter-spacing: -1px; }
+.hero h1 .accent { color: var(--accent2); }
+.hero p { font-size: 17px; color: var(--text2); max-width: 520px; line-height: 1.6; margin-bottom: 32px; }
+.hero-actions { display: flex; gap: 12px; }
+.btn-primary { padding: 12px 28px; border-radius: 24px; font-size: 15px; font-weight: 600; background: var(--accent); color: #fff; border: none; cursor: pointer; transition: all .15s; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,109,250,0.3); }
+.btn-secondary { padding: 12px 28px; border-radius: 24px; font-size: 15px; font-weight: 600; background: transparent; color: var(--text2); border: 1.5px solid var(--border2); cursor: pointer; transition: all .15s; }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* FEATURES */
+.features { display: flex; justify-content: center; gap: 20px; padding: 0 24px 60px; flex-wrap: wrap; }
+.feature-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; width: 200px; text-align: center; transition: all .2s; }
+.feature-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.feature-icon { font-size: 32px; margin-bottom: 12px; }
+.feature-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.feature-card p { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* DASHBOARD (Logged-in state) */
+.dashboard { padding: 40px 24px; max-width: 800px; margin: 0 auto; width: 100%; flex: 1; }
+.dashboard h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.dashboard .welcome-sub { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
+.balance-card { background: linear-gradient(135deg, var(--accent), #5b4fcf); border-radius: 14px; padding: 28px 32px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+.balance-label { font-size: 13px; opacity: .8; }
+.balance-amount { font-size: 36px; font-weight: 800; margin-top: 4px; }
+.balance-currency { font-size: 16px; font-weight: 600; opacity: .7; }
+.quick-actions { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+.quick-action { flex: 1; min-width: 140px; padding: 16px 20px; border-radius: var(--radius); background: var(--bg2); border: 1px solid var(--border); cursor: pointer; text-align: center; transition: all .15s; text-decoration: none; color: var(--text); }
+.quick-action:hover { border-color: var(--accent); background: var(--bg3); }
+.quick-action .qa-icon { font-size: 24px; margin-bottom: 6px; }
+.quick-action .qa-label { font-size: 13px; font-weight: 600; }
+.quick-action .qa-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* TRANSACTIONS TABLE */
+.tx-section { margin-bottom: 24px; }
+.tx-section h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.tx-table { width: 100%; border-collapse: collapse; }
+.tx-table th, .tx-table td { padding: 10px 14px; text-align: left; font-size: 13px; }
+.tx-table th { color: var(--text3); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+.tx-table td { border-bottom: 1px solid var(--border); color: var(--text2); }
+.tx-type { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.tx-type.topup { background: rgba(52,211,153,0.15); color: var(--green); }
+.tx-type.spend { background: rgba(248,113,113,0.15); color: var(--red); }
+.tx-type.test_topup { background: rgba(251,191,36,0.15); color: var(--yellow); }
+.tx-amount.positive { color: var(--green); }
+.tx-amount.negative { color: var(--red); }
+.tx-empty { text-align: center; padding: 32px; color: var(--text3); font-size: 13px; }
+
+/* MODALS */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 32px; width: 400px; max-width: 90vw; max-height: 85vh; overflow-y: auto; }
+.modal-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+.modal-close { float: right; background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; line-height: 1; }
+.modal-close:hover { color: var(--text); }
+
+/* AUTH FORM */
+.tab-bar { display: flex; margin-bottom: 20px; background: var(--bg3); border-radius: 10px; padding: 3px; }
+.tab-btn { flex: 1; padding: 8px 0; text-align: center; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text2); background: none; border: none; transition: all .15s; }
+.tab-btn.active { background: var(--bg4); color: var(--text); }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; }
+.form-group input { width: 100%; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--bg3); border: 1.5px solid var(--border); color: var(--text); font-size: 14px; outline: none; transition: border-color .15s; }
+.form-group input:focus { border-color: var(--accent); }
+.form-error { font-size: 12px; color: var(--red); margin-top: 4px; display: none; }
+.form-submit { width: 100%; padding: 11px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; background: var(--accent); color: #fff; border: none; cursor: pointer; margin-top: 6px; transition: all .15s; }
+.form-submit:hover { background: var(--accent2); }
+.form-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+/* PRICING */
+.pricing-grid { display: flex; gap: 12px; margin-top: 16px; }
+.pricing-card { flex: 1; background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 20px 16px; text-align: center; transition: all .15s; }
+.pricing-card:hover { border-color: var(--border2); }
+.pricing-card.popular { border-color: var(--accent); background: var(--accent-glow); }
+.pricing-card .pkg-name { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.pricing-card .pkg-price { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+.pricing-card .pkg-credits { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+.pricing-card .pkg-desc { font-size: 11px; color: var(--text3); margin-bottom: 14px; }
+.pricing-card button { width: 100%; padding: 8px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; background: var(--accent); color: #fff; border: none; transition: all .15s; }
+.pricing-card button:hover { background: var(--accent2); }
+.popular-badge { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; background: var(--accent); color: #fff; margin-bottom: 8px; }
+
+/* TOAST */
+.toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); padding: 10px 24px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 999; pointer-events: none; opacity: 0; transition: opacity .2s; }
+.toast.show { opacity: 1; }
+.toast.success { background: #065f46; color: var(--green); }
+.toast.error { background: #7f1d1d; color: var(--red); }
+.toast.info { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+
+/* STATES */
+.landing-state, .logged-in-state { display: none; }
+.landing-state.show, .logged-in-state.show { display: flex; flex-direction: column; flex: 1; }
+
+/* FOOTER */
+footer { text-align: center; padding: 20px; color: var(--text3); font-size: 12px; border-top: 1px solid var(--border); }
+footer a { color: var(--text2); text-decoration: none; }
+footer a:hover { color: var(--accent2); }
+
+@media (max-width: 768px) {
+  header { padding: 0 12px; height: 48px; }
+  .logo { font-size: 14px; }
+  .auth-btn { padding: 5px 12px; font-size: 12px; }
+  .hero { padding: 48px 16px 32px; }
+  .hero h1 { font-size: 26px; }
+  .hero p { font-size: 14px; max-width: 100%; }
+  .hero-actions { flex-direction: column; width: 100%; max-width: 300px; }
+  .hero-actions button { width: 100%; }
+  .features { flex-direction: column; align-items: center; gap: 12px; padding: 0 16px 40px; }
+  .feature-card { width: 100%; max-width: 320px; }
+  .dashboard { padding: 24px 16px; }
+  .balance-card { flex-direction: column; gap: 16px; text-align: center; }
+  .balance-amount { font-size: 28px; }
+  .quick-actions { flex-direction: column; }
+  .modal-card { width: 95vw; max-width: 400px; margin: 20px auto; padding: 24px 20px; }
+  .pricing-grid { flex-direction: column; gap: 10px; }
+  .pricing-card { max-width: 100%; }
+  .tx-table { font-size: 12px; }
+  .user-name { max-width: 80px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="/"><div class="logo-dot"></div>Seedance Studio</a>
+  <div class="header-right">
+    <button class="lang-btn" id="lang-btn" onclick="toggleLang()">中<span class="lang-zh-label"> / EN</span></button>
+    <div class="landing-state" id="header-unauth" style="display:contents">
+      <button class="auth-btn ghost" id="btn-login" onclick="openAuth('login')">
+        <span class="lang-zh-label">登录</span><span class="lang-en-label">Login</span>
+      </button>
+      <button class="auth-btn" id="btn-register" onclick="openAuth('register')">
+        <span class="lang-zh-label">免费注册</span><span class="lang-en-label">Sign Up</span>
+      </button>
+    </div>
+    <div class="user-chip logged-in-state" id="user-chip" onclick="toggleUserMenu()">
+      <div class="user-avatar" id="user-avatar">S</div>
+      <div>
+        <div class="user-name" id="user-name"></div>
+        <div class="user-balance" id="user-balance">0</div>
+      </div>
+      <div class="user-dropdown" id="user-dropdown">
+        <button onclick="window.open('/studio','_self')">
+          <span class="lang-zh-label">进入工作台</span><span class="lang-en-label">Launch Studio</span>
+        </button>
+        <button onclick="openPricingModal()">
+          <span class="lang-zh-label">充值</span><span class="lang-en-label">Recharge</span>
+        </button>
+        <hr>
+        <button class="logout-btn" onclick="doLogout()">
+          <span class="lang-zh-label">退出登录</span><span class="lang-en-label">Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- LANDING STATE -->
+  <div class="landing-state show" id="landing-state">
+    <div class="hero">
+      <div class="hero-badge">
+        <span class="lang-zh-label">AI 驱动 · 5 步出片</span>
+        <span class="lang-en-label">AI-Powered · 5 Steps to Video</span>
+      </div>
+      <h1>
+        <span class="lang-zh-label">AI 视频创作<span class="accent">工作台</span></span>
+        <span class="lang-en-label">AI Video Creation <span class="accent">Workbench</span></span>
+      </h1>
+      <p>
+        <span class="lang-zh-label">从参考图到最终成片，5 步自动化管线：原图生成 → 调色 → 视频草稿 → 音乐生成 → 一键成片。</span>
+        <span class="lang-en-label">From reference image to final video: 5 automated steps — Image Gen → Color Grade → Video Draft → Music → Final Cut.</span>
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="openAuth('register')">
+          <span class="lang-zh-label">开始免费试用</span><span class="lang-en-label">Start Free Trial</span>
+        </button>
+        <button class="btn-secondary" onclick="openAuth('login')">
+          <span class="lang-zh-label">已有账号</span><span class="lang-en-label">Sign In</span>
+        </button>
+      </div>
+    </div>
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3><span class="lang-zh-label">AI 图片生成</span><span class="lang-en-label">AI Image Gen</span></h3>
+        <p><span class="lang-zh-label">Seedream 4.5 模型，上传原图或 AI 生成</span><span class="lang-en-label">Seedream 4.5, upload or generate reference images</span></p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎬</div>
+        <h3><span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Draft</span></h3>
+        <p><span class="lang-zh-label">Seedance 2.0 Fast，480p 快速预览</span><span class="lang-en-label">Seedance 2.0 Fast, 480p quick preview</span></p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎵</div>
+        <h3><span class="lang-zh-label">音乐生成</span><span class="lang-en-label">Music Gen</span></h3>
+        <p><span class="lang-zh-label">Suno v4 模型，为视频配乐</span><span class="lang-en-label">Suno v4, soundtrack for your video</span></p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎥</div>
+        <h3><span class="lang-zh-label">最终成片</span><span class="lang-en-label">Final Cut</span></h3>
+        <p><span class="lang-zh-label">火山引擎 Seedance 2.0，720p~2K 输出</span><span class="lang-en-label">Volcano Seedance 2.0, up to 2K output</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGGED-IN STATE -->
+  <div class="logged-in-state" id="logged-in-state">
+    <div class="dashboard" id="dashboard">
+      <h2 id="dash-welcome"><span class="lang-zh-label">欢迎回来</span><span class="lang-en-label">Welcome back</span></h2>
+      <div class="welcome-sub"><span class="lang-zh-label">以下是您的账户概览</span><span class="lang-en-label">Here's your account overview</span></div>
+
+      <div class="balance-card">
+        <div>
+          <div class="balance-label"><span class="lang-zh-label">账户余额</span><span class="lang-en-label">Balance</span></div>
+          <div class="balance-amount" id="dash-balance">0</div>
+        </div>
+        <div class="balance-currency" id="dash-currency">USD</div>
+      </div>
+
+      <div class="quick-actions">
+        <a class="quick-action" href="/studio">
+          <div class="qa-icon">🚀</div>
+          <div class="qa-label"><span class="lang-zh-label">进入工作台</span><span class="lang-en-label">Launch Studio</span></div>
+          <div class="qa-sub"><span class="lang-zh-label">开始 AI 视频创作</span><span class="lang-en-label">Start creating AI videos</span></div>
+        </a>
+        <div class="quick-action" onclick="openPricingModal()">
+          <div class="qa-icon">💰</div>
+          <div class="qa-label"><span class="lang-zh-label">充值</span><span class="lang-en-label">Recharge</span></div>
+          <div class="qa-sub"><span class="lang-zh-label">购买创作点数</span><span class="lang-en-label">Buy credits</span></div>
+        </div>
+      </div>
+
+      <!-- API Keys -->
+      <div class="tx-section" style="margin-bottom:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3><span class="lang-zh-label">API Keys</span><span class="lang-en-label">API Keys</span></h3>
+          <button id="apikey-create-btn" onclick="createApiKey()" style="padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">+ <span class="lang-zh-label">创建</span><span class="lang-en-label">Create</span></button>
+        </div>
+        <p style="font-size:12px;color:var(--text2);margin:4px 0 12px"><span class="lang-zh-label">在 ComfyUI 节点中使用 API Key 连接 Seedance 服务。密钥仅创建时可见一次。</span><span class="lang-en-label">Use an API Key in your ComfyUI node to connect to Seedance. The key is shown only once.</span></p>
+        <table class="tx-table" id="apikey-table">
+          <thead><tr>
+            <th><span class="lang-zh-label">名称</span><span class="lang-en-label">Name</span></th>
+            <th><span class="lang-zh-label">前缀</span><span class="lang-en-label">Prefix</span></th>
+            <th><span class="lang-zh-label">创建时间</span><span class="lang-en-label">Created</span></th>
+            <th></th>
+          </tr></thead>
+          <tbody id="apikey-body">
+            <tr><td colspan="4" class="tx-empty"><span class="lang-zh-label">暂无 API Key</span><span class="lang-en-label">No API Keys yet</span></td></tr>
+          </tbody>
+        </table>
+        <div id="apikey-new" style="display:none;margin-top:12px;padding:14px;background:var(--hover);border-radius:8px">
+          <p style="font-size:13px;color:var(--green);font-weight:600;margin:0 0 4px"><span class="lang-zh-label">新密钥（仅显示一次！）</span><span class="lang-en-label">New Key (shown only once!)</span></p>
+          <code id="apikey-new-value" style="font-size:14px;word-break:break-all;background:var(--bg);padding:6px 10px;border-radius:4px;display:block;margin:8px 0;user-select:all"></code>
+          <button onclick="copyNewKey()" style="padding:4px 12px;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px"><span class="lang-zh-label">复制</span><span class="lang-en-label">Copy</span></button>
+        </div>
+      </div>
+
+      <div class="tx-section">
+        <h3><span class="lang-zh-label">最近交易</span><span class="lang-en-label">Recent Transactions</span></h3>
+        <table class="tx-table">
+          <thead><tr>
+            <th><span class="lang-zh-label">时间</span><span class="lang-en-label">Time</span></th>
+            <th><span class="lang-zh-label">类型</span><span class="lang-en-label">Type</span></th>
+            <th><span class="lang-zh-label">金额</span><span class="lang-en-label">Amount</span></th>
+            <th><span class="lang-zh-label">备注</span><span class="lang-en-label">Note</span></th>
+          </tr></thead>
+          <tbody id="tx-body">
+            <tr><td colspan="4" class="tx-empty"><span class="lang-zh-label">暂无交易记录</span><span class="lang-en-label">No transactions yet</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span class="lang-zh-label">&copy; 2026 Seedance Studio. All rights reserved.</span>
+  <span class="lang-en-label">&copy; 2026 Seedance Studio. All rights reserved.</span>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuth()">&times;</button>
+    <h2 id="auth-title"><span class="lang-zh-label">登录 / 注册</span><span class="lang-en-label">Login / Register</span></h2>
+    <div class="tab-bar" id="auth-tabs">
+      <button class="tab-btn active" data-tab="login"><span class="lang-zh-label">登录</span><span class="lang-en-label">Login</span></button>
+      <button class="tab-btn" data-tab="register"><span class="lang-zh-label">注册</span><span class="lang-en-label">Register</span></button>
+    </div>
+    <form id="auth-form" onsubmit="submitAuth(event)">
+      <div class="form-group">
+        <label><span class="lang-zh-label">邮箱</span><span class="lang-en-label">Email</span></label>
+        <input type="email" id="auth-email" placeholder="you@example.com" required>
+        <div class="form-error" id="auth-error"></div>
+      </div>
+      <div class="form-group">
+        <label><span class="lang-zh-label">密码</span><span class="lang-en-label">Password</span></label>
+        <input type="password" id="auth-password" placeholder="min 8 characters" minlength="8" required>
+      </div>
+      <button type="submit" class="form-submit" id="auth-submit">
+        <span class="lang-zh-label">登录</span><span class="lang-en-label">Login</span>
+      </button>
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text3);font-size:12px">
+        <hr style="flex:1;border:none;border-top:1px solid var(--border)">
+        <span style="white-space:nowrap"><span class="lang-zh-label">或</span><span class="lang-en-label">or</span></span>
+        <hr style="flex:1;border:none;border-top:1px solid var(--border)">
+      </div>
+      <div id="g_id_signin" style="display:flex;justify-content:center"></div>
+      <div id="github_signin" style="display:flex;justify-content:center;margin-top:8px"></div>
+    </form>
+  </div>
+</div>
+
+<!-- PRICING MODAL -->
+<div class="modal-overlay" id="pricing-modal">
+  <div class="modal-box" style="width:520px">
+    <button class="modal-close" onclick="closePricingModal()">&times;</button>
+    <h2><span class="lang-zh-label">充值套餐</span><span class="lang-en-label">Recharge Packages</span></h2>
+    <div class="pricing-grid" id="pricing-grid"></div>
+    <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3)" id="pricing-note"></p>
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────
+let AUTH_TOKEN = localStorage.getItem('seedance_token') || null;
+let CURRENT_USER = null;
+const API_BASE = '';
+
+// ─── Google Identity Services ─────────────────────────────────────────────
+(function loadGIS() {
+  const script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.async = true;
+  script.onload = initGIS;
+  document.head.appendChild(script);
+})();
+
+function initGIS() {
+  const clientId = (window.GOOGLE_CLIENT_ID || '').trim();
+  if (!clientId || !window.google) return;
+  window.google.accounts.id.initialize({
+    client_id: clientId,
+    callback: handleGoogleCredential,
+    auto_select: false,
+    context: 'signin',
+  });
+  window.google.accounts.id.renderButton(
+    document.getElementById('g_id_signin'),
+    { theme: 'filled_black', size: 'large', width: 320, text: 'continue_with' }
+  );
+}
+
+async function handleGoogleCredential(response) {
+  const errorEl = document.getElementById('auth-error');
+  errorEl.style.display = 'none';
+  try {
+    const r = await fetch(API_BASE + '/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: response.credential }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Google auth failed');
+    AUTH_TOKEN = d.token;
+    localStorage.setItem('seedance_token', AUTH_TOKEN);
+    closeAuth();
+    await fetchMe();
+    showToast(d.is_new ? 'Welcome! Account created.' : 'Welcome back!', 'success');
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.style.display = 'block';
+  }
+}
+
+// ─── GitHub OAuth ──────────────────────────────────────────────────────────
+async function initGitHub() {
+  const clientId = (window.GITHUB_CLIENT_ID || '').trim();
+  if (!clientId) return;
+  const div = document.getElementById('github_signin');
+  if (!div) return;
+  div.innerHTML = `<button type="button" onclick="handleGitHubLogin()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:320px;padding:10px 0;background:#24292f;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Continue with GitHub</button>`;
+}
+
+async function handleGitHubLogin() {
+  try {
+    const r = await fetch(API_BASE + '/api/auth/github');
+    const d = await r.json();
+    if (d.url) window.location.href = d.url;
+  } catch (err) {
+    showToast('GitHub login failed', 'error');
+  }
+}
+
+(function handleTokenFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const isNew = params.get('new');
+  if (token) {
+    AUTH_TOKEN = token;
+    localStorage.setItem('seedance_token', token);
+    window.history.replaceState({}, '', '/');
+    showToast(isNew ? 'Welcome! Account created.' : 'Welcome back!', 'success');
+  }
+})();
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+(async function init() {
+  // Fetch OAuth config (Google + GitHub client IDs)
+  try {
+    const r = await fetch(API_BASE + '/api/auth/config');
+    const d = await r.json();
+    window.GOOGLE_CLIENT_ID = d.google_client_id || '';
+    window.GITHUB_CLIENT_ID = d.github_client_id || '';
+    if (window.GOOGLE_CLIENT_ID && window.google) {
+      initGIS();
+    }
+    initGitHub();
+  } catch (_) {}
+
+  if (AUTH_TOKEN) await fetchMe();
+  else showState('landing');
+
+  // Auth tab clicks
+  document.querySelectorAll('#auth-tabs .tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchAuthTab(btn.dataset.tab));
+  });
+})();
+
+// ─── i18n ─────────────────────────────────────────────────────────────────
+function setLang(lang) {
+  if (lang === 'en') document.body.classList.add('lang-en');
+  else document.body.classList.remove('lang-en');
+}
+function toggleLang() {
+  const btn = document.getElementById('lang-btn');
+  if (document.body.classList.contains('lang-en')) {
+    document.body.classList.remove('lang-en');
+    btn.classList.remove('active');
+  } else {
+    document.body.classList.add('lang-en');
+    btn.classList.add('active');
+  }
+}
+
+// ─── State Management ─────────────────────────────────────────────────────
+function showState(state) {
+  const landing = document.getElementById('landing-state');
+  const loggedIn = document.getElementById('logged-in-state');
+  const headerUnauth = document.getElementById('header-unauth');
+  const headerUser = document.getElementById('user-chip');
+
+  if (state === 'landing') {
+    landing.classList.add('show');
+    loggedIn.classList.remove('show');
+    headerUnauth.style.display = '';
+    headerUser.classList.remove('show');
+  } else {
+    landing.classList.remove('show');
+    loggedIn.classList.add('show');
+    headerUnauth.style.display = 'none';
+    headerUser.classList.add('show');
+  }
+}
+
+function toggleUserMenu() {
+  document.getElementById('user-dropdown').classList.toggle('show');
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg, type) {
+  type = type || 'info';
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type + ' show';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.classList.remove('show'); }, 2500);
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────
+function openAuth(tab) {
+  document.getElementById('auth-modal').classList.add('show');
+  switchAuthTab(tab || 'login');
+}
+function closeAuth() {
+  document.getElementById('auth-modal').classList.remove('show');
+  document.getElementById('auth-error').style.display = 'none';
+}
+function switchAuthTab(tab) {
+  document.querySelectorAll('#auth-tabs .tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  const submitBtn = document.getElementById('auth-submit');
+  if (tab === 'register') {
+    submitBtn.innerHTML = '<span class="lang-zh-label">注册</span><span class="lang-en-label">Register</span>';
+  } else {
+    submitBtn.innerHTML = '<span class="lang-zh-label">登录</span><span class="lang-en-label">Login</span>';
+  }
+  document.getElementById('auth-form').dataset.mode = tab;
+}
+
+async function submitAuth(e) {
+  e.preventDefault();
+  const mode = document.getElementById('auth-form').dataset.mode || 'login';
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errorEl = document.getElementById('auth-error');
+  const submitBtn = document.getElementById('auth-submit');
+
+  if (!email) { errorEl.textContent = 'Email required'; errorEl.style.display = 'block'; return; }
+  if (password.length < 8) { errorEl.textContent = 'Password must be at least 8 characters'; errorEl.style.display = 'block'; return; }
+  errorEl.style.display = 'none';
+
+  submitBtn.disabled = true;
+  try {
+    const endpoint = mode === 'register' ? '/api/auth/register' : '/api/auth/login';
+    const r = await fetch(API_BASE + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, auth_provider: 'email' }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Request failed');
+    AUTH_TOKEN = d.token;
+    localStorage.setItem('seedance_token', AUTH_TOKEN);
+    closeAuth();
+    await fetchMe();
+    showToast(mode === 'register' ? 'Registration successful' : 'Login successful', 'success');
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+async function fetchMe() {
+  try {
+    const r = await fetch(API_BASE + '/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+    });
+    if (!r.ok) throw new Error('Token invalid');
+    const d = await r.json();
+    CURRENT_USER = d.user;
+    applyUserUI();
+    showState('logged-in');
+    loadDashboard();
+  } catch (err) {
+    AUTH_TOKEN = null;
+    CURRENT_USER = null;
+    localStorage.removeItem('seedance_token');
+    showState('landing');
+  }
+}
+
+function applyUserUI() {
+  if (!CURRENT_USER) return;
+  const u = CURRENT_USER;
+  document.getElementById('user-name').textContent = u.email || u.phone || 'User';
+  document.getElementById('user-avatar').textContent = (u.email || 'S')[0].toUpperCase();
+
+  const sym = u.currency === 'CNY' ? '¥' : '$';
+  const subunit = u.currency === 'CNY' ? 100 : 100;
+  document.getElementById('user-balance').textContent = sym + (u.balance_subunit / 100).toFixed(2);
+  document.getElementById('dash-balance').textContent = sym + (u.balance_subunit / 100).toFixed(2);
+  document.getElementById('dash-currency').textContent = u.currency;
+  document.getElementById('dash-welcome').innerHTML =
+    (document.body.classList.contains('lang-en') ? 'Welcome back, ' : '欢迎回来，') +
+    '<span style="color:var(--accent2)">' + (u.email || u.phone || 'User') + '</span>';
+}
+
+function doLogout() {
+  AUTH_TOKEN = null;
+  CURRENT_USER = null;
+  localStorage.removeItem('seedance_token');
+  showState('landing');
+  document.getElementById('user-dropdown').classList.remove('show');
+  showToast('Logged out', 'info');
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const r = await fetch(API_BASE + '/api/payment/dashboard', {
+      headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+    });
+    if (!r.ok) throw new Error('Failed');
+    const d = await r.json();
+    CURRENT_USER = d.user;
+    applyUserUI();
+    renderTransactions(d.transactions || []);
+    loadApiKeys();
+  } catch (err) {
+    console.error('Dashboard load failed:', err);
+  }
+}
+
+// ─── API Keys ─────────────────────────────────────────────────────────────
+async function loadApiKeys() {
+  try {
+    const r = await fetch(API_BASE + '/api/keys', {
+      headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    const tbody = document.getElementById('apikey-body');
+    if (!d.keys || !d.keys.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="tx-empty">No API Keys yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = d.keys.map(k => `<tr>
+      <td>${esc(k.name || '-')}</td>
+      <td><code>${esc(k.key_prefix)}</code></td>
+      <td>${formatDate(k.created_at)}</td>
+      <td><button onclick="revokeApiKey('${esc(k.key_id)}')" style="padding:2px 8px;background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;cursor:pointer;font-size:12px">Revoke</button></td>
+    </tr>`).join('');
+  } catch (err) {
+    console.error('API keys load failed:', err);
+  }
+}
+
+async function createApiKey() {
+  const btn = document.getElementById('apikey-create-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(API_BASE + '/api/keys', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Default' })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Failed');
+    document.getElementById('apikey-new').style.display = 'block';
+    document.getElementById('apikey-new-value').textContent = d.key;
+    showToast('API Key created! Copy it now.', 'success');
+    loadApiKeys();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function copyNewKey() {
+  const code = document.getElementById('apikey-new-value');
+  navigator.clipboard.writeText(code.textContent).then(() => {
+    showToast('Copied!', 'success');
+  }).catch(() => {});
+}
+
+async function revokeApiKey(keyId) {
+  if (!confirm('Revoke this API key? It will stop working immediately.')) return;
+  try {
+    const r = await fetch(API_BASE + '/api/keys/' + keyId, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+    });
+    if (!r.ok) throw new Error('Failed');
+    showToast('API key revoked', 'info');
+    loadApiKeys();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(iso) { if (!iso) return '-'; const d = new Date(iso); return d.toLocaleDateString(); }
+
+function renderTransactions(txs) {
+  const tbody = document.getElementById('tx-body');
+  if (!txs.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="tx-empty">No transactions yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = txs.map(tx => {
+    const date = new Date(tx.created_at).toLocaleDateString();
+    const cls = tx.amount_subunit >= 0 ? 'positive' : 'negative';
+    const sym = tx.currency === 'CNY' ? '¥' : '$';
+    const amt = sym + (Math.abs(tx.amount_subunit) / 100).toFixed(2);
+    const sign = tx.amount_subunit >= 0 ? '+' : '';
+    return `<tr>
+      <td>${date}</td>
+      <td><span class="tx-type ${tx.tx_type}">${tx.tx_type}</span></td>
+      <td class="tx-amount ${cls}">${sign}${amt}</td>
+      <td>${tx.note || ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Pricing / Recharge ───────────────────────────────────────────────────
+async function openPricingModal() {
+  document.getElementById('pricing-modal').classList.add('show');
+  document.getElementById('user-dropdown').classList.remove('show');
+  try {
+    const r = await fetch(API_BASE + '/api/payment/pricing');
+    const d = await r.json();
+    document.getElementById('pricing-note').textContent = d.note || '';
+    const grid = document.getElementById('pricing-grid');
+    grid.innerHTML = d.packages.map(p => `
+      <div class="pricing-card ${p.popular ? 'popular' : ''}">
+        ${p.popular ? '<div class="popular-badge">POPULAR</div>' : ''}
+        <div class="pkg-name">${p.name}</div>
+        <div class="pkg-price">${p.display}</div>
+        <div class="pkg-credits">${p.credits_display}</div>
+        <div class="pkg-desc">${p.desc}</div>
+        <button onclick="doRecharge('${p.id}', ${p.amount}, '${d.currency}')">
+          ${CURRENT_USER ? 'Buy Now' : 'Login to Buy'}
+        </button>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error('Pricing load failed:', err);
+  }
+}
+
+function closePricingModal() {
+  document.getElementById('pricing-modal').classList.remove('show');
+}
+
+async function doRecharge(pkgId, amount, currency) {
+  if (!AUTH_TOKEN) {
+    closePricingModal();
+    openAuth('login');
+    return;
+  }
+  try {
+    const r = await fetch(API_BASE + '/api/payment/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + AUTH_TOKEN
+      },
+      body: JSON.stringify({
+        package_id: pkgId,
+        success_url: window.location.origin + '/',
+        cancel_url: window.location.origin + '/',
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Checkout failed');
+    closePricingModal();
+    // Redirect to Stripe hosted checkout
+    window.location.href = d.url;
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// Close modals on overlay click
+document.getElementById('auth-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAuth();
+});
+document.getElementById('pricing-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePricingModal();
+});
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  const chip = document.getElementById('user-chip');
+  if (chip && !chip.contains(e.target)) {
+    document.getElementById('user-dropdown').classList.remove('show');
+  }
+});
+</script>
+</body>
+</html>

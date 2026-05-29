@@ -46,7 +46,7 @@ app.registerExtension({
 
                 const iframe = document.createElement("iframe");
                 iframe.id    = "seedance-wizard-iframe";
-                iframe.src   = "/extensions/comfyui-seedance-wizard/wizard.html";
+                iframe.src   = "/extensions/seedance-wizard/wizard.html";
                 iframe.style.cssText =
                     "width:100%;height:100%;border:none;display:block;flex:1;";
                 iframe.allow   = "clipboard-read;clipboard-write";
@@ -71,6 +71,7 @@ app.registerExtension({
             "seedance_video_progress",
             "seedance_video_complete",
             "seedance_error",
+            "seedance_pipeline_progress",
         ];
 
         WS_EVENTS.forEach((evtName) => {
