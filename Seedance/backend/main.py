@@ -37,6 +37,53 @@ else:
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
 
+async def _daily_backup_loop():
+    """Background task: run DB backup daily at 3:00 AM local time."""
+    import asyncio, datetime, subprocess, gzip, io, uuid
+    await asyncio.sleep(10)  # wait for startup to settle
+
+    while True:
+        # Sleep until next 3:00 AM
+        now = datetime.datetime.now()
+        next_run = now.replace(hour=3, minute=0, second=0, microsecond=0)
+        if next_run <= now:
+            next_run += datetime.timedelta(days=1)
+        wait_sec = (next_run - now).total_seconds()
+        logger.info(f"[BACKUP] Next auto-backup at {next_run.strftime('%Y-%m-%d %H:%M')} (in {wait_sec/3600:.1f}h)")
+        await asyncio.sleep(wait_sec)
+
+        # Run backup
+        db_url = os.getenv("DATABASE_URL", "")
+        admin_key = os.getenv("ADMIN_KEY", "")
+        if not db_url or not admin_key:
+            logger.warning("[BACKUP] Skipped: DATABASE_URL or ADMIN_KEY not set")
+            continue
+
+        try:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_id = uuid.uuid4().hex[:8]
+            filename = f"seedance_{timestamp}_{backup_id}.sql.gz"
+
+            result = subprocess.run(
+                ["pg_dump", db_url, "--no-owner", "--no-acl", "--clean"],
+                capture_output=True, text=False, timeout=300,
+            )
+            if result.returncode != 0:
+                logger.error(f"[BACKUP] pg_dump failed: {result.stderr.decode()[:200]}")
+                continue
+
+            buf = io.BytesIO()
+            with gzip.GzipFile(filename="", fileobj=buf, mode="wb") as gz:
+                gz.write(result.stdout)
+            compressed = buf.getvalue()
+
+            from services.storage import upload_bytes
+            url = await upload_bytes(compressed, "application/gzip", prefix="backups")
+            logger.info(f"[BACKUP] ✅ {filename} ({len(compressed)} bytes) → {url}")
+        except Exception as e:
+            logger.error(f"[BACKUP] Auto-backup failed: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 初始化 DB 连接池 + 自动建表
@@ -44,9 +91,13 @@ async def lifespan(app: FastAPI):
     await store.init_schema()
     # 初始化 HTTP 客户端池
     app.state.http_client = httpx.AsyncClient(timeout=120.0)
+    # 启动定时备份任务
+    import asyncio
+    backup_task = asyncio.create_task(_daily_backup_loop())
     logger.info("Seedance Studio 后端启动成功")
     yield
     # 关闭时清理
+    backup_task.cancel()
     await app.state.http_client.aclose()
     from db import close_pool
     await close_pool()
@@ -236,3 +287,97 @@ async def admin_init_db(request: Request):
         "results": results,
         "tables_found": table_names,
     }
+
+
+@app.post("/admin/backup")
+async def admin_backup(request: Request):
+    """触发数据库备份 → 上传到 R2（需 Admin Key）"""
+    auth = request.headers.get("Authorization", "")
+    admin_key = os.getenv("ADMIN_KEY", "")
+    if not admin_key or auth != f"Bearer {admin_key}":
+        raise HTTPException(status_code=403, detail="Admin key required")
+
+    import subprocess
+    import uuid
+
+    timestamp = __import__("datetime").datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_id = uuid.uuid4().hex[:8]
+    filename = f"seedance_backup_{timestamp}_{backup_id}.sql.gz"
+
+    # Run pg_dump from DATABASE_URL
+    db_url = os.getenv("DATABASE_URL", "")
+    if not db_url:
+        return {"status": "error", "detail": "DATABASE_URL not configured"}
+
+    result = subprocess.run(
+        ["pg_dump", db_url, "--no-owner", "--no-acl", "--clean"],
+        capture_output=True, text=False, timeout=300,
+    )
+
+    if result.returncode != 0:
+        logger.error(f"[BACKUP] pg_dump failed: {result.stderr.decode()[:300]}")
+        raise HTTPException(status_code=500, detail=f"pg_dump failed: {result.stderr.decode()[:200]}")
+
+    # gzip
+    import gzip, io
+    buf = io.BytesIO()
+    with gzip.GzipFile(filename="", fileobj=buf, mode="wb") as gz:
+        gz.write(result.stdout)
+    compressed = buf.getvalue()
+
+    # Upload to R2
+    try:
+        from services.storage import upload_bytes
+        url = await upload_bytes(compressed, "application/gzip", prefix="backups")
+    except RuntimeError as e:
+        logger.error(f"[BACKUP] Upload failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+
+    logger.info(f"[BACKUP] ✅ {filename} → {url}")
+    return {
+        "status": "ok",
+        "filename": filename,
+        "size_bytes": len(compressed),
+        "url": url,
+        "message": "Backup saved to R2",
+    }
+
+
+@app.get("/admin/backup/list")
+async def admin_backup_list(request: Request):
+    """列出 R2 中的备份文件（需 Admin Key）"""
+    auth = request.headers.get("Authorization", "")
+    admin_key = os.getenv("ADMIN_KEY", "")
+    if not admin_key or auth != f"Bearer {admin_key}":
+        raise HTTPException(status_code=403, detail="Admin key required")
+
+    import boto3
+    from botocore.config import Config
+
+    r2_key = os.getenv("R2_ACCESS_KEY_ID", "")
+    r2_secret = os.getenv("R2_SECRET_ACCESS_KEY", "")
+    r2_endpoint = os.getenv("R2_ENDPOINT", "")
+    r2_bucket = os.getenv("R2_BUCKET", "seedance-studios")
+
+    if not all([r2_key, r2_secret, r2_endpoint]):
+        return {"status": "error", "detail": "R2 not configured"}
+
+    try:
+        s3 = boto3.client("s3",
+            endpoint_url=r2_endpoint,
+            aws_access_key_id=r2_key,
+            aws_secret_access_key=r2_secret,
+            config=Config(signature_version="s3v4", region_name="auto"),
+        )
+        resp = s3.list_objects_v2(Bucket=r2_bucket, Prefix="backups/")
+        files = []
+        for obj in resp.get("Contents", []):
+            files.append({
+                "key": obj["Key"],
+                "size_bytes": obj["Size"],
+                "last_modified": str(obj["LastModified"]),
+            })
+        files.sort(key=lambda f: f["last_modified"], reverse=True)
+        return {"status": "ok", "files": files[:20], "count": len(files)}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}

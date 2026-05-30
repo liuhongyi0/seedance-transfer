@@ -99,18 +99,16 @@ async def upload_file(content: bytes, filename: str = "image.jpg",
 
 def _ext_from_mime(mime: str) -> str:
     m = mime.lower()
-    if "png" in m:
-        return ".png"
-    if "webp" in m:
-        return ".webp"
-    if "gif" in m:
-        return ".gif"
-    if "mp4" in m:
-        return ".mp4"
-    if "webm" in m:
-        return ".webm"
-    if "mpeg" in m or "mp3" in m:
-        return ".mp3"
-    if "wav" in m or "wave" in m:
-        return ".wav"
-    return ".jpg"
+    if "png" in m:        return ".png"
+    if "webp" in m:       return ".webp"
+    if "gif" in m:        return ".gif"
+    if "jpeg" in m or "jpg" in m: return ".jpg"
+    if "mp4" in m:        return ".mp4"
+    if "webm" in m:       return ".webm"
+    if "mpeg" in m or "mp3" in m: return ".mp3"
+    if "wav" in m or "wave" in m: return ".wav"
+    if "gzip" in m or "gz" in m:   return ".sql.gz"
+    if "zip" in m:        return ".zip"
+    if "json" in m:       return ".json"
+    if "text" in m or "plain" in m: return ".txt"
+    return ".bin"

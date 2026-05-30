@@ -2,7 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# 安装依赖（build context 是仓库根目录 seedance-transfer/）
+# 安装系统依赖（pg_dump 用于数据库备份）
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 Python 依赖（build context 是仓库根目录 seedance-transfer/）
 COPY Seedance/backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
