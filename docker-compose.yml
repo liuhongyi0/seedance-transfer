@@ -11,8 +11,8 @@
 services:
   backend:
     build:
-      context: .
-      dockerfile: Seedance/backend/Dockerfile
+      context: Seedance/backend
+      dockerfile: Dockerfile
     container_name: seedance-backend
     restart: unless-stopped
     env_file:
