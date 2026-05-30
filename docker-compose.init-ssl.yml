@@ -1,0 +1,8 @@
+# Override for initial certbot run — HTTP only, no SSL certs yet
+# Usage: docker compose -f docker-compose.yml -f docker-compose.init-ssl.yml up -d nginx
+# After certbot obtains certs, restart without this override.
+services:
+  nginx:
+    volumes:
+      - Seedance/backend/nginx-init.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot_www:/var/www/certbot

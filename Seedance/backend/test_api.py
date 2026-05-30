@@ -326,7 +326,7 @@ async def test_wizard_balance(client):
 async def test_wizard_estimate(client):
     print("\n─── 15. Wizard 费用预估 ───")
     r = await client.post(f"{BASE}/api/estimate", json={
-        "duration": 5, "resolution": "720p"
+        "duration": 5, "resolution": "720p", "prompt_en": "test video scene"
     })
     if r.status_code == 200:
         data = r.json()
@@ -379,7 +379,7 @@ async def test_asset_delete(client, sid):
 
 async def test_model_catalog(client):
     print("\n─── 17. 模型目录 ───")
-    r = await client.get(f"{BASE}/api/models/catalog")
+    r = await client.get(f"{BASE}/api/models")
     if r.status_code == 200:
         data = r.json()
         cats = {k: len(v) for k, v in data.items()}
@@ -472,7 +472,7 @@ async def test_api_key_create_delete(client, token):
     }, json={"label": "test-key-auto"})
     if r.status_code == 200:
         data = r.json()
-        kid = data.get("key", {}).get("id") or data.get("id")
+        kid = data.get("key_id") or data.get("id")
         ok(f"Key创建成功: id={str(kid)[:8]}…")
         # Delete it
         if kid:
@@ -491,7 +491,10 @@ async def test_api_key_create_delete(client, token):
 
 async def test_comfyui_activation(client):
     print("\n─── 24. ComfyUI 设备激活 ───")
+    test_email = f"comfyui-{os.urandom(2).hex()}@seedance.test"
     r = await client.post(f"{BASE}/api/auth/comfyui/register", json={
+        "email": test_email,
+        "password": "test12345678",
         "device_id": f"test-device-{os.urandom(4).hex()}",
         "device_name": "Test ComfyUI Node"
     })

@@ -20,6 +20,9 @@ import json as _json
 from config import settings
 from store import store
 from services.billing import require_user, charge, calculate_cost
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -147,7 +150,7 @@ async def wizard_analyze(req: WizardAnalyzeRequest, request: Request):
                 raw = raw[:-3]
 
         if len(raw) > 10_000:
-            print(f"[wizard/analyze] LLM response too large ({len(raw)} chars), truncating")
+            logger.info(f"[wizard/analyze] LLM response too large ({len(raw)} chars), truncating")
             raw = raw[:10_000]
 
         result = _json.loads(raw)
@@ -187,7 +190,7 @@ async def wizard_preview(req: WizardPreviewRequest, request: Request):
                 "Authorization": f"Bearer {settings.EVOLINK_API_KEY}",
                 "Content-Type": "application/json"
             },
-            json={"model": "flux-schnell", "prompt": req.prompt_en,
+            json={"model": "doubao-seedream-4.5", "prompt": req.prompt_en,
                   "size": "1024x576", "n": 1},
             timeout=30.0
         )
@@ -211,7 +214,7 @@ async def wizard_preview(req: WizardPreviewRequest, request: Request):
                         elif pd.get("status") == "failed":
                             break
     except Exception as e:
-        print(f"[wizard/preview] Error: {e}")
+        logger.error(f"[wizard/preview] Error: {e}")
 
     return {"success": True, "preview_url": "", "note": "Preview generation pending"}
 
@@ -264,7 +267,7 @@ async def video_generate(req: VideoGenerateRequest, request: Request):
             return {"success": True, "task_id": task_id, "status": "processing",
                     "provider": result.get("provider")}
     except Exception as e:
-        print(f"[video/generate] Error: {e}")
+        logger.error(f"[video/generate] Error: {e}")
 
     return {"success": True, "task_id": task_id, "status": "processing",
             "note": f"{provider} submit skipped"}
@@ -298,7 +301,7 @@ async def video_status(task_id: str, request: Request):
             "provider": provider,
         }
     except Exception as e:
-        print(f"[video/status] Error: {e}")
+        logger.error(f"[video/status] Error: {e}")
 
     return {"task_id": task_id, "status": "processing", "progress": 20,
             "provider": provider}
@@ -317,11 +320,12 @@ async def video_result(task_id: str, request: Request):
         http = request.app.state.http_client
         try:
             from services.video_provider import poll_video
+
             result = await poll_video(http, remote_id=remote_id, max_attempts=1)
             if result.get("status") == "succeeded":
                 video_url = result.get("video_url", "")
         except Exception:
-            print(f"[wizard] Video poll failed for task {task_id} (non-fatal)")
+            logger.error(f"[wizard] Video poll failed for task {task_id} (non-fatal)")
             pass  # poll failure is non-fatal in a multi-source status check
 
     return {

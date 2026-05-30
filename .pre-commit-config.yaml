@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+        exclude: "comfyui-seedance-wizard/web/i18n/.*\\.json"
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.0
+    hooks:
+      - id: ruff
+        args: ["check", "--select", "E,F,N,S,B,PLC,PLE,ISC,RUF",
+               "--ignore", "S101,S104,N802,RUF002,RUF003,PLC0415,E501"]
+        files: "Seedance/backend/.*\\.py$"
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.3
+    hooks:
+      - id: bandit
+        args: ["-r", "Seedance/backend/", "-x", "./test_api.py", "-f", "txt"]
+        files: "Seedance/backend/.*\\.py$"
+        stages: [pre-push]

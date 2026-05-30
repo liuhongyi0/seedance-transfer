@@ -7,6 +7,9 @@ PostgreSQL 连接池管理
 import os
 import asyncpg
 import socket
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 _pool = None
 
@@ -18,7 +21,7 @@ def _test_tcp(host, port):
         s.close()
         return True
     except Exception as e:
-        print(f"[DB] TCP test to {host}:{port} FAILED: {e}")
+        logger.error(f"[DB] TCP test to {host}:{port} FAILED: {e}")
         return False
 
 
@@ -36,14 +39,14 @@ async def get_pool():
             password = u.password
             database = u.path.lstrip("/")
 
-            print(f"[DB] target: {host}:{port} user={user} db={database}")
+            logger.info(f"[DB] target: {host}:{port} user={user} db={database}")
 
             # 先测 TCP
             if not _test_tcp(host, port):
-                print("[DB] TCP unreachable, aborting")
+                logger.info("[DB] TCP unreachable, aborting")
                 return None
 
-            print("[DB] TCP OK, trying asyncpg...")
+            logger.info("[DB] TCP OK, trying asyncpg...")
 
             try:
                 _pool = await asyncpg.create_pool(
@@ -57,10 +60,10 @@ async def get_pool():
                     timeout=15.0,
                     ssl=False,
                 )
-                print("[DB] Pool created successfully")
+                logger.info("[DB] Pool created successfully")
             except Exception as e:
                 import traceback
-                print(f"[DB] asyncpg pool create failed: {e}")
+                logger.error(f"[DB] asyncpg pool create failed: {e}")
                 traceback.print_exc()
                 return None
     return _pool

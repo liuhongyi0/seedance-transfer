@@ -18,6 +18,10 @@ from store import store
 from services.billing import calculate_cost, charge, refund, require_user
 from services.storage import upload_bytes
 
+from log_config import get_logger
+logger = get_logger(__name__)
+
+
 router = APIRouter()
 
 
@@ -36,10 +40,10 @@ async def _rehost_to_r2(video_url: str) -> str:
             resp.raise_for_status()
             content_type = resp.headers.get("content-type", "video/mp4")
             r2_url = await upload_bytes(resp.content, content_type, prefix="final")
-            print(f"[rehost] 视频转存 R2 成功: {r2_url}")
+            logger.info(f"[rehost] 视频转存 R2 成功: {r2_url}")
             return r2_url
     except Exception as e:
-        print(f"[rehost] 视频转存 R2 失败，降级使用原始 URL: {e}")
+        logger.info(f"[rehost] 视频转存 R2 失败，降级使用原始 URL: {e}")
         return video_url
 
 
@@ -251,7 +255,7 @@ async def generate_final_video(req: FinalVideoRequest, request: Request):
                         poll_resp.raise_for_status()
                         poll_data = poll_resp.json()
                     except Exception as pe:
-                        print(f"[final poll] HTTP error: {pe}")
+                        logger.info(f"[final poll] HTTP error: {pe}")
                         continue
 
                     pct = poll_data.get("progress", 0)
@@ -280,7 +284,7 @@ async def generate_final_video(req: FinalVideoRequest, request: Request):
                 await store.update_task(req.session_id, task_id, status="failed",
                                   error=f"轮询超时（{settings.MAX_POLL_FINAL * settings.POLL_INTERVAL}s）")
             except Exception as e:
-                print(f"❌ 后台轮询异常: {e}")
+                logger.error(f"❌ 后台轮询异常: {e}")
                 traceback.print_exc()
                 await store.update_task(req.session_id, task_id, status="failed", error=str(e)[:200])
 

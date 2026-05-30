@@ -18,6 +18,9 @@ from store import store
 from services.translate import translate_to_english
 from services.prompt_builder import build_image_prompt
 from services.billing import calculate_cost, charge, refund, require_user
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -354,7 +357,7 @@ async def describe_image(req: DescribeRequest, request: Request):
         return {"success": True, "prompt_en": prompt_en}
     except httpx.HTTPStatusError as e:
         raw = e.response.text[:500]
-        print(f"❌ 视觉模型HTTP错误 {e.response.status_code}: {raw}")
+        logger.error(f"❌ 视觉模型HTTP错误 {e.response.status_code}: {raw}")
         try:
             body = e.response.json()
             err = body.get("error", {})
@@ -405,7 +408,7 @@ async def stylize_image(req: StylizeRequest, request: Request):
             choices = data.get("choices", [])
             content_desc = (choices[0].get("message", {}).get("content", "") if choices else "").strip()
         except Exception as e:
-            print(f"⚠️ 视觉描述失败，继续风格化: {e}")
+            logger.warning(f"⚠️ 视觉描述失败，继续风格化: {e}")
 
     # Step 2: 构建风格化 Prompt
     style_prompt = f"{content_desc + ', ' if content_desc else ''}{req.extra_prompt + ', ' if req.extra_prompt else ''}{req.style}, {req.lighting}, {req.mood}, high quality, detailed"
@@ -421,6 +424,7 @@ async def stylize_image(req: StylizeRequest, request: Request):
             "prompt_en": style_prompt, "ratio": req.ratio
         })
         from services.model_catalog import get_evolink_name
+
         evolink_model = get_evolink_name("image", req.model_key)
         payload = {
             "model": evolink_model,
@@ -503,7 +507,7 @@ async def stylize_image(req: StylizeRequest, request: Request):
         except HTTPException:
             raise
         except Exception as inner_e:
-            print(f"⚠️ 风格化回退失败: {inner_e}")
+            logger.warning(f"⚠️ 风格化回退失败: {inner_e}")
         raise HTTPException(status_code=502, detail=f"EvoLink风格化失败: {e.response.status_code}")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Image stylization failed due to an internal error")

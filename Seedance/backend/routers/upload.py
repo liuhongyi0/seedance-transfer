@@ -6,6 +6,9 @@ POST /api/upload/image  → 上传图片到 R2，返回永久 URL
 
 from fastapi import APIRouter, HTTPException, Request, UploadFile, File
 from services.storage import upload_bytes
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -33,7 +36,7 @@ async def upload_video(file: UploadFile = File(...)):
             "content_type": file.content_type,
         }
     except Exception as e:
-        print(f"[UPLOAD VIDEO] Error: {e}")
+        logger.error(f"[UPLOAD VIDEO] Error: {e}")
         raise HTTPException(status_code=500, detail="Video upload failed due to an internal error")
 
 
@@ -57,5 +60,5 @@ async def upload_image(file: UploadFile = File(...)):
             "content_type": file.content_type,
         }
     except Exception as e:
-        print(f"[UPLOAD IMAGE] Error: {e}")
+        logger.error(f"[UPLOAD IMAGE] Error: {e}")
         raise HTTPException(status_code=500, detail="Image upload failed due to an internal error")

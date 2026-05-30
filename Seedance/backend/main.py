@@ -9,11 +9,30 @@ from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 import httpx
 import os
+import sentry_sdk
 from dotenv import load_dotenv
 
 from routers import image, video_draft, music, final_video, session, payment, auth, sse, models, upload, keys, wizard
+from middleware.rate_limit import RateLimitMiddleware
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 load_dotenv()
+
+# ── Sentry ────────────────────────────────────────────────────────────────
+_sentry_dsn = os.getenv("SENTRY_DSN", "")
+if _sentry_dsn:
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        environment=os.getenv("DEPLOYMENT_REGION", "production"),
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.05,
+        send_default_pii=False,
+    )
+    logger.info("Sentry monitoring enabled")
+else:
+    logger.info("Sentry not configured (set SENTRY_DSN to enable)")
 
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
@@ -25,13 +44,13 @@ async def lifespan(app: FastAPI):
     await store.init_schema()
     # 初始化 HTTP 客户端池
     app.state.http_client = httpx.AsyncClient(timeout=120.0)
-    print("✅ Seedance Studio 后端启动成功")
+    logger.info("Seedance Studio 后端启动成功")
     yield
     # 关闭时清理
     await app.state.http_client.aclose()
     from db import close_pool
     await close_pool()
-    print("🔒 后端服务已关闭")
+    logger.info("后端服务已关闭")
 
 app = FastAPI(
     title="Seedance Studio API",
@@ -39,6 +58,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# 频率限制（最外层，先于 CORS）
+app.add_middleware(RateLimitMiddleware)
 
 # CORS配置：开发环境宽松，生产环境限制域名
 app.add_middleware(
@@ -138,14 +160,38 @@ video {{ width:100%; display:block; }}
 
 @app.get("/health")
 async def health():
+    import asyncio
+
     from db import get_pool
-    pool = await get_pool()
+    from config import settings
+
+    pool, evolink_status, volc_status = await asyncio.gather(
+        get_pool(),
+        _probe("evolink", "https://api.evolink.ai/v1/models", settings.EVOLINK_API_KEY),
+        _probe("volcengine", "https://ark.cn-beijing.volces.com/api/v3/models", settings.VOLC_API_KEY),
+    )
+
     return {
         "status": "ok",
         "db": "connected" if pool else "unavailable",
+        "dependencies": {
+            "evolink": evolink_status,
+            "volcengine": volc_status,
+        },
         "service": "seedance-studio-api",
         "version": "1.0.0",
     }
+
+
+async def _probe(name: str, url: str, key: str | None) -> str:
+    if not key:
+        return "unconfigured"
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as c:
+            r = await c.get(url, headers={"Authorization": f"Bearer {key}"})
+        return "ok" if r.status_code < 500 else f"error({r.status_code})"
+    except Exception:
+        return "unreachable"
 
 
 @app.post("/admin/init-db")

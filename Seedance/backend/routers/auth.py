@@ -22,6 +22,9 @@ import secrets
 
 from config import settings
 from store import store
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -116,7 +119,7 @@ async def register(req: RegisterRequest):
         raise
     except Exception as e:
         import traceback
-        print(f"[REGISTER ERROR] {e}\n{traceback.format_exc()}")
+        logger.error(f"[REGISTER ERROR] {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail="Registration failed due to an internal error")
 
 
@@ -167,7 +170,7 @@ async def google_auth(req: GoogleAuthRequest, request: Request):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"[GOOGLE AUTH] Token verification error: {e}")
+        logger.info(f"[GOOGLE AUTH] Token verification error: {e}")
         raise HTTPException(status_code=502, detail="Google token verification failed")
 
     # 验证 audience（如果有配置 GOOGLE_CLIENT_ID）
@@ -290,7 +293,7 @@ async def github_callback(code: str = ""):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"[GITHUB AUTH] Token exchange error: {e}")
+        logger.info(f"[GITHUB AUTH] Token exchange error: {e}")
         raise HTTPException(status_code=502, detail="GitHub token exchange failed")
 
     access_token = token_data.get("access_token")
@@ -314,7 +317,7 @@ async def github_callback(code: str = ""):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"[GITHUB AUTH] User fetch error: {e}")
+        logger.info(f"[GITHUB AUTH] User fetch error: {e}")
         raise HTTPException(status_code=502, detail="GitHub user fetch failed")
 
     github_id = str(gh_user.get("id", ""))
@@ -343,7 +346,7 @@ async def github_callback(code: str = ""):
                     elif emails:
                         email = emails[0]["email"]
         except Exception:
-            print(f"[auth] GitHub email fetch failed (non-fatal)")
+            logger.error(f"[auth] GitHub email fetch failed (non-fatal)")
             pass  # email is optional
 
     if not github_id:

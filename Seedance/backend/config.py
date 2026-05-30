@@ -4,6 +4,9 @@
 
 import os
 from dotenv import load_dotenv
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 load_dotenv()
 
@@ -108,6 +111,6 @@ def validate_keys():
     if not settings.VOLC_API_KEY:
         missing.append("VOLC_API_KEY")
     if missing:
-        print(f"⚠️  警告：以下API Key未配置，相关功能将返回Mock数据：{missing}")
-        print("   请在 backend/.env 文件中填写对应Key")
+        logger.warning(f"⚠️  警告：以下API Key未配置，相关功能将返回Mock数据：{missing}")
+        logger.info("   请在 backend/.env 文件中填写对应Key")
     return len(missing) == 0

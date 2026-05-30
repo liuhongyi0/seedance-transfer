@@ -135,7 +135,7 @@ async def generate_music(req: MusicGenRequest, request: Request):
         evolink_model = get_evolink_name("music", req.model_key)
 
         resp = await http.post(
-            f"{settings.EVOLINK_BASE_URL}/audio/generations",
+            f"{settings.EVOLINK_BASE_URL}/audios/generations",
             headers={"Authorization": f"Bearer {settings.EVOLINK_API_KEY}"},
             json={
                 "model": evolink_model,
@@ -155,58 +155,64 @@ async def generate_music(req: MusicGenRequest, request: Request):
         await store.update_task(req.session_id, task_id, status="processing", progress=10,
                           meta={"evo_task_id": evo_task_id, "suno_prompt": suno_prompt})
 
-        # 轮询任务状态（最多10次 × 3s = 30s）
-        for attempt in range(10):
-            await asyncio.sleep(settings.POLL_INTERVAL)
-            poll_resp = await http.get(
-                f"{settings.EVOLINK_BASE_URL}/tasks/{evo_task_id}",
-                headers={"Authorization": f"Bearer {settings.EVOLINK_API_KEY}"},
-                timeout=30.0
-            )
-            poll_resp.raise_for_status()
-            poll_data = poll_resp.json()
+        # Background polling (no blocking — client polls via GET /task/{id})
+        async def _background_poll():
+            try:
+                for i in range(settings.MAX_POLL_DRAFT):
+                    await asyncio.sleep(settings.POLL_INTERVAL)
+                    poll_resp = await http.get(
+                        f"{settings.EVOLINK_BASE_URL}/tasks/{evo_task_id}",
+                        headers={"Authorization": f"Bearer {settings.EVOLINK_API_KEY}"},
+                        timeout=30.0
+                    )
+                    poll_resp.raise_for_status()
+                    poll_data = poll_resp.json()
 
-            pct = poll_data.get("progress", 0)
-            status = poll_data.get("status", "processing")
-            await store.update_task(req.session_id, task_id, status=status,
-                              progress=min(10 + pct * 0.9, 99))
+                    pct = poll_data.get("progress", 0)
+                    status = poll_data.get("status", "processing")
+                    await store.update_task(req.session_id, task_id, status=status,
+                                      progress=min(10 + pct * 0.9, 99))
 
-            if status in ("completed", "succeeded"):
-                results = poll_data.get("results", [])
-                if results and isinstance(results, list):
-                    audio_url = results[0]
-                else:
-                    audio_url = poll_data.get("audio_url") or (poll_data.get("output") or [None])[0]
-                await store.update_task(req.session_id, task_id,
-                                  status="completed", progress=100,
-                                  result_url=audio_url,
-                                  meta={"audio_url": audio_url,
-                                        "evo_task_id": evo_task_id,
-                                        "suno_prompt": suno_prompt,
-                                        "credits_used": poll_data.get("usage", {}).get("credits_used")})
-                return {
-                    "success": True,
-                    "task_id": task_id,
-                    "status": "completed",
-                    "audio_url": audio_url,
-                    "cost_val": settings.cost_music_per_unit,
-                    "currency": settings.currency
-                }
+                    if status in ("completed", "succeeded"):
+                        results = poll_data.get("results", [])
+                        result_data = poll_data.get("result_data", [])
+                        if result_data and isinstance(result_data, list):
+                            item = result_data[0]
+                            audio_url = item.get("audio_url") if isinstance(item, dict) else item
+                        elif results and isinstance(results, list):
+                            audio_url = results[0] if isinstance(results[0], str) else results[0].get("audio_url", "")
+                        else:
+                            audio_url = poll_data.get("audio_url") or (poll_data.get("output") or [None])[0]
+                        logger.info(f"✅ 音乐生成完成: {audio_url[:60]}...")
+                        await store.update_task(req.session_id, task_id,
+                                          status="completed", progress=100,
+                                          result_url=audio_url,
+                                          meta={"audio_url": audio_url,
+                                                "evo_task_id": evo_task_id,
+                                                "suno_prompt": suno_prompt,
+                                                "credits_used": poll_data.get("usage", {}).get("credits_used")})
+                        return
 
-            elif status == "failed":
-                error_msg = poll_data.get("error", {}).get("message", "未知错误")
-                await store.update_task(req.session_id, task_id, status="failed", error=error_msg)
-                raise HTTPException(status_code=502, detail=f"EvoLink音乐生成失败: {error_msg}")
+                    elif status == "failed":
+                        error_msg = poll_data.get("error", {}).get("message", "未知错误")
+                        await store.update_task(req.session_id, task_id, status="failed", error=error_msg)
+                        return
 
-        # 超时
-        await store.update_task(req.session_id, task_id, status="processing",
-                          progress=99, meta={"evo_task_id": evo_task_id})
+                await store.update_task(req.session_id, task_id, status="failed",
+                                  error=f"轮询超时（{settings.MAX_POLL_DRAFT * settings.POLL_INTERVAL}s）")
+            except Exception as e:
+                logger.error(f"❌ 音乐后台轮询异常: {e}")
+                await store.update_task(req.session_id, task_id, status="failed", error=str(e)[:200])
+
+        asyncio.create_task(_background_poll())
+
         return {
             "success": True,
             "task_id": task_id,
             "status": "processing",
-            "audio_url": None,
-            "note": "音乐仍在生成中，请稍后通过 GET /api/music/task/{task_id} 查询"
+            "cost_val": settings.cost_music_per_unit,
+            "currency": settings.currency,
+            "note": "任务已提交，请轮询 GET /api/music/task/{task_id}?session_id=xxx"
         }
 
     except httpx.HTTPStatusError as e:
@@ -265,8 +271,12 @@ async def poll_music(task_id: str, session_id: str, request: Request):
 
         if provider_status in ("succeeded", "completed"):
             results = data.get("results", [])
-            if results and isinstance(results, list):
-                audio_url = results[0]
+            result_data = data.get("result_data", [])
+            if result_data and isinstance(result_data, list):
+                item = result_data[0]
+                audio_url = item.get("audio_url") if isinstance(item, dict) else item
+            elif results and isinstance(results, list):
+                audio_url = results[0] if isinstance(results[0], str) else results[0].get("audio_url", "")
             else:
                 audio_url = data.get("audio_url") or (data.get("output") or [None])[0]
             await store.update_task(session_id, task_id,

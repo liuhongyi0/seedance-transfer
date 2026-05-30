@@ -538,9 +538,9 @@ class SeedanceWizardNode:
                     "multiline": False,
                     "tooltip": "Override API key (leave empty to use config file)."
                 }),
-                "model_key": (["seedance-1.5", "seedance-2.0", "kling-3.0", "wan-2.6", "hailuo-2.3"], {
+                "model_key": (["seedance-1.5", "seedance-2.0", "veo3.1-fast", "sora-2", "kling-o3", "wan-2.7", "wan-2.6", "hailuo-2.3"], {
                     "default": "seedance-1.5",
-                    "tooltip": "Video model for generation. Seedance 2.0 = Volcengine direct, others = EvoLink."
+                    "tooltip": "Video model. seedance-1.5/2.0=ByteDance, veo3=Google, sora-2=OpenAI, kling-o3=Kuaishou, wan=Alibaba."
                 }),
             }
         }

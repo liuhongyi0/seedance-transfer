@@ -17,6 +17,9 @@ from typing import Optional
 
 from config import settings
 from store import store
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -188,7 +191,7 @@ async def create_checkout(req: CheckoutRequest, request: Request):
         )
         return {"success": True, "url": session.url}
     except Exception as e:
-        print(f"[STRIPE CHECKOUT] Error: {e}")
+        logger.error(f"[STRIPE CHECKOUT] Error: {e}")
         raise HTTPException(status_code=500, detail="Stripe checkout creation failed")
 
 
@@ -201,16 +204,16 @@ async def stripe_webhook(request: Request):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature", "")
 
-    print(f"[WEBHOOK] sig_header={sig_header[:50]}... key={STRIPE_KEY[:15]}... whsec={STRIPE_WEBHOOK_SECRET[:15]}...")
+    logger.info(f"[WEBHOOK] sig_header={sig_header[:50]}... key={STRIPE_KEY[:15]}... whsec={STRIPE_WEBHOOK_SECRET[:15]}...")
     try:
         event = _stripe.Webhook.construct_event(
             payload, sig_header, STRIPE_WEBHOOK_SECRET, api_key=STRIPE_KEY
         )
     except ValueError as e:
-        print(f"[WEBHOOK] ValueError: {e}")
+        logger.error(f"[WEBHOOK] ValueError: {e}")
         raise HTTPException(status_code=400, detail=f"Invalid payload: {e}")
     except _stripe.error.SignatureVerificationError as e:
-        print(f"[WEBHOOK] SignatureVerificationError: {e}")
+        logger.error(f"[WEBHOOK] SignatureVerificationError: {e}")
         raise HTTPException(status_code=400, detail=f"Invalid signature: {e}")
 
     if event["type"] == "checkout.session.completed":
@@ -228,7 +231,7 @@ async def stripe_webhook(request: Request):
                 await store.topup_balance(user_id, amount_total, tx_type="topup", note=note)
             except Exception:
                 import traceback
-                print(f"[WEBHOOK] topup failed: {traceback.format_exc()}")
+                logger.error(f"[WEBHOOK] topup failed: {traceback.format_exc()}")
                 raise HTTPException(status_code=500, detail="Topup failed")
 
     return {"status": "ok"}

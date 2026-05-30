@@ -9,6 +9,9 @@ EvoLink:    uses flat JSON format (proxy API)
 import asyncio
 import httpx
 from typing import Optional
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 from config import settings
 from services.model_catalog import (
@@ -123,7 +126,7 @@ async def _poll_volc(
             resp.raise_for_status()
             data = resp.json()
         except Exception as e:
-            print(f"[volc poll] Error: {e}")
+            logger.error(f"[volc poll] Error: {e}")
             continue
 
         status = data.get("status", "processing")
@@ -152,15 +155,23 @@ async def _submit_evolink(
     aspect_ratio: str,
     image_url: Optional[str],
 ) -> dict:
-    evolink_model = get_evolink_name(VIDEO_DRAFT, model_key)
+    # Pick model variant: image-to-video if ref image exists, else text-to-video
+    base_model = get_evolink_name(VIDEO_DRAFT, model_key)
+    if image_url:
+        # Use image-to-video variant (e.g. seedance-2.0-fast-image-to-video)
+        evolink_model = base_model.replace("-text-to-video", "-image-to-video") \
+                                   if "-text-to-video" in base_model else base_model
+    else:
+        evolink_model = base_model
+
     body = {
         "model": evolink_model,
         "prompt": prompt,
         "duration": duration,
-        "aspect_ratio": aspect_ratio,
+        "size": aspect_ratio,  # "16:9" format
     }
     if image_url:
-        body["reference_images"] = [{"url": image_url, "type": "input_image"}]
+        body["image_urls"] = [image_url]
 
     resp = await http.post(
         f"{settings.EVOLINK_BASE_URL}/videos/generations",
@@ -193,13 +204,22 @@ async def _poll_evolink(
             resp.raise_for_status()
             data = resp.json()
         except Exception as e:
-            print(f"[evolink poll] Error: {e}")
+            logger.error(f"[evolink poll] Error: {e}")
             continue
 
         status = data.get("status", "processing")
         if status == "succeeded":
-            video_url = data.get("output", {}).get("results", [None])[0] or ""
-            return {"status": "succeeded", "video_url": video_url}
+            # EvoLink returns result_data[].video_url or results[]
+            result_data = data.get("result_data", [])
+            if result_data and isinstance(result_data, list):
+                item = result_data[0]
+                video_url = item.get("video_url") if isinstance(item, dict) else item
+            else:
+                results = data.get("results", [])
+                video_url = results[0] if results else ""
+                if isinstance(video_url, dict):
+                    video_url = video_url.get("video_url", "")
+            return {"status": "succeeded", "video_url": video_url or ""}
         elif status == "failed":
             return {"status": "failed", "error": "EvoLink generation failed"}
 

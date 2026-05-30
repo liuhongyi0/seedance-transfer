@@ -12,6 +12,7 @@ import os
 import hashlib
 import logging
 from typing import Dict, Optional
+from log_config import get_logger
 
 logger = logging.getLogger("seedance.store")
 
@@ -55,16 +56,16 @@ class SessionStore:
         """首次启动时建表（幂等）"""
         pool = await self._pg()
         if not pool:
-            print("[INIT_SCHEMA] No PG pool available, skipping schema init")
+            logger.info("[INIT_SCHEMA] No PG pool available, skipping schema init")
             return
         schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
-        print(f"[INIT_SCHEMA] Looking for schema at: {schema_path}")
+        logger.info(f"[INIT_SCHEMA] Looking for schema at: {schema_path}")
         if not os.path.exists(schema_path):
-            print(f"[INIT_SCHEMA] schema.sql NOT FOUND at {schema_path}")
+            logger.info(f"[INIT_SCHEMA] schema.sql NOT FOUND at {schema_path}")
             return
         with open(schema_path) as f:
             sql = f.read()
-        print(f"[INIT_SCHEMA] Read schema.sql, {len(sql)} bytes")
+        logger.info(f"[INIT_SCHEMA] Read schema.sql, {len(sql)} bytes")
         # 按语句拆分执行，strip comment-only lines from each segment
         for stmt in sql.split(";"):
             # remove leading/trailing whitespace, then strip comment lines
@@ -74,11 +75,11 @@ class SessionStore:
             if clean:
                 try:
                     await pool.execute(clean)
-                    print(f"[INIT_SCHEMA] OK: {clean[:60]}...")
+                    logger.info(f"[INIT_SCHEMA] OK: {clean[:60]}...")
                 except Exception as e:
-                    print(f"[INIT_SCHEMA] FAIL: {e}\n  SQL: {clean[:100]}...")
+                    logger.error(f"[INIT_SCHEMA] FAIL: {e}\n  SQL: {clean[:100]}...")
                     logger.warning(f"Schema statement failed: {e}\n  SQL: {clean[:100]}...")
-        print("[INIT_SCHEMA] Schema initialization complete")
+        logger.info("[INIT_SCHEMA] Schema initialization complete")
         logger.info("DB schema initialized successfully")
 
     # ─── Session CRUD ──────────────────────────────────────────────────────

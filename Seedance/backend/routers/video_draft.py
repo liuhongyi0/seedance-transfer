@@ -16,6 +16,9 @@ from config import settings
 from store import store
 from services.color_to_prompt import color_params_to_prompt
 from services.billing import calculate_cost, charge, refund, require_user
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -32,7 +35,7 @@ async def rehost_image(image_url: str, http: httpx.AsyncClient) -> str:
         # 无存储后端，原样返回
         return image_url
     except Exception as e:
-        print(f"⚠️ rehost 上传失败，使用原始 URL: {e}")
+        logger.warning(f"⚠️ rehost 上传失败，使用原始 URL: {e}")
         return image_url
 
 
@@ -136,7 +139,7 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
         public_ref_url = ref_url
         if ref_url and provider != "volcengine":
             public_ref_url = await rehost_image(ref_url, http)
-            print(f"🖼️ 参考图中转: {ref_url[:60]}... → {public_ref_url[:60]}...")
+            logger.info(f"🖼️ 参考图中转: {ref_url[:60]}... → {public_ref_url[:60]}...")
 
         from services.video_provider import submit_video, poll_video
 
@@ -167,7 +170,7 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
                     st = result.get("status", "processing")
                     if st == "succeeded":
                         vurl = result.get("video_url", "")
-                        print(f"✅ 视频生成完成 ({provider}): {vurl}")
+                        logger.info(f"✅ 视频生成完成 ({provider}): {vurl}")
                         await store.update_task(req.session_id, task_id,
                                           status="completed", progress=100,
                                           result_url=vurl,
@@ -180,7 +183,7 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
                         # Try fallback without ref image on URL errors
                         if public_ref_url and any(k in str(msg) for k in URL_ERR_KWS):
                             note_bg = "⚠️ 参考图URL不可公开访问，已自动降级为纯提示词生成"
-                            print(f"⚠️ 降级重试（无参考图）原因: {msg}")
+                            logger.warning(f"⚠️ 降级重试（无参考图）原因: {msg}")
                             fb = await submit_video(
                                 http, prompt=full_prompt, model_key=req.model_key,
                                 duration=req.duration, resolution=req.resolution,
@@ -213,7 +216,7 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
                 await store.update_task(req.session_id, task_id, status="failed",
                                   error=f"轮询超时（{settings.MAX_POLL_DRAFT * settings.POLL_INTERVAL}s）")
             except Exception as e:
-                print(f"❌ 后台轮询异常: {e}")
+                logger.error(f"❌ 后台轮询异常: {e}")
                 traceback.print_exc()
                 await store.update_task(req.session_id, task_id, status="failed", error=str(e)[:200])
 
@@ -245,13 +248,13 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
                 detail += f": {err_obj or e.response.text[:200]}"
         except Exception:
             detail += f": {e.response.text[:200]}"
-        print(f"❌ HTTPStatusError: {detail}")
+        logger.error(f"❌ HTTPStatusError: {detail}")
         await store.update_task(req.session_id, task_id, status="failed", error=detail)
         raise HTTPException(status_code=502, detail=detail) from e
     except Exception as e:
         if user_id and cost_subunit:
             await refund(user_id, "video_draft", cost_subunit, str(e)[:80])
-        print(f"❌ 未预期异常: {str(e)}")
+        logger.error(f"❌ 未预期异常: {str(e)}")
         traceback.print_exc()
         await store.update_task(req.session_id, task_id, status="failed", error=str(e)[:200])
         raise HTTPException(status_code=500, detail="Video draft generation failed due to an internal error") from e
