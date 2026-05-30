@@ -1,16 +1,19 @@
 """
-支付路由
+支付路由 — Creem（MoR 全球支付）
 GET  /api/payment/pricing          → 套餐定价（根据 region 显示 ¥ 或 $）
 GET  /api/payment/dashboard        → 用户控制台（需 Bearer Token）
 GET  /api/payment/transactions     → 交易记录（需 Bearer Token）
 POST /api/payment/test-topup       → 测试充值（开发期，需 Bearer Token）
-POST /api/payment/create-checkout  → 创建 Stripe Checkout Session
-POST /api/payment/stripe/webhook   → Stripe Webhook
+POST /api/payment/create-checkout  → 创建 Creem Checkout Session
+POST /api/payment/creem/webhook    → Creem Webhook（自动充值）
 POST /api/payment/wechat/webhook   → 微信支付回调（占位）
 """
 
 import os
-import stripe as _stripe
+import hmac
+import hashlib
+import httpx
+import uuid
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
@@ -23,15 +26,18 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 
-STRIPE_KEY = os.getenv("STRIPE_SECRET_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+CREEM_API_KEY = os.getenv("CREEM_API_KEY", "")
+CREEM_WEBHOOK_SECRET = os.getenv("CREEM_WEBHOOK_SECRET", "")
+CREEM_TEST_MODE = CREEM_API_KEY.startswith("creem_test_") if CREEM_API_KEY else True
+CREEM_BASE = "https://test-api.creem.io" if CREEM_TEST_MODE else "https://api.creem.io"
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
-# Stripe 套餐映射：package_id → (amount_subunit, credits, name)
-STRIPE_PACKAGES = {
-    "starter":  {"amount_subunit": 700,   "credits": 50,  "name": "Starter"},
-    "standard": {"amount_subunit": 1800,  "credits": 200, "name": "Standard"},
-    "pro":      {"amount_subunit": 5200,  "credits": 800, "name": "Pro"},
+# Creem 产品映射：package_id → (product_id, credits, name)
+# 在 Creem Dashboard 创建产品后，把 product_id 填到这里
+CREEM_PRODUCTS = {
+    "starter":  {"product_id": os.getenv("CREEM_PRODUCT_STARTER", ""),  "credits": 50,  "name": "Starter"},
+    "standard": {"product_id": os.getenv("CREEM_PRODUCT_STANDARD", ""), "credits": 200, "name": "Standard"},
+    "pro":      {"product_id": os.getenv("CREEM_PRODUCT_PRO", ""),      "credits": 800, "name": "Pro"},
 }
 
 
@@ -96,7 +102,8 @@ async def get_pricing():
              "credits_display": f"{p['credits']} 点数"}
             for p in packages
         ],
-        "note": "Payment integration coming soon" if settings.is_intl else "支付功能即将上线，点数永久有效"
+        "note": "" if CREEM_API_KEY else ("支付功能即将上线" if not settings.is_intl else "Payment coming soon"),
+        "payment_provider": "creem",
     }
 
 
@@ -134,10 +141,7 @@ async def get_transactions(request: Request):
 
 @router.post("/test-topup")
 async def test_topup(req: TopupRequest, request: Request):
-    """
-    测试充值（仅开发期使用，生产环境由 Stripe/微信支付 webhook 替代）
-    在 PG 事务中完成：UPDATE balance + INSERT transaction
-    """
+    """测试充值（仅开发期，生产可关闭）"""
     user_id = _verify_token(request)
     try:
         new_balance = await store.topup_balance(
@@ -151,87 +155,130 @@ async def test_topup(req: TopupRequest, request: Request):
 
 @router.post("/create-checkout")
 async def create_checkout(req: CheckoutRequest, request: Request):
-    """创建 Stripe Checkout Session"""
+    """创建 Creem Checkout Session"""
     if not settings.is_intl:
-        raise HTTPException(status_code=501, detail="Stripe only available in international region")
+        raise HTTPException(status_code=501, detail="Payment only available in international region")
 
     user_id = _verify_token(request)
-    pkg = STRIPE_PACKAGES.get(req.package_id)
+    pkg = CREEM_PRODUCTS.get(req.package_id)
     if not pkg:
         raise HTTPException(status_code=400, detail=f"Unknown package: {req.package_id}")
+    if not pkg["product_id"]:
+        raise HTTPException(status_code=500,
+            detail=f"Creem product_id not configured for '{req.package_id}'. Set CREEM_PRODUCT_{req.package_id.upper()}")
 
-    if not STRIPE_KEY:
-        raise HTTPException(status_code=500, detail="Stripe not configured")
+    if not CREEM_API_KEY:
+        raise HTTPException(status_code=500, detail="Creem not configured")
+
+    # Get user info for customer.email
+    user = await store.get_user_by_id(user_id)
+    user_email = user.get("email", "") if user else ""
 
     success_url = req.success_url or f"{BASE_URL}/"
     cancel_url = req.cancel_url or f"{BASE_URL}/"
 
     try:
-        session = _stripe.checkout.Session.create(
-            api_key=STRIPE_KEY,
-            mode="payment",
-            payment_method_types=["card"],
-            line_items=[{
-                "price_data": {
-                    "currency": settings.currency.lower(),
-                    "product_data": {
-                        "name": f"Seedance {pkg['name']} — {pkg['credits']} Credits",
-                    },
-                    "unit_amount": pkg["amount_subunit"],
+        async with httpx.AsyncClient(timeout=30.0) as http:
+            resp = await http.post(
+                f"{CREEM_BASE}/v1/checkouts",
+                headers={
+                    "x-api-key": CREEM_API_KEY,
+                    "Content-Type": "application/json",
                 },
-                "quantity": 1,
-            }],
-            metadata={
-                "user_id": user_id,
-                "package_id": req.package_id,
-                "credits": str(pkg["credits"]),
-            },
-            success_url=success_url,
-            cancel_url=cancel_url,
-        )
-        return {"success": True, "url": session.url}
+                json={
+                    "product_id": pkg["product_id"],
+                    "request_id": str(uuid.uuid4()),
+                    "units": 1,
+                    "customer": {
+                        "email": user_email,
+                        "id": user_id,
+                    },
+                    "success_url": success_url,
+                    "metadata": {
+                        "user_id": user_id,
+                        "package_id": req.package_id,
+                        "credits": str(pkg["credits"]),
+                    },
+                },
+            )
+            # Creem returns 303 redirect to checkout page
+            if resp.status_code in (200, 201, 303):
+                data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+                checkout_url = data.get("checkout_url") or data.get("url") or str(resp.url)
+                return {"success": True, "url": checkout_url}
+            else:
+                body = resp.text[:300]
+                logger.error(f"[CREEM CHECKOUT] {resp.status_code}: {body}")
+                raise HTTPException(status_code=502, detail=f"Creem error: {resp.status_code}")
+    except httpx.HTTPError as e:
+        logger.error(f"[CREEM CHECKOUT] HTTP error: {e}")
+        raise HTTPException(status_code=502, detail="Creem checkout creation failed")
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[STRIPE CHECKOUT] Error: {e}")
-        raise HTTPException(status_code=500, detail="Stripe checkout creation failed")
+        logger.error(f"[CREEM CHECKOUT] Error: {e}")
+        raise HTTPException(status_code=500, detail="Creem checkout creation failed")
 
 
-@router.post("/stripe/webhook")
-async def stripe_webhook(request: Request):
-    """Stripe Webhook：接收 payment 确认事件，自动充值"""
-    if not STRIPE_KEY or not STRIPE_WEBHOOK_SECRET:
-        raise HTTPException(status_code=500, detail="Stripe webhook not configured")
+@router.post("/creem/webhook")
+async def creem_webhook(request: Request):
+    """Creem Webhook：接收 checkout.completed 事件，自动充值"""
+    if not CREEM_API_KEY or not CREEM_WEBHOOK_SECRET:
+        raise HTTPException(status_code=500, detail="Creem webhook not configured")
 
     payload = await request.body()
-    sig_header = request.headers.get("stripe-signature", "")
+    sig_header = request.headers.get("creem-signature", "")
 
-    logger.info(f"[WEBHOOK] sig_header={sig_header[:50]}... key={STRIPE_KEY[:15]}... whsec={STRIPE_WEBHOOK_SECRET[:15]}...")
+    # Verify HMAC-SHA256 signature (strip "sha256=" prefix if present)
+    if sig_header.startswith("sha256="):
+        sig_value = sig_header[7:]
+    else:
+        sig_value = sig_header
+
+    expected = hmac.new(
+        CREEM_WEBHOOK_SECRET.encode(),
+        payload,
+        hashlib.sha256,
+    ).hexdigest()
+
+    if not hmac.compare_digest(expected, sig_value):
+        logger.warning("[CREEM WEBHOOK] Invalid signature")
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
     try:
-        event = _stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET, api_key=STRIPE_KEY
-        )
-    except ValueError as e:
-        logger.error(f"[WEBHOOK] ValueError: {e}")
-        raise HTTPException(status_code=400, detail=f"Invalid payload: {e}")
-    except _stripe.error.SignatureVerificationError as e:
-        logger.error(f"[WEBHOOK] SignatureVerificationError: {e}")
-        raise HTTPException(status_code=400, detail=f"Invalid signature: {e}")
+        import json
+        event = json.loads(payload)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
-    if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-        # Stripe SDK v9+ 返回 StripeObject, 无 .get() 方法，需 to_dict()
-        s = session.to_dict() if hasattr(session, 'to_dict') else dict(session)
-        meta = s.get("metadata") or {}
+    event_type = event.get("type") or event.get("event") or ""
+    logger.info(f"[CREEM WEBHOOK] Event: {event_type}")
+
+    # Handle checkout completed → top up user balance
+    if event_type == "checkout.completed":
+        # Creem event structure: data.object.metadata
+        obj = event.get("data", {}).get("object", event.get("data", {}))
+        meta = obj.get("metadata") or {}
         user_id = meta.get("user_id")
         package_id = meta.get("package_id", "unknown")
-        amount_total = s.get("amount_total", 0)
 
         if user_id:
-            note = f"Stripe: {package_id}, session: {s.get('id', '')[:20]}"
+            # Determine credits from package
+            pkg = CREEM_PRODUCTS.get(package_id, {})
+            credits = pkg.get("credits", 0)
+            # Creem uses minor units (cents); 1 credit ≈ 0.15 USD
+            # Map package credits to subunit: starter=50pt=$7=700c, standard=200pt=$18=1800c, pro=800pt=$52=5200c
+            amount_subunit = {
+                "starter": 700, "standard": 1800, "pro": 5200
+            }.get(package_id, int(credits * 14))  # fallback ~14 cents/credit
+
+            note = f"Creem: {package_id}"
             try:
-                await store.topup_balance(user_id, amount_total, tx_type="topup", note=note)
+                await store.topup_balance(user_id, amount_subunit, tx_type="topup", note=note)
+                logger.info(f"[CREEM WEBHOOK] ✅ Topped up {user_id}: +{amount_subunit} cents for {package_id}")
             except Exception:
                 import traceback
-                logger.error(f"[WEBHOOK] topup failed: {traceback.format_exc()}")
+                logger.error(f"[CREEM WEBHOOK] topup failed: {traceback.format_exc()}")
                 raise HTTPException(status_code=500, detail="Topup failed")
 
     return {"status": "ok"}
