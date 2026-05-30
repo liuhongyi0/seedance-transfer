@@ -1,4 +1,5 @@
 FROM python:3.11-slim
+# cache-bust: 2026-05-30-v3
 
 WORKDIR /app
 
@@ -8,11 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps
-COPY requirements.txt .
+COPY Seedance/backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source
-COPY . .
+# Copy backend source
+COPY Seedance/backend/ .
 
 # Non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
