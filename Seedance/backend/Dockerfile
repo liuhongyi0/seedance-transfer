@@ -2,16 +2,16 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# 安装系统依赖（pg_dump 用于数据库备份）
+# Install system deps (pg_dump for DB backup)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 Python 依赖（build context 是仓库根目录 seedance-transfer/）
+# Install Python deps (build context = repo root seedance-transfer/)
 COPY Seedance/backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制后端代码
+# Copy backend code (cache bust: 2026-05-30 v2 — Sentry + R2 + backup + 9 video models)
 COPY Seedance/backend/ .
 
 # 创建非 root 用户
