@@ -163,6 +163,95 @@ async def studio():
     return {"error": "Studio page not found"}, 404
 
 
+@app.get("/privacy")
+async def privacy():
+    """隐私政策"""
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse("""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Privacy Policy · Seedance Studio</title>
+<style>
+:root{--bg:#0a0a0f;--text:#e8e8f0;--text2:#9090a8;--accent:#7c6dfa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.7;padding:40px 24px;max-width:740px;margin:0 auto}
+h1{font-size:28px;font-weight:800;margin-bottom:24px;letter-spacing:-.5px}
+h1 span{color:var(--accent)}
+h2{font-size:18px;font-weight:700;margin:32px 0 12px;color:#fff}
+p{margin-bottom:12px;color:var(--text2)}
+a{color:var(--accent)}
+</style></head>
+<body>
+<h1><span>Seedance Studio</span> Privacy Policy</h1>
+<p>Last updated: May 31, 2026</p>
+
+<h2>1. Information We Collect</h2>
+<p>When you create an account, we collect your email address and authentication credentials. When you use our services, we store uploaded images and generated videos to provide the service.</p>
+
+<h2>2. How We Use Your Information</h2>
+<p>We use your email for account authentication and service-related communication only. Uploaded content is used solely for AI generation within the scope of your session. We do not use your content to train models.</p>
+
+<h2>3. Data Storage & Security</h2>
+<p>Your data is stored on Cloudflare R2 with encryption at rest. Passwords are hashed with bcrypt. API keys are stored as SHA-256 hashes. We do not store plaintext payment information — all payments are processed by Creem.</p>
+
+<h2>4. Third-Party Services</h2>
+<p>We use the following third-party services: EvoLink AI (image/video/music generation), Volcano Engine (video rendering), Cloudflare R2 (file storage), Creem (payment processing), and Sentry (error monitoring).</p>
+
+<h2>5. Your Rights</h2>
+<p>You can delete your account and all associated data at any time by contacting <a href="mailto:support@see4dance.com">support@see4dance.com</a>. You can also request a copy of your data.</p>
+
+<h2>6. Contact</h2>
+<p>For privacy-related inquiries: <a href="mailto:support@see4dance.com">support@see4dance.com</a></p>
+</body></html>""")
+
+
+@app.get("/terms")
+async def terms():
+    """服务条款"""
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse("""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Terms of Service · Seedance Studio</title>
+<style>
+:root{--bg:#0a0a0f;--text:#e8e8f0;--text2:#9090a8;--accent:#7c6dfa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.7;padding:40px 24px;max-width:740px;margin:0 auto}
+h1{font-size:28px;font-weight:800;margin-bottom:24px;letter-spacing:-.5px}
+h1 span{color:var(--accent)}
+h2{font-size:18px;font-weight:700;margin:32px 0 12px;color:#fff}
+p,li{margin-bottom:8px;color:var(--text2)}
+a{color:var(--accent)}
+ul{padding-left:20px}
+</style></head>
+<body>
+<h1><span>Seedance Studio</span> Terms of Service</h1>
+<p>Last updated: May 31, 2026</p>
+
+<h2>1. Acceptance of Terms</h2>
+<p>By using Seedance Studio ("the Service"), you agree to these Terms. If you do not agree, do not use the Service.</p>
+
+<h2>2. Description of Service</h2>
+<p>Seedance Studio is an AI-powered video creation platform. Users upload images and describe their creative ideas; the platform generates preview images, video drafts, music, and final rendered videos using third-party AI models.</p>
+
+<h2>3. Credits & Payments</h2>
+<p>All payments are one-time purchases of credits. Credits never expire. Each AI operation (image generation, video drafting, music, final rendering) consumes a specified number of credits based on the model selected. Prices are displayed before each operation.</p>
+
+<h2>4. Refund Policy</h2>
+<p>Unused credits are eligible for a full refund within 14 days of purchase. Consumed credits are non-refundable because the associated AI API costs have already been incurred.</p>
+
+<h2>5. Acceptable Use</h2>
+<p>You agree not to use the Service to generate: illegal content, hate speech, adult content, deepfakes of real individuals without consent, or content that infringes third-party intellectual property.</p>
+
+<h2>6. Intellectual Property</h2>
+<p>You retain ownership of your uploaded content. Videos you generate belong to you. We reserve no rights to your generated content.</p>
+
+<h2>7. Limitation of Liability</h2>
+<p>The Service is provided "as is". We are not liable for any damages arising from use of the Service. AI models may occasionally produce unexpected results — we do not guarantee specific outcomes.</p>
+
+<h2>8. Contact</h2>
+<p><a href="mailto:support@see4dance.com">support@see4dance.com</a></p>
+</body></html>""")
 @app.get("/share/{share_id}")
 async def view_share(share_id: str):
     """查看分享的视频"""
