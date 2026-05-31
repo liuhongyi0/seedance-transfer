@@ -32,12 +32,12 @@ CREEM_TEST_MODE = CREEM_API_KEY.startswith("creem_test_") if CREEM_API_KEY else 
 CREEM_BASE = "https://test-api.creem.io" if CREEM_TEST_MODE else "https://api.creem.io"
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
-# Creem 产品映射：package_id → (product_id, credits, name)
+# Creem 产品映射：package_id → (product_id, pts, name)
 # 在 Creem Dashboard 创建产品后，把 product_id 填到这里
 CREEM_PRODUCTS = {
-    "starter":  {"product_id": os.getenv("CREEM_PRODUCT_STARTER", ""),  "credits": 50,  "name": "Starter"},
-    "standard": {"product_id": os.getenv("CREEM_PRODUCT_STANDARD", ""), "credits": 200, "name": "Standard"},
-    "pro":      {"product_id": os.getenv("CREEM_PRODUCT_PRO", ""),      "credits": 800, "name": "Pro"},
+    "starter":  {"product_id": os.getenv("CREEM_PRODUCT_STARTER", ""),  "credits": 145, "name": "Starter"},
+    "standard": {"product_id": os.getenv("CREEM_PRODUCT_STANDARD", ""), "credits": 300, "name": "Standard"},
+    "pro":      {"product_id": os.getenv("CREEM_PRODUCT_PRO", ""),      "credits": 920, "name": "Pro"},
 }
 
 
@@ -77,21 +77,21 @@ async def get_pricing():
 
     if settings.is_intl:
         packages = [
-            {"id": "starter",  "name": "Starter",  "amount": 7,   "credits": 50,
-             "desc": "~1 full creation",  "popular": False},
-            {"id": "standard", "name": "Standard", "amount": 18,  "credits": 200,
-             "desc": "~3 full creations", "popular": True},
-            {"id": "pro",      "name": "Pro",      "amount": 52,  "credits": 800,
-             "desc": "~12 full creations", "popular": False},
+            {"id": "starter",  "name": "Starter",  "amount": 9.9,   "credits": 145,
+             "desc": "≈8条5s视频",  "popular": False},
+            {"id": "standard", "name": "Standard", "amount": 19.9,  "credits": 300,
+             "desc": "≈16条5s视频", "popular": True},
+            {"id": "pro",      "name": "Pro",      "amount": 59.9,  "credits": 920,
+             "desc": "≈51条5s视频", "popular": False},
         ]
     else:
         packages = [
-            {"id": "starter",  "name": "体验包",  "amount": 49,  "credits": 35,
-             "desc": "约1次完整创作（1080p×10s）", "popular": False},
-            {"id": "standard", "name": "基础包",  "amount": 128, "credits": 110,
-             "desc": "约3次完整创作 · 月度订阅",   "popular": True},
-            {"id": "pro",      "name": "专业包",  "amount": 368, "credits": 400,
-             "desc": "约12次完整创作 · 月度订阅",  "popular": False},
+            {"id": "starter",  "name": "体验包",  "amount": 69,  "credits": 145,
+             "desc": "≈8条5s视频", "popular": False},
+            {"id": "standard", "name": "基础包",  "amount": 139, "credits": 300,
+             "desc": "≈16条5s视频", "popular": True},
+            {"id": "pro",      "name": "专业包",  "amount": 419, "credits": 920,
+             "desc": "≈51条5s视频", "popular": False},
         ]
 
     return {

@@ -538,9 +538,9 @@ class SeedanceWizardNode:
                     "multiline": False,
                     "tooltip": "Override API key (leave empty to use config file)."
                 }),
-                "model_key": (["seedance-1.5", "seedance-2.0", "kling-o3"], {
+                "model_key": (["seedance-1.5", "seedance-2.0", "veo3.1-fast", "veo3-fast", "veo3.1-pro", "sora-2", "kling-v3", "kling-o3", "wan-2.6", "wan-2.7", "hailuo-2.3"], {
                     "default": "seedance-1.5",
-                    "tooltip": "seedance-1.5=Best Value, seedance-2.0=Flagship, kling-o3=Cinematic"
+                    "tooltip": "seedance-1.5=Value, seedance-2.0=Flagship, veo=Google, kling=Kuaishou, wan=Alibaba"
                 }),
             }
         }
