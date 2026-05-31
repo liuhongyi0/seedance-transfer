@@ -191,7 +191,6 @@ async def create_checkout(req: CheckoutRequest, request: Request):
                     "units": 1,
                     "customer": {
                         "email": user_email,
-                        "id": user_id,
                     },
                     "success_url": success_url,
                     "metadata": {
