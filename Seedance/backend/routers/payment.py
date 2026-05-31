@@ -78,20 +78,20 @@ async def get_pricing():
     if settings.is_intl:
         packages = [
             {"id": "starter",  "name": "Starter",  "amount": 11.9,   "credits": 120,
-             "desc": "6 videos · ~30s total",  "popular": False},
+             "desc": "30s 720p · $0.40/s",  "popular": False},
             {"id": "standard", "name": "Standard", "amount": 23.9,  "credits": 270,
-             "desc": "15 videos · ~75s total", "popular": True},
+             "desc": "75s 720p · $0.32/s", "popular": True},
             {"id": "pro",      "name": "Pro",      "amount": 69.9,  "credits": 900,
-             "desc": "50 videos · ~250s total", "popular": False},
+             "desc": "250s 720p · $0.28/s", "popular": False},
         ]
     else:
         packages = [
             {"id": "starter",  "name": "体验包",  "amount": 79,  "credits": 120,
-             "desc": "6条视频 · 约30秒", "popular": False},
+             "desc": "30秒720p · ¥2.63/秒", "popular": False},
             {"id": "standard", "name": "基础包",  "amount": 169, "credits": 270,
-             "desc": "15条视频 · 约75秒", "popular": True},
+             "desc": "75秒720p · ¥2.25/秒", "popular": True},
             {"id": "pro",      "name": "专业包",  "amount": 499, "credits": 900,
-             "desc": "50条视频 · 约250秒", "popular": False},
+             "desc": "250秒720p · ¥2.00/秒", "popular": False},
         ]
 
     return {
