@@ -523,9 +523,11 @@ function toggleLang() {
   if (document.body.classList.contains('lang-en')) {
     document.body.classList.remove('lang-en');
     btn.classList.remove('active');
+    localStorage.setItem('seedance_lang', 'zh');
   } else {
     document.body.classList.add('lang-en');
     btn.classList.add('active');
+    localStorage.setItem('seedance_lang', 'en');
   }
 }
 
@@ -847,6 +849,26 @@ document.addEventListener('click', function(e) {
     document.getElementById('user-dropdown').classList.remove('show');
   }
 });
+</script>
+
+<!-- Auto-detect language -->
+<script>
+(function(){
+  var saved = localStorage.getItem('seedance_lang');
+  if (saved === 'en') {
+    document.body.classList.add('lang-en');
+    var btn = document.getElementById('lang-btn');
+    if (btn) btn.classList.add('active');
+  } else if (!saved) {
+    // Auto-detect: use EN if browser language is not Chinese
+    var lang = navigator.language || '';
+    if (!lang.startsWith('zh')) {
+      document.body.classList.add('lang-en');
+      var btn2 = document.getElementById('lang-btn');
+      if (btn2) btn2.classList.add('active');
+    }
+  }
+})();
 </script>
 </body>
 </html>

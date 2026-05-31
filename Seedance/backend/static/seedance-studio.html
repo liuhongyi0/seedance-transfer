@@ -3839,5 +3839,18 @@ document.querySelectorAll('.lang-placeholder').forEach(el => {
     (el.dataset.enPlaceholder || '') : (el.dataset.zhPlaceholder || '');
 });
 </script>
+
+<!-- Auto-detect language -->
+<script>
+(function(){
+  var saved = localStorage.getItem('seedance_lang');
+  var isEn = saved === 'en' || (!saved && !navigator.language.startsWith('zh'));
+  if (isEn) {
+    document.body.classList.add('lang-en');
+    var btn = document.getElementById('lang-btn');
+    if (btn) btn.classList.add('active');
+  }
+})();
+</script>
 </body>
 </html>
