@@ -1379,14 +1379,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
   <div class="card">
     <div class="card-title"><span class="lang-zh-label">选择<span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span></span><span class="lang-en-label">Select Video Draft</span> <span style="color:var(--red);font-size:11px"><span class="lang-zh-label">必选</span><span class="lang-en-label">Required</span></span></div>
     <div class="asset-select-grid" id="s5-videos">
-      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>或上传<span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span></div>
+      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0"><span class="lang-zh-label">← 先在步骤三生成或上传视频草稿</span><span class="lang-en-label">← Generate or upload video drafts in Step 3 first</span></div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-title"><span class="lang-zh-label">选择音乐</span><span class="lang-en-label">Select Music</span> <span style="font-size:11px;font-weight:400;color:var(--text3)"><span class="lang-zh-label">可选</span><span class="lang-en-label">Optional</span></span></div>
     <div class="asset-select-grid" id="s5-music">
-      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span><span class="lang-zh-label">音乐<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Music Drafts</span>（可跳过）</div>
+      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0"><span class="lang-zh-label">← 先在步骤四生成音乐草稿（可跳过）</span><span class="lang-en-label">← Generate music drafts in Step 4 first (optional)</span></div>
     </div>
   </div>
 
@@ -3247,7 +3247,7 @@ function updateS5() {
   const vidsGrid = document.getElementById('s5-videos');
   if (vidsGrid) {
     if (state.videos.length === 0) {
-      vidsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三生成Generate或上传视频草稿DraftVideo Drafts</div>';
+      vidsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0"><span class="lang-zh-label">← 先在步骤三生成或上传视频草稿</span><span class="lang-en-label">← Generate or upload video drafts in Step 3 first</span></div>';
     } else {
       vidsGrid.innerHTML = state.videos.map((v, i) => {
         const icon = v.uploaded ? '📤' : '▶';
@@ -3269,7 +3269,7 @@ function updateS5() {
   const musGrid = document.getElementById('s5-music');
   if (musGrid) {
     if (state.musics.length === 0) {
-      musGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四生成Generate音乐草稿DraftMusic Drafts（可跳过）</div>';
+      musGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0"><span class="lang-zh-label">← 先在步骤四生成音乐草稿（可跳过）</span><span class="lang-en-label">← Generate music drafts in Step 4 first (optional)</span></div>';
     } else {
       musGrid.innerHTML = state.musics.map((m, i) => {
         const safeName = escapeHtml(m.name);
@@ -3430,7 +3430,7 @@ function updateMat() {
   document.getElementById('vid-count').textContent = state.videos.length + ' / 3';
   const vl = document.getElementById('vid-list');
   if (state.videos.length === 0) {
-    vl.innerHTML = '<div class="mat-placeholder">暂无草稿Draft，在步骤三生成Generate</div>';
+    vl.innerHTML = '<div class="mat-placeholder"><span class="lang-zh-label">暂无草稿，在步骤三生成</span><span class="lang-en-label">No drafts yet. Generate in Step 3</span></div>';
   } else {
     vl.innerHTML = state.videos.map((v,i) => `
       <div class="mat-item">
@@ -3445,7 +3445,7 @@ function updateMat() {
   document.getElementById('mus-count').textContent = state.musics.length + ' / 3';
   const ml = document.getElementById('mus-list');
   if (state.musics.length === 0) {
-    ml.innerHTML = '<div class="mat-placeholder">暂无音乐，在步骤四生成Generate</div>';
+    ml.innerHTML = '<div class="mat-placeholder"><span class="lang-zh-label">暂无音乐，在步骤四生成</span><span class="lang-en-label">No music yet. Generate in Step 4</span></div>';
   } else {
     ml.innerHTML = state.musics.map((m,i) => `
       <div class="mat-item">
