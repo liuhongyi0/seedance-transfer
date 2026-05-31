@@ -572,7 +572,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <div class="step-btn" onclick="goStep(5)" id="stepbtn-5"><div class="step-num">5</div><span class="lang-zh-label"> 生成成片</span><span class="lang-en-label"> Final</span></div>
   </nav>
   <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
-    <button class="lang-toggle-btn" id="lang-btn" onclick="toggleLang()"><span class="lang-zh-label">中</span><span class="lang-en-label">EN</span></button>
+    <button class="lang-toggle-btn" id="lang-btn" onclick="toggleLang()"><span class="lang-zh-label">EN</span><span class="lang-en-label">中文</span></button>
     <!-- 未登录 -->
     <button class="auth-btn" id="auth-login-btn" onclick="openAuthModal('login')" style="display:none"><span class="lang-zh-label">登录 / 注册</span><span class="lang-en-label">Login / Sign Up</span></button>
     <!-- 已登录 -->
@@ -764,19 +764,19 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           <div style="margin-top:12px">
             <div style="font-size:11px;color:var(--text3);margin-bottom:7px"><span class="lang-zh-label">场景预设</span><span class="lang-en-label">Quick Scene Presets</span> <span style="opacity:.6">/ Quick Scene Presets</span></div>
             <div class="preset-row">
-              <div class="preset-chip" onclick="applyPreset('cyberpunk')">赛博朋克美女</div>
-              <div class="preset-chip" onclick="applyPreset('ink')">水墨山水</div>
-              <div class="preset-chip" onclick="applyPreset('scifi')">科幻机甲</div>
-              <div class="preset-chip" onclick="applyPreset('miniature')">微缩景观</div>
-              <div class="preset-chip" onclick="applyPreset('vintage')">复古胶片人像</div>
-              <div class="preset-chip" onclick="applyPreset('aurora')">极光雪山</div>
+              <div class="preset-chip" onclick="applyPreset('cyberpunk')"><span class="lang-zh-label">赛博朋克美女</span><span class="lang-en-label">Cyberpunk</span></div>
+              <div class="preset-chip" onclick="applyPreset('ink')"><span class="lang-zh-label">水墨山水</span><span class="lang-en-label">Ink Wash</span></div>
+              <div class="preset-chip" onclick="applyPreset('scifi')"><span class="lang-zh-label">科幻机甲</span><span class="lang-en-label">Sci-Fi Mecha</span></div>
+              <div class="preset-chip" onclick="applyPreset('miniature')"><span class="lang-zh-label">微缩景观</span><span class="lang-en-label">Miniature</span></div>
+              <div class="preset-chip" onclick="applyPreset('vintage')"><span class="lang-zh-label">复古胶片人像</span><span class="lang-en-label">Vintage Film</span></div>
+              <div class="preset-chip" onclick="applyPreset('aurora')"><span class="lang-zh-label">极光雪山</span><span class="lang-en-label">Aurora Alps</span></div>
             </div>
           </div>
         </div>
 
         <!-- 画面风格 -->
         <div>
-          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px">画面风格</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px"><span class="lang-zh-label">画面风格</span><span class="lang-en-label">Visual Style</span></div>
           <div class="row-gap">
             <div>
               <div style="font-size:11px;color:var(--text3);margin-bottom:7px">视觉风格 <span class="lang-en-label" style="display:inline">/ Visual Style</span></div>
@@ -860,17 +860,17 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
       <div id="s1-ai-section">
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">
           <div class="count-pills">
-            <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">生成数量：</span><span class="lang-en-label">Count: </span></span>
-            <div class="count-pill" onclick="selectCount(this)" data-count="1">1 张</div>
-            <div class="count-pill selected" onclick="selectCount(this)" data-count="3">3 张</div>
-            <div class="count-pill" onclick="selectCount(this)" data-count="4">4 张</div>
+            <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label"><span class="lang-zh-label">生成数量：</span><span class="lang-en-label">Count: </span></span><span class="lang-en-label">Count: </span></span>
+            <div class="count-pill" onclick="selectCount(this)" data-count="1"><span class="lang-zh-label">1 张</span><span class="lang-en-label">1</span></div>
+            <div class="count-pill selected" onclick="selectCount(this)" data-count="3"><span class="lang-zh-label">3 张</span><span class="lang-en-label">3</span></div>
+            <div class="count-pill" onclick="selectCount(this)" data-count="4"><span class="lang-zh-label">4 张</span><span class="lang-en-label">4</span></div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
             <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">模型:</span><span class="lang-en-label">Model:</span></span>
             <select class="param-select" style="width:auto;min-width:170px;font-size:12px" id="s1-model-select" onchange="refreshAllCosts()"></select>
           </div>
         </div>
-        <div style="font-size:11px;margin-bottom:6px" id="s1-cost-info">约 ¥0.22/张 × 3张 = ¥0.66</div>
+        <div style="font-size:11px;margin-bottom:6px" id="s1-cost-info"><span class="lang-zh-label">约 ¥0.22/张 × 3张 = ¥0.66</span><span class="lang-en-label">~$0.03/img × 3 = $0.09</span></div>
         <button class="btn btn-primary" style="width:220px" onclick="genImagesFromPrompt()"><span class="lang-zh-label">✦ 生成原图（低<span class="lang-zh-label">分辨率</span><span class="lang-en-label">Resolution</span>）</span><span class="lang-en-label">✦ Generate Images (Low Res)</span></button>
         <div class="loading-bar" id="s1-loading"><div class="loading-bar-inner"></div></div>
         <div class="loading-text" id="s1-loadtext"><span class="lang-zh-label">AI 正在生成中，约 15-25 秒…</span><span class="lang-en-label">AI generating, ~15-25 seconds...</span></div>
@@ -1224,7 +1224,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">模型:</span><span class="lang-en-label">Model:</span></span>
     <select class="param-select" style="width:auto;min-width:200px;font-size:12px" id="s3-model-select" onchange="refreshAllCosts()"></select>
   </div>
-  <div style="font-size:11px;margin-bottom:6px" id="s3-cost-info">约 ¥2.70/个</div>
+  <div style="font-size:11px;margin-bottom:6px" id="s3-cost-info"><span class="lang-zh-label">约 ¥2.70/个</span><span class="lang-en-label">~$0.38/each</span></div>
   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <button class="btn btn-primary" style="width:200px" onclick="genVideo()"><span class="lang-zh-label">▶ 生成<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span></span><span class="lang-en-label">▶ Generate Video Draft</span></button>
     <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">（最多保留3个草稿）</span><span class="lang-en-label">(max 3 drafts)</span></span>
@@ -1356,7 +1356,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">模型:</span><span class="lang-en-label">Model:</span></span>
     <select class="param-select" style="width:auto;min-width:170px;font-size:12px" id="s4-model-select" onchange="refreshAllCosts()"></select>
   </div>
-  <div style="font-size:11px;margin-bottom:6px" id="s4-cost-info">约 ¥0.10/个</div>
+  <div style="font-size:11px;margin-bottom:6px" id="s4-cost-info"><span class="lang-zh-label">约 ¥0.10/个</span><span class="lang-en-label">~$0.01/each</span></div>
   <div style="display:flex;align-items:center;gap:14px">
     <button class="btn btn-primary" style="width:200px" onclick="genMusic()"><span class="lang-zh-label">♫ 生成<span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span></span><span class="lang-en-label">♫ Generate Music Draft</span></button>
   </div>
@@ -1913,7 +1913,8 @@ function refreshAllCosts() {
   const sym = getSym();
   const imgPriceEl = document.getElementById('s1-cost-info');
   if (imgPriceEl && imgModel.price) {
-    imgPriceEl.innerHTML = `<span style="color:var(--text2)">${imgModel.display_name || imgModel.display_name_en || ''}</span> · <span style="color:var(--accent2)">${sym}${imgModel.price.toFixed(2)}/张 × ${count}张 = <b>${sym}${imgTotal.toFixed(2)}</b></span>`;
+    const perUnit = document.body.classList.contains('lang-en') ? 'img' : '张';
+    imgPriceEl.innerHTML = `<span style="color:var(--text2)">${imgModel.display_name || imgModel.display_name_en || ''}</span> · <span style="color:var(--accent2)">${sym}${imgModel.price.toFixed(2)}/${perUnit} × ${count} = <b>${sym}${imgTotal.toFixed(2)}</b></span>`;
   }
 
   // Step 3 (video draft): per-second pricing
@@ -1921,16 +1922,17 @@ function refreshAllCosts() {
   const vidPriceEl = document.getElementById('s3-cost-info');
   if (vidPriceEl && vidModel.price_per_sec) {
     const perSec720 = vidModel.price_per_sec['720p'] || vidModel.price;
-    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${perSec720.toFixed(2)}/秒</b> (720p)</span>`;
+    const secUnit = document.body.classList.contains('lang-en') ? 'sec' : '秒';
+    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${perSec720.toFixed(2)}/${secUnit}</b> (720p)</span>`;
   } else if (vidPriceEl && vidModel.price) {
-    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${vidModel.price.toFixed(2)}/个</b></span>`;
+    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${vidModel.price.toFixed(2)}/${_unit('个','each')}</b></span>`;
   }
   // Update draft info line (provider + estimated price)
   const draftPriceEl = document.getElementById('s3-draft-price');
   const draftProvEl = document.getElementById('s3-draft-provider');
   if (draftPriceEl && vidModel.price_per_sec) {
     const perSec720 = vidModel.price_per_sec['720p'] || vidModel.price;
-    draftPriceEl.textContent = `${sym}${(perSec720 * 5).toFixed(1)}/个`;
+    draftPriceEl.textContent = `${sym}${(perSec720 * 5).toFixed(1)}/${_unit('个','each')}`;
   }
   if (draftProvEl && vidModel.provider) {
     draftProvEl.textContent = vidModel.provider === 'volcengine' ? '<span class="lang-zh-label">火山引擎直连</span><span class="lang-en-label">Volcengine Direct</span>' : '<span class="lang-zh-label">第三方API</span><span class="lang-en-label">3rd Party API</span>';
@@ -1940,7 +1942,7 @@ function refreshAllCosts() {
   const musModel = getModelPrice('music');
   const musPriceEl = document.getElementById('s4-cost-info');
   if (musPriceEl && musModel.price) {
-    musPriceEl.innerHTML = `<span style="color:var(--text2)">${musModel.display_name || musModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${musModel.price.toFixed(2)}/个</b></span>`;
+    musPriceEl.innerHTML = `<span style="color:var(--text2)">${musModel.display_name || musModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${musModel.price.toFixed(2)}/${_unit('个','each')}</b></span>`;
   }
 }
 
@@ -1983,10 +1985,20 @@ function goStep(n) {
 function toggleLang() {
   document.body.classList.toggle('lang-en');
   document.getElementById('lang-btn').classList.toggle('active');
+
+  // Update bilingual placeholders
+  document.querySelectorAll('.lang-placeholder').forEach(el => {
+    el.placeholder = document.body.classList.contains('lang-en') ? 
+      (el.dataset.enPlaceholder || '') : (el.dataset.zhPlaceholder || '');
+  });
+
 }
 
 // ── i18n helper ────────────────────────────────
 function _t(zh, en) { return document.body.classList.contains('lang-en') ? en : zh; }
+
+function _unit(zh, en) { return document.body.classList.contains('lang-en') ? en : zh; }
+
 function _tUpdate(el, zh, en) { el.textContent = _t(zh, en); }
 
 
@@ -2110,10 +2122,10 @@ function rebuildLight() {
 // ── PRESET APPLY ──
 const presets = {
   cyberpunk: { style: 'cyberpunk neon', light: 'neon lights', mood: 'mysterious dark', kw: '赛博朋克都市、霓虹女孩' },
-  ink:       { style: 'ink painting', light: 'soft natural light', mood: 'dreamy ethereal', kw: '水墨山水、意境' },
+  ink:       { style: 'ink painting', light: 'soft natural light', mood: 'dreamy ethereal', kw: '<span class="lang-zh-label">水墨山水</span><span class="lang-en-label">Ink Wash</span>、意境' },
   scifi:     { style: '3D render', light: 'spotlight', mood: 'epic grand', kw: '未来机甲、科幻战场' },
   miniature: { style: 'realistic photography', light: 'soft natural light', mood: 'fresh bright', kw: '微缩模型城市景观' },
-  vintage:   { style: 'vintage film grain', light: 'golden hour', mood: 'warm healing', kw: '复古胶片人像、怀旧' },
+  vintage:   { style: 'vintage film grain', light: 'golden hour', mood: 'warm healing', kw: '<span class="lang-zh-label">复古胶片人像</span><span class="lang-en-label">Vintage Film</span>、怀旧' },
   aurora:    { style: 'realistic photography', light: 'soft natural light', mood: 'epic grand', kw: '北极光、雪山极地' },
 };
 function applyPreset(name) {
