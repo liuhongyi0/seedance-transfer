@@ -35,9 +35,9 @@ BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 # Creem 产品映射：package_id → (product_id, pts, name)
 # 在 Creem Dashboard 创建产品后，把 product_id 填到这里
 CREEM_PRODUCTS = {
-    "starter":  {"product_id": os.getenv("CREEM_PRODUCT_STARTER", ""),  "credits": 140, "name": "Starter"},
-    "standard": {"product_id": os.getenv("CREEM_PRODUCT_STANDARD", ""), "credits": 315, "name": "Standard"},
-    "pro":      {"product_id": os.getenv("CREEM_PRODUCT_PRO", ""),      "credits": 1050, "name": "Pro"},
+    "starter":  {"product_id": os.getenv("CREEM_PRODUCT_STARTER", ""),  "credits": 120, "name": "Starter"},
+    "standard": {"product_id": os.getenv("CREEM_PRODUCT_STANDARD", ""), "credits": 270, "name": "Standard"},
+    "pro":      {"product_id": os.getenv("CREEM_PRODUCT_PRO", ""),      "credits": 900, "name": "Pro"},
 }
 
 
@@ -77,21 +77,21 @@ async def get_pricing():
 
     if settings.is_intl:
         packages = [
-            {"id": "starter",  "name": "Starter",  "amount": 9.9,   "credits": 140,
-             "desc": "7 videos · ~35s total",  "popular": False},
-            {"id": "standard", "name": "Standard", "amount": 19.9,  "credits": 315,
-             "desc": "17 videos · ~85s total", "popular": True},
-            {"id": "pro",      "name": "Pro",      "amount": 59.9,  "credits": 1050,
-             "desc": "58 videos · ~290s total", "popular": False},
+            {"id": "starter",  "name": "Starter",  "amount": 11.9,   "credits": 120,
+             "desc": "6 videos · ~30s total",  "popular": False},
+            {"id": "standard", "name": "Standard", "amount": 23.9,  "credits": 270,
+             "desc": "15 videos · ~75s total", "popular": True},
+            {"id": "pro",      "name": "Pro",      "amount": 69.9,  "credits": 900,
+             "desc": "50 videos · ~250s total", "popular": False},
         ]
     else:
         packages = [
-            {"id": "starter",  "name": "体验包",  "amount": 69,  "credits": 140,
-             "desc": "7条视频 · 约35秒", "popular": False},
-            {"id": "standard", "name": "基础包",  "amount": 139, "credits": 315,
-             "desc": "17条视频 · 约85秒", "popular": True},
-            {"id": "pro",      "name": "专业包",  "amount": 419, "credits": 1050,
-             "desc": "58条视频 · 约290秒", "popular": False},
+            {"id": "starter",  "name": "体验包",  "amount": 79,  "credits": 120,
+             "desc": "6条视频 · 约30秒", "popular": False},
+            {"id": "standard", "name": "基础包",  "amount": 169, "credits": 270,
+             "desc": "15条视频 · 约75秒", "popular": True},
+            {"id": "pro",      "name": "专业包",  "amount": 499, "credits": 900,
+             "desc": "50条视频 · 约250秒", "popular": False},
         ]
 
     return {
