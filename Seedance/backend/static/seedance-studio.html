@@ -1602,7 +1602,7 @@ function applyUserUI(user) {
   CURRENT_USER = user;
   const initial = (user.email || user.phone || 'U')[0].toUpperCase();
   document.getElementById('user-avatar').textContent = initial;
-  document.getElementById('user-name').textContent = user.email || user.phone || '用户';
+  document.getElementById('user-name').textContent = user.email || user.phone || _t('用户','User');
   const bal = user.balance_subunit != null
     ? (user.currency === 'CNY' ? '¥' : '$') + (user.balance_subunit / 100).toFixed(2)
     : '';
@@ -1778,7 +1778,7 @@ async function openPricingModal() {
     renderPricing(d);
   } catch(_) {
     document.getElementById('pricing-grid').innerHTML =
-      `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3)">无法加载套餐，请检查网络</div>`;
+      `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3)">${_t('无法加载套餐，请检查网络','Cannot load packages, check network')}</div>`;
   }
 }
 function closePricingModal() {
@@ -1789,16 +1789,16 @@ function renderPricing(data) {
   const note = document.getElementById('pricing-note');
   note.textContent = data.note || '';
   if (!data.packages || !data.packages.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3)">暂无套餐</div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3)">${_t('暂无套餐','No packages')}</div>`;
     return;
   }
   grid.innerHTML = data.packages.map(p => `
     <div class="pkg-card${p.popular ? ' popular' : ''}">
-      ${p.popular ? `<div class="pkg-popular-badge">最受欢迎</div>` : ''}
+      ${p.popular ? `<div class="pkg-popular-badge">${_t('最受欢迎','Most Popular')}</div>` : ''}
       <div class="pkg-name">${escapeHtml(p.name)}</div>
       <div class="pkg-price">${escapeHtml(p.display)}</div>
       <div class="pkg-credits">${escapeHtml(p.credits_display)}</div>
-      <button class="pkg-buy" data-pkg-id="${escapeHtml(p.id)}" data-pkg-name="${escapeHtml(p.name)}" data-pkg-price="${escapeHtml(p.display)}">立即购买</button>
+      <button class="pkg-buy" data-pkg-id="${escapeHtml(p.id)}" data-pkg-name="${escapeHtml(p.name)}" data-pkg-price="${escapeHtml(p.display)}">' + _t('立即购买','Buy Now') + '</button>
     </div>`).join('');
   document.querySelectorAll('.pkg-buy').forEach(btn => {
     btn.onclick = function() {
@@ -1914,7 +1914,7 @@ function refreshAllCosts() {
   const imgPriceEl = document.getElementById('s1-cost-info');
   if (imgPriceEl && imgModel.price) {
     const perUnit = document.body.classList.contains('lang-en') ? 'img' : '张';
-    imgPriceEl.innerHTML = `<span style="color:var(--text2)">${imgModel.display_name || imgModel.display_name_en || ''}</span> · <span style="color:var(--accent2)">${sym}${imgModel.price.toFixed(2)}/${perUnit} × ${count} = <b>${sym}${imgTotal.toFixed(2)}</b></span>`;
+    imgPriceEl.innerHTML = `<span style="color:var(--text2)">${imgModel.display_name || imgModel.display_name_en || ''} · <span style="color:var(--accent2)">${sym}${imgModel.price.toFixed(2)}/${perUnit} × ${count} = <b>${sym}${imgTotal.toFixed(2)}</b>`;
   }
 
   // Step 3 (video draft): per-second pricing
@@ -1923,9 +1923,9 @@ function refreshAllCosts() {
   if (vidPriceEl && vidModel.price_per_sec) {
     const perSec720 = vidModel.price_per_sec['720p'] || vidModel.price;
     const secUnit = document.body.classList.contains('lang-en') ? 'sec' : '秒';
-    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${perSec720.toFixed(2)}/${secUnit}</b> (720p)</span>`;
+    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''} · <span style="color:var(--accent2)"><b>${sym}${perSec720.toFixed(2)}/${secUnit}</b> (720p)`;
   } else if (vidPriceEl && vidModel.price) {
-    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${vidModel.price.toFixed(2)}/${_unit('个','each')}</b></span>`;
+    vidPriceEl.innerHTML = `<span style="color:var(--text2)">${vidModel.display_name || vidModel.display_name_en || ''} · <span style="color:var(--accent2)"><b>${sym}${vidModel.price.toFixed(2)}/${_unit('个','each')}</b>`;
   }
   // Update draft info line (provider + estimated price)
   const draftPriceEl = document.getElementById('s3-draft-price');
@@ -1935,14 +1935,14 @@ function refreshAllCosts() {
     draftPriceEl.textContent = `${sym}${(perSec720 * 5).toFixed(1)}/${_unit('个','each')}`;
   }
   if (draftProvEl && vidModel.provider) {
-    draftProvEl.innerHTML = vidModel.provider === 'volcengine' ? '<span class="lang-zh-label">火山引擎直连</span><span class="lang-en-label">Volcengine Direct</span>' : '<span class="lang-zh-label">第三方API</span><span class="lang-en-label">3rd Party API</span>';
+    draftProvEl.innerHTML = vidModel.provider === 'volcengine' ? _t('火山引擎直连','Volcengine Direct') : _t('第三方API','3rd Party API');
   }
 
   // Step 4 (music): unit price
   const musModel = getModelPrice('music');
   const musPriceEl = document.getElementById('s4-cost-info');
   if (musPriceEl && musModel.price) {
-    musPriceEl.innerHTML = `<span style="color:var(--text2)">${musModel.display_name || musModel.display_name_en || ''}</span> · <span style="color:var(--accent2)"><b>${sym}${musModel.price.toFixed(2)}/${_unit('个','each')}</b></span>`;
+    musPriceEl.innerHTML = `<span style="color:var(--text2)">${musModel.display_name || musModel.display_name_en || ''} · <span style="color:var(--accent2)"><b>${sym}${musModel.price.toFixed(2)}/${_unit('个','each')}</b>`;
   }
 }
 
@@ -1983,21 +1983,21 @@ function goStep(n) {
 
 // ── LANGUAGE TOGGLE ──
 function toggleLang() {
-  document.body.classList.toggle('lang-en');
-  document.getElementById('lang-btn').classList.toggle('active');
-
+  var en = document.body.classList.toggle('lang-en');
+  var btn = document.getElementById('lang-btn');
+  if (btn) btn.classList.toggle('active');
+  localStorage.setItem('seedance_lang', en ? 'en' : 'zh');
   // Update bilingual placeholders
-  document.querySelectorAll('.lang-placeholder').forEach(el => {
+  document.querySelectorAll('.lang-placeholder').forEach(function(el) {
     el.placeholder = document.body.classList.contains('lang-en') ? 
       (el.dataset.enPlaceholder || '') : (el.dataset.zhPlaceholder || '');
   });
-
 }
 
 // ── i18n helper ────────────────────────────────
-function _t(zh, en) { return document.body.classList.contains('lang-en') ? en : zh; }
+function _t(zh, en) { var s = document.body.classList.contains('lang-en') ? en : zh; return s.replace(/<[^>]*>/g, ''); }
 
-function _unit(zh, en) { return document.body.classList.contains('lang-en') ? en : zh; }
+function _unit(zh, en) { return document.body.classList.contains('lang-en') ? en.replace(/<[^>]*>/g,'') : zh.replace(/<[^>]*>/g,''); }
 
 function _tUpdate(el, zh, en) { el.textContent = _t(zh, en); }
 
@@ -2122,10 +2122,10 @@ function rebuildLight() {
 // ── PRESET APPLY ──
 const presets = {
   cyberpunk: { style: 'cyberpunk neon', light: 'neon lights', mood: 'mysterious dark', kw: '赛博朋克都市、霓虹女孩' },
-  ink:       { style: 'ink painting', light: 'soft natural light', mood: 'dreamy ethereal', kw: '<span class="lang-zh-label">水墨山水</span><span class="lang-en-label">Ink Wash</span>、意境' },
+  ink:       { style: 'ink painting', light: 'soft natural light', mood: 'dreamy ethereal', kw: '水墨山水Ink Wash、意境' },
   scifi:     { style: '3D render', light: 'spotlight', mood: 'epic grand', kw: '未来机甲、科幻战场' },
   miniature: { style: 'realistic photography', light: 'soft natural light', mood: 'fresh bright', kw: '微缩模型城市景观' },
-  vintage:   { style: 'vintage film grain', light: 'golden hour', mood: 'warm healing', kw: '<span class="lang-zh-label">复古胶片人像</span><span class="lang-en-label">Vintage Film</span>、怀旧' },
+  vintage:   { style: 'vintage film grain', light: 'golden hour', mood: 'warm healing', kw: '复古胶片人像Vintage Film、怀旧' },
   aurora:    { style: 'realistic photography', light: 'soft natural light', mood: 'epic grand', kw: '北极光、雪山极地' },
 };
 function applyPreset(name) {
@@ -2229,7 +2229,7 @@ function unlockPrompt() {
     btn.textContent = '🔒 锁定编辑';
   } else {
     preview.contentEditable = 'false';
-    btn.textContent = '<span class="lang-zh-label">🔓 解锁编辑</span><span class="lang-en-label">🔓 Unlock Edit</span>';
+    btn.textContent = '🔓 解锁编辑🔓 Unlock Edit';
     const fp = document.getElementById('final-prompt');
     if (fp) fp.value = preview.textContent;
   }
@@ -2270,7 +2270,7 @@ function updateFilter() {
   const label = document.getElementById('adj-preview-label');
   if (label) {
     const hasAdj = b != 0 || c != 0 || s != 0 || t != 0 || document.getElementById('sl-shadow').value != 0 || document.getElementById('sl-hl').value != 0;
-    label.textContent = hasAdj ? '调节滑块即可<span class="lang-zh-label">实时预览</span><span class="lang-en-label">Live Preview</span><span class='lang-zh-label'>调色效果</span><span class='lang-en-label'>Grading Effect</span>' : 'CSS 滤镜<span class="lang-zh-label">实时预览</span><span class="lang-en-label">Live Preview</span>，最终效果以实际<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>为准';
+    label.textContent = hasAdj ? '调节滑块即可实时预览Live Preview调色效果Grading Effect' : 'CSS 滤镜实时预览Live Preview，最终效果以实际生成Generate为准';
   }
 }
 
@@ -2299,7 +2299,7 @@ function resetSliders() {
   const btn = document.getElementById('ba-toggle-btn');
   if (btn) { btn.textContent = '👁 对比原图'; btn.style.borderColor = ''; btn.style.color = ''; }
   document.getElementById('adj-mock-img').style.filter = '';
-  document.getElementById('adj-preview-label').textContent = 'CSS 滤镜<span class="lang-zh-label">实时预览</span><span class="lang-en-label">Live Preview</span>，最终效果以实际<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>为准';
+  document.getElementById('adj-preview-label').textContent = 'CSS 滤镜实时预览Live Preview，最终效果以实际生成Generate为准';
 }
 let _adjImgId = null;
 
@@ -2430,9 +2430,9 @@ async function pollTask(pollPath, onProgress, maxMs = 120000) {
       const d = await apiGet(pollPath);
       if (typeof onProgress === 'function') onProgress(d);
       if (d.status === 'completed' || d.status === 'succeeded') return d;
-      if (d.status === 'failed') throw new Error(d.error || _t('<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败','Generation failed'));
+      if (d.status === 'failed') throw new Error(d.error || _t('生成Generate失败','Generation failed'));
     } catch(e) {
-      if (e.message.includes(_t('<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败','Generation failed'))) throw e;
+      if (e.message.includes(_t('生成Generate失败','Generation failed'))) throw e;
     }
   }
   throw new Error(_t('等待超时，请稍后查看结果','Timeout, check later'));
@@ -2467,13 +2467,13 @@ function watchTask(taskId, pollPath, onProgress, maxMs = 120000) {
           const d = JSON.parse(e.data);
           if (typeof onProgress === 'function') onProgress(d);
           if (d.status === 'completed' || d.status === 'succeeded') done(d, null);
-          else if (d.status === 'failed') done(null, new Error(d.error || _t('<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败','Generation failed')));
+          else if (d.status === 'failed') done(null, new Error(d.error || _t('生成Generate失败','Generation failed')));
         } catch(_) {}
       };
       es.addEventListener('done', (e) => {
         try {
           const d = JSON.parse(e.data);
-          if (d.status === 'failed') done(null, new Error(d.error || _t('<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败','Generation failed')));
+          if (d.status === 'failed') done(null, new Error(d.error || _t('生成Generate失败','Generation failed')));
           else done(d, null);
         } catch(_) {}
       });
@@ -2488,7 +2488,7 @@ function watchTask(taskId, pollPath, onProgress, maxMs = 120000) {
 }
 
 // ── 合规关键词检测 ──
-const BANNED_KW = ['真实<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>','明星','名人','网红','celebrity','idol','偶像','艺人','演员',
+const BANNED_KW = ['真实人物Portrait','明星','名人','网红','celebrity','idol','偶像','艺人','演员',
   '歌手','主播','博主','范冰冰','杨幂','肖战','王一博','易烊千玺','吴亦凡','鹿晗',
   'Taylor Swift','Elon Musk','Obama','Trump','马斯克','奥巴马','特朗普'];
 function checkCompliance(text) {
@@ -2496,18 +2496,18 @@ function checkCompliance(text) {
   return BANNED_KW.find(k => lower.includes(k.toLowerCase()));
 }
 
-// ── 图片<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span> ──
+// ── 图片生成Generate ──
 async function genImages() {
   showLoading('s1');
   document.getElementById('save-guide').classList.remove('visible');
   try {
     const themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').join('/');
     const styleEl = document.querySelector('#style-tags .tag.selected');
-    const style = styleEl?.dataset.val || styleEl?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">电影质感</span><span class="lang-en-label">Cinematic</span>';
+    const style = styleEl?.dataset.val || styleEl?.firstChild?.textContent?.trim() || '电影质感Cinematic';
     const lightEl = document.querySelector('#light-tags .tag.selected');
-    const lighting = lightEl?.dataset.val || lightEl?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">自然柔光</span><span class="lang-en-label">Soft Natural Light</span>';
+    const lighting = lightEl?.dataset.val || lightEl?.firstChild?.textContent?.trim() || '自然柔光Soft Natural Light';
     const moodEl = document.querySelector('#mood-tags .tag.selected');
-    const mood = moodEl?.dataset.val || moodEl?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">温暖治愈</span><span class="lang-en-label">Warm Healing</span>';
+    const mood = moodEl?.dataset.val || moodEl?.firstChild?.textContent?.trim() || '温暖治愈Warm Healing';
     const ratio = document.querySelector('#ratio-btns .ratio-btn.selected')?.dataset.val || '16:9';
     const kw = document.getElementById('extra-kw')?.value || '';
     const countPill = document.querySelector('.count-pill.selected');
@@ -2518,25 +2518,25 @@ async function genImages() {
     const hit = checkCompliance(allText);
     if (hit) {
       hideLoading('s1');
-      showToast(`⚠️ 提示词包含敏感词"${hit}"，请修改后重试。请勿使用真实<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>/明星相关词汇。`, 'warn');
+      showToast(`⚠️ 提示词包含敏感词"${hit}"，请修改后重试。请勿使用真实人物Portrait/明星相关词汇。`, 'warn');
       return;
     }
 
     // 使用 Prompt 面板覆盖（来自 genImagesFromPrompt）
-    let promptText = kw || themes || '<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>';
+    let promptText = kw || themes || '人物Portrait';
     if (s1State.overridePrompt) {
       promptText = s1State.overridePrompt;
       s1State.overridePrompt = '';
     }
 
-    document.getElementById('s1-result-hint').textContent = `<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>了 ${count} 张原图，选择保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span> ↓`;
+    document.getElementById('s1-result-hint').textContent = `生成Generate了 ${count} 张原图，选择保存到素材盘Material Panel ↓`;
 
     if (SESSION_ID) {
       const data = await apiPost('/api/image/generate', {
         session_id: SESSION_ID,
         prompt_cn: promptText,
         style, lighting, mood,
-        theme: themes.split('/')[0] || '<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>',
+        theme: themes.split('/')[0] || '人物Portrait',
         ratio, count,
         model_key: getSelectedModelKey('s1-model-select')
       });
@@ -2567,13 +2567,13 @@ async function genImages() {
     }
   } catch(e) {
     hideLoading('s1');
-    alert(_t('图片<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败：','Image gen failed: ') + e.message);
+    alert(_t('图片生成Generate失败：','Image gen failed: ') + e.message);
   }
 }
 
 async function saveImg(btn, name, icon) {
   const card = btn.closest('.gen-img-card');
-  if (state.imgs.length >= 9) { alert(_t(_t('<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>已满（最多9张原图）','Panel full (max 9)'),'Panel full (max 9)')); return; }
+  if (state.imgs.length >= 9) { alert(_t(_t('素材盘Material Panel已满（最多9张原图）','Panel full (max 9)'),'Panel full (max 9)')); return; }
   const url = card.dataset.url || '';
   let imgId = null;
   if (SESSION_ID && url) {
@@ -2726,7 +2726,7 @@ function onAnnotMouseUp(e) {
   pending.style.display = 'flex';
   const input = document.getElementById('annot-label-input');
   input.value = '';
-  input.placeholder = `如 "<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span> ${annotState.annotations.length+1}"、"产品"、"背景"…`;
+  input.placeholder = `如 "人物Portrait ${annotState.annotations.length+1}"、"产品"、"背景"…`;
   input.focus();
   input.onkeydown = ev => { if(ev.key==='Enter') confirmAnnot(rect); if(ev.key==='Escape') cancelAnnot(); };
   document.getElementById('annot-confirm-btn').onclick = () => confirmAnnot(rect);
@@ -2780,7 +2780,7 @@ function renderAnnotOverlays() {
   const list = document.getElementById('annot-list');
   if (!list) return;
   if (annotState.annotations.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0"><span class="lang-zh-label">在图片上拖动框选重要区域，添加标注</span><span class="lang-en-label">Drag on the image to box important regions</span>（<span class="lang-zh-label">可选</span><span class="lang-en-label">Optional</span>）</div>';
+    list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0">在图片上拖动框选重要区域，添加标注Drag on the image to box important regions（可选Optional）</div>';
     return;
   }
   list.innerHTML = annotState.annotations.map((a,i) => `
@@ -2793,7 +2793,7 @@ function renderAnnotOverlays() {
 
 async function saveUploadedImg() {
   if (!annotState.url) { showToast('请先上传图片','warn'); return; }
-  if (state.imgs.length >= 9) { alert('<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>已满（最多9张）'); return; }
+  if (state.imgs.length >= 9) { alert('素材盘Material Panel已满（最多9张）'); return; }
   const n = state.imgs.filter(i => i.uploaded).length + 1;
   const _themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').filter(Boolean).join(', ');
   const _kw = document.getElementById('extra-kw')?.value?.trim() || '';
@@ -2809,7 +2809,7 @@ async function saveUploadedImg() {
     prompt: document.getElementById('s1-prompt-text')?.value?.trim() || ''
   });
   updateMat();
-  showToast('✓ 已保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>', 'success');
+  showToast('✓ 已保存到素材盘Material Panel', 'success');
   document.getElementById('save-guide').classList.add('visible');
   annotState.annotations = [];
   renderAnnotOverlays();
@@ -2868,7 +2868,7 @@ function applyDescribePrompt() {
 
 async function saveUploadedImgWithPrompt() {
   if (!annotState.url) { showToast('请先上传图片','warn'); return; }
-  if (state.imgs.length >= 9) { alert('<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>已满（最多9张）'); return; }
+  if (state.imgs.length >= 9) { alert('素材盘Material Panel已满（最多9张）'); return; }
   const prompt = document.getElementById('describe-prompt').value.trim();
   const n = state.imgs.filter(i => i.uploaded).length + 1;
   state.imgs.push({
@@ -2878,11 +2878,11 @@ async function saveUploadedImgWithPrompt() {
     ai_prompt: prompt   // 供步骤三默认使用
   });
   updateMat();
-  showToast(_t('✓ 已保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>（含 AI Prompt）','✓ Saved with AI prompt'), 'success');
+  showToast(_t('✓ 已保存到素材盘Material Panel（含 AI Prompt）','✓ Saved with AI prompt'), 'success');
   document.getElementById('save-guide').classList.add('visible');
 }
 
-// ── AI <span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span> ──
+// ── AI 风格化Stylized ──
 const stylizeState = { imageUrl: '', imageId: null };
 
 async function stylizeImage() {
@@ -2914,7 +2914,7 @@ async function stylizeImage() {
     document.getElementById('stylize-result').style.display = '';
     if (data.note) showToast(data.note, 'warn');
   } catch(e) {
-    showToast('AI <span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span>失败：' + e.message, 'error');
+    showToast('AI 风格化Stylized失败：' + e.message, 'error');
   } finally {
     btn.disabled = false;
     document.getElementById('stylize-loading').style.display = 'none';
@@ -2924,9 +2924,9 @@ async function stylizeImage() {
 
 async function saveStylizedImg() {
   if (!stylizeState.imageUrl) return;
-  if (state.imgs.length >= 9) { alert('<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>已满（最多9张）'); return; }
+  if (state.imgs.length >= 9) { alert('素材盘Material Panel已满（最多9张）'); return; }
   const styleEl = document.querySelector('#stylize-style-tags .tag.selected');
-  const styleName = styleEl?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span>';
+  const styleName = styleEl?.firstChild?.textContent?.trim() || '风格化Stylized';
   const n = state.imgs.filter(i => i.stylized).length + 1;
   // 若已有 image_id（后端已保存）直接用，否则调保存接口
   let imgId = stylizeState.imageId;
@@ -2936,18 +2936,18 @@ async function saveStylizedImg() {
         session_id: SESSION_ID, task_id: '', image_urls: [stylizeState.imageUrl]
       });
       imgId = d.image_ids?.[0];
-    } catch(e) { console.warn('保存<span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span>图失败', e); }
+    } catch(e) { console.warn('保存风格化Stylized图失败', e); }
   }
   state.imgs.push({ id: imgId, name: `${styleName} ${n}`, icon: '🎨',
                     url: stylizeState.imageUrl, stylized: true });
   updateMat();
-  showToast(`✓ 已保存"${styleName}"到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>`, 'success');
+  showToast(`✓ 已保存"${styleName}"到素材盘Material Panel`, 'success');
   document.getElementById('save-guide').classList.add('visible');
 }
 
-// ── <span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span><span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span> ──
+// ── 视频草稿DraftVideo Drafts生成Generate ──
 async function genVideo() {
-  if (state.videos.length >= 3) { alert(_t('<span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span>已满（最多3个），请先删除旧<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span>','Video panel full (max 3)')); return; }
+  if (state.videos.length >= 3) { alert(_t('视频草稿DraftVideo Drafts已满（最多3个），请先删除旧草稿Draft','Video panel full (max 3)')); return; }
   showLoading('s3');
   try {
     let prompt = document.getElementById('prompt-preview')?.textContent || '';
@@ -2978,7 +2978,7 @@ async function genVideo() {
         const result = await watchTask(
           data.task_id,
           `/api/video-draft/task/${data.task_id}?session_id=${SESSION_ID}`,
-          d => { const el = document.getElementById('s3-loadtext'); if(el) el.textContent = `视频<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>中 ${d.progress||0}%…`; },
+          d => { const el = document.getElementById('s3-loadtext'); if(el) el.textContent = `视频生成Generate中 ${d.progress||0}%…`; },
           120000
         );
         videoUrl = result.video_url;
@@ -2988,7 +2988,7 @@ async function genVideo() {
     }
     hideLoading('s3');
     const n = state.videos.length + 1;
-    state.videos.push({ name: `<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span> ${n}`, meta: '480p · 5s', url: videoUrl });
+    state.videos.push({ name: `草稿Draft ${n}`, meta: '480p · 5s', url: videoUrl });
     updateMat();
     if (SESSION_ID && videoUrl) {
       await apiPost('/api/video-draft/save', {
@@ -2997,17 +2997,17 @@ async function genVideo() {
     }
   } catch(e) {
     hideLoading('s3');
-    alert(_t('<span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span><span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败：','Video draft failed: ') + e.message);
+    alert(_t('视频草稿DraftVideo Drafts生成Generate失败：','Video draft failed: ') + e.message);
   }
 }
 
-// ── 音乐<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span> ──
+// ── 音乐生成Generate ──
 async function genMusic() {
-  if (state.musics.length >= 3) { alert(_t('<span class="lang-zh-label">音乐<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Music Drafts</span>已满（最多3个）','Music panel full (max 3)')); return; }
+  if (state.musics.length >= 3) { alert(_t('音乐草稿DraftMusic Drafts已满（最多3个）','Music panel full (max 3)')); return; }
   showLoading('s4');
   try {
-    const mood = document.querySelector('#music-mood .tag.selected')?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">温柔舒缓</span><span class="lang-en-label">Gentle & Soothing</span>';
-    const genre = document.querySelector('#music-genre .tag.selected')?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">纯钢琴</span><span class="lang-en-label">Solo Piano</span>';
+    const mood = document.querySelector('#music-mood .tag.selected')?.firstChild?.textContent?.trim() || '温柔舒缓Gentle & Soothing';
+    const genre = document.querySelector('#music-genre .tag.selected')?.firstChild?.textContent?.trim() || '纯钢琴Solo Piano';
     const durEl = document.querySelector('#music-dur .tag.selected')?.textContent?.trim() || '20 秒';
     const dur = parseInt(durEl) || 20;
     const instruments = [...document.querySelectorAll('#music-inst .tag.selected')].map(t => t.firstChild?.textContent?.trim() || t.textContent.trim());
@@ -3023,7 +3023,7 @@ async function genMusic() {
         const result = await watchTask(
           data.task_id,
           `/api/music/task/${data.task_id}?session_id=${SESSION_ID}`,
-          d => { const el = document.getElementById('s4-loadtext'); if(el) el.textContent = `音乐<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>中 ${d.progress||0}%…`; },
+          d => { const el = document.getElementById('s4-loadtext'); if(el) el.textContent = `音乐生成Generate中 ${d.progress||0}%…`; },
           60000
         );
         audioUrl = result.audio_url;
@@ -3041,11 +3041,11 @@ async function genMusic() {
     }
   } catch(e) {
     hideLoading('s4');
-    alert(_t('音乐<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败：','Music failed: ') + e.message);
+    alert(_t('音乐生成Generate失败：','Music failed: ') + e.message);
   }
 }
 
-// ── 最终成片<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span> ──
+// ── 最终成片生成Generate ──
 async function genFinal() {
   const prompt = document.getElementById('final-prompt')?.value?.trim() || '';
   const res = document.getElementById('res-select').value;
@@ -3056,12 +3056,12 @@ async function genFinal() {
   const selVidCard  = document.querySelector('#s5-videos .asset-card.selected');
   const selMusCards = document.querySelectorAll('#s5-music .asset-card.selected');
 
-  // 必须选<span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span>
+  // 必须选视频草稿DraftVideo Drafts
   if (!selVidCard && state.videos.length > 0) {
-    showToast(_t('请先选择一个<span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span>','Select a video draft'), 'error'); return;
+    showToast(_t('请先选择一个视频草稿DraftVideo Drafts','Select a video draft'), 'error'); return;
   }
   if (!prompt) {
-    showToast(_t('请填写<span class="lang-zh-label">最终 Prompt</span><span class="lang-en-label">Final Prompt</span>','Enter final prompt'), 'error'); return;
+    showToast(_t('请填写最终 PromptFinal Prompt','Enter final prompt'), 'error'); return;
   }
 
   // 获取选中的实际 state 对象
@@ -3142,11 +3142,11 @@ async function genFinal() {
       document.getElementById('s5-done').scrollIntoView({ behavior: 'smooth' });
     }
   } catch(e) {
-    if (_s5Cancelled) return; // <span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span>后的异常忽略
+    if (_s5Cancelled) return; // 取消Cancel后的异常忽略
     hideLoading('s5');
     document.getElementById('s5-cancel-btn').style.display = 'none';
     document.getElementById('s5-gen-btn').style.display = '';
-    showToast(_t('成片<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败：','Final cut failed: ') + e.message, 'error');
+    showToast(_t('成片生成Generate失败：','Final cut failed: ') + e.message, 'error');
   }
 }
 
@@ -3171,7 +3171,7 @@ function handleVideoDrop(event) {
   document.getElementById('s3-video-zone').classList.remove('dragover');
   const file = event.dataTransfer.files[0];
   if (!file) return;
-  if (!file.type.startsWith('video/')) { showToast('请<span class="lang-zh-label">上传视频文件</span><span class="lang-en-label">Upload Video File</span>（mp4/mov/webm）', 'error'); return; }
+  if (!file.type.startsWith('video/')) { showToast('请上传视频文件Upload Video File（mp4/mov/webm）', 'error'); return; }
   _previewS3Video(file);
 }
 
@@ -3186,7 +3186,7 @@ function _previewS3Video(file) {
 
 async function saveUploadedVideo() {
   if (!_s3UploadedVideoFile) return;
-  if (state.videos.length >= 3) { showToast(_t('<span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span>已满（最多3个），请先删除旧<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span>','Video panel full (max 3)'), 'error'); return; }
+  if (state.videos.length >= 3) { showToast(_t('视频草稿DraftVideo Drafts已满（最多3个），请先删除旧草稿Draft','Video panel full (max 3)'), 'error'); return; }
 
   const loadingEl = document.getElementById('s3-upload-loading');
   const loadTextEl = document.getElementById('s3-upload-loadtext');
@@ -3208,7 +3208,7 @@ async function saveUploadedVideo() {
     const sizeMB = (_s3UploadedVideoFile.size / 1024 / 1024).toFixed(1);
     state.videos.push({ name, meta: `上传 · ${sizeMB}MB`, url: d.url, uploaded: true });
     updateMat();
-    showToast(`✓ 已上传并保存"${name}"到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>`, 'success');
+    showToast(`✓ 已上传并保存"${name}"到素材盘Material Panel`, 'success');
   } catch(e) {
     showToast('视频上传失败：' + e.message, 'error');
   } finally {
@@ -3225,17 +3225,17 @@ function updateS5() {
   const imgsGrid = document.getElementById('s5-imgs');
   if (imgsGrid) {
     if (state.imgs.length === 0) {
-      imgsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0"><span class="lang-zh-label">← 先在步骤一保存原图</span><span class="lang-en-label">← Save images in Step 1 first</span>，即可在此选择</div>';
+      imgsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤一保存原图← Save images in Step 1 first，即可在此选择</div>';
     } else {
       imgsGrid.innerHTML = state.imgs.map((img, i) => {
         const previewBg = img.url
           ? `style="background-image:url(${img.url});background-size:cover;background-position:center"`
           : '';
         const safeName = escapeHtml(img.name || ('原图 '+(i+1)));
-        const colorTag = img.color_params ? '<span style="position:absolute;top:5px;left:5px;font-size:9px;background:var(--green);color:#fff;padding:1px 6px;border-radius:4px">已调色</span>' : '';
+        const colorTag = img.color_params ? '<span style="position:absolute;top:5px;left:5px;font-size:9px;background:var(--green);color:#fff;padding:1px 6px;border-radius:4px">已调色' : '';
         return `<div class="asset-card${i===0?' selected':''}" data-idx="${i}" onclick="toggleAssetS5(this,'img')">
           <div class="asset-card-preview" ${previewBg}>
-            ${img.url ? colorTag : `<span style="font-size:22px">${img.icon||'🖼️'}</span>${colorTag}`}
+            ${img.url ? colorTag : `<span style="font-size:22px">${img.icon||'🖼️'}${colorTag}`}
           </div>
           <div class="asset-card-label">${safeName}</div>
         </div>`;
@@ -3243,11 +3243,11 @@ function updateS5() {
     }
   }
 
-  // <span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span>
+  // 视频草稿DraftVideo Drafts
   const vidsGrid = document.getElementById('s5-videos');
   if (vidsGrid) {
     if (state.videos.length === 0) {
-      vidsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>或上传<span class="lang-zh-label">视频<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Video Drafts</span></div>';
+      vidsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三生成Generate或上传视频草稿DraftVideo Drafts</div>';
     } else {
       vidsGrid.innerHTML = state.videos.map((v, i) => {
         const icon = v.uploaded ? '📤' : '▶';
@@ -3255,9 +3255,9 @@ function updateS5() {
         const safeMeta = escapeHtml(v.meta);
         return `<div class="asset-card${i===0?' selected':''}" data-idx="${i}" onclick="toggleAssetS5(this,'vid')">
           <div class="asset-card-preview" style="flex-direction:column;gap:4px">
-            <span style="font-size:28px">${icon}</span>
-            <span style="font-size:12px;color:var(--text2)">${safeName}</span>
-            <span style="font-size:10px;color:var(--text3)">${safeMeta}</span>
+            <span style="font-size:28px">${icon}
+            <span style="font-size:12px;color:var(--text2)">${safeName}
+            <span style="font-size:10px;color:var(--text3)">${safeMeta}
           </div>
           <div class="asset-card-label">${safeName}</div>
         </div>`;
@@ -3265,20 +3265,20 @@ function updateS5() {
     }
   }
 
-  // <span class="lang-zh-label">音乐<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Music Drafts</span>
+  // 音乐草稿DraftMusic Drafts
   const musGrid = document.getElementById('s5-music');
   if (musGrid) {
     if (state.musics.length === 0) {
-      musGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span><span class="lang-zh-label">音乐<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span></span><span class="lang-en-label">Music Drafts</span>（可跳过）</div>';
+      musGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四生成Generate音乐草稿DraftMusic Drafts（可跳过）</div>';
     } else {
       musGrid.innerHTML = state.musics.map((m, i) => {
         const safeName = escapeHtml(m.name);
         const safeMeta = escapeHtml(m.meta);
         return `<div class="asset-card" data-idx="${i}" onclick="toggleAssetS5(this,'mus')">
           <div class="asset-card-preview" style="flex-direction:column;gap:4px">
-            <span style="font-size:28px">♫</span>
-            <span style="font-size:12px;color:var(--text2)">${safeName}</span>
-            <span style="font-size:10px;color:var(--text3)">${safeMeta}</span>
+            <span style="font-size:28px">♫
+            <span style="font-size:12px;color:var(--text2)">${safeName}
+            <span style="font-size:10px;color:var(--text3)">${safeMeta}
           </div>
           <div class="asset-card-label">${safeName}</div>
         </div>`;
@@ -3287,7 +3287,7 @@ function updateS5() {
   }
 }
 
-// 步骤五 asset 选择（图片<span class="lang-zh-label">可多选</span><span class="lang-en-label">multi-select</span>最多2张，视频单选，音乐可<span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span>选择）
+// 步骤五 asset 选择（图片可多选multi-select最多2张，视频单选，音乐可取消Cancel选择）
 function toggleAssetS5(el, type) {
   if (type === 'img') {
     // 图片最多2张
@@ -3338,7 +3338,7 @@ function checkS5PromptStale() {
   }
 }
 
-// ── 步骤五<span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span><span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span> ──
+// ── 步骤五取消Cancel生成Generate ──
 let _s5Cancelled = false;
 
 function cancelFinal() {
@@ -3346,7 +3346,7 @@ function cancelFinal() {
   hideLoading('s5');
   document.getElementById('s5-cancel-btn').style.display = 'none';
   document.getElementById('s5-gen-btn').style.display = '';
-  showToast(_t('已<span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span><span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>','Cancelled'), 'error');
+  showToast(_t('已取消Cancel生成Generate','Cancelled'), 'error');
 }
 
 // ── 匹配视频风格 ──
@@ -3355,7 +3355,7 @@ function syncMusicStyle() {
   const styleVal = styleTag?.firstChild?.textContent?.trim() || '';
   const moodTags = document.querySelectorAll('#music-mood .tag');
   moodTags.forEach(t => t.classList.remove('selected'));
-  let idx = 1; // default: <span class="lang-zh-label">温柔舒缓</span><span class="lang-en-label">Gentle & Soothing</span>
+  let idx = 1; // default: 温柔舒缓Gentle & Soothing
   if (styleVal.includes('35mm') || styleVal.includes('复古')) idx = 1;
   else if (styleVal.includes('4K') || styleVal.includes('纪录')) idx = 0;
   else if (styleVal.includes('动漫')) idx = 3;
@@ -3397,13 +3397,13 @@ function updateMat() {
   const adjList = document.getElementById('adj-img-list');
   if (adjList) {
     if (state.imgs.length === 0) {
-      adjList.innerHTML = '<div class="img-select-item empty" style="font-size:13px"><span class="lang-zh-label">← 先在步骤一保存原图</span><span class="lang-en-label">← Save images in Step 1 first</span></div>';
+      adjList.innerHTML = '<div class="img-select-item empty" style="font-size:13px">← 先在步骤一保存原图← Save images in Step 1 first</div>';
     } else {
       adjList.innerHTML = state.imgs.map((img, i) => {
         const bg = img.url ? `style="background-image:url(${img.url});background-size:cover;background-position:center"` : '';
         const isSelected = img.id === _adjImgId;
         return `<div class="img-select-item${isSelected ? ' selected' : ''}" onclick="selectAdjImg(this,${i})" ${bg}>
-          ${img.url ? '' : `<span style="font-size:24px">${img.icon||'🖼️'}</span>`}
+          ${img.url ? '' : `<span style="font-size:24px">${img.icon||'🖼️'}`}
           ${img.color_params ? '<div style="position:absolute;bottom:3px;right:4px;font-size:9px;background:var(--green);color:#fff;padding:1px 5px;border-radius:4px">已调色</div>' : ''}
         </div>`;
       }).join('');
@@ -3430,7 +3430,7 @@ function updateMat() {
   document.getElementById('vid-count').textContent = state.videos.length + ' / 3';
   const vl = document.getElementById('vid-list');
   if (state.videos.length === 0) {
-    vl.innerHTML = '<div class="mat-placeholder">暂无<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span>，在步骤三<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span></div>';
+    vl.innerHTML = '<div class="mat-placeholder">暂无草稿Draft，在步骤三生成Generate</div>';
   } else {
     vl.innerHTML = state.videos.map((v,i) => `
       <div class="mat-item">
@@ -3445,7 +3445,7 @@ function updateMat() {
   document.getElementById('mus-count').textContent = state.musics.length + ' / 3';
   const ml = document.getElementById('mus-list');
   if (state.musics.length === 0) {
-    ml.innerHTML = '<div class="mat-placeholder">暂无音乐，在步骤四<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span></div>';
+    ml.innerHTML = '<div class="mat-placeholder">暂无音乐，在步骤四生成Generate</div>';
   } else {
     ml.innerHTML = state.musics.map((m,i) => `
       <div class="mat-item">
@@ -3469,7 +3469,7 @@ function previewVid(i) {
   const v = state.videos[i];
   if (!v || !v.url) { showToast(_t('视频 URL 未获取（Mock 模式）','Mock mode'), 'error'); return; }
   _previewingVidIdx = i;
-  document.getElementById('vid-preview-title').textContent = v.name || `<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span> ${i + 1}`;
+  document.getElementById('vid-preview-title').textContent = v.name || `草稿Draft ${i + 1}`;
   document.getElementById('vid-preview-meta').textContent = v.meta || (v.uploaded ? '上传视频' : '');
   const player = document.getElementById('vid-preview-player');
   player.src = v.url;
@@ -3566,7 +3566,7 @@ function updateS1LockList() {
   list.innerHTML = annotState.annotations.map((a, i) =>
     `<div class="ws-lock-item">
       <div class="ws-lock-dot" style="background:${getAnnotColor(i)}"></div>
-      <span>${escapeHtml(a.label)}</span>
+      <span>${escapeHtml(a.label)}
     </div>`
   ).join('');
 }
@@ -3598,19 +3598,19 @@ async function autoDescribeAfterUpload() {
   }
 }
 
-// ── generateFromUpload — 上传模式统一<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>按钮 ──
+// ── generateFromUpload — 上传模式统一生成Generate按钮 ──
 async function generateFromUpload() {
   if (!annotState.url) { showToast('请先上传图片','warn'); return; }
   const prompt = document.getElementById('s1-prompt-text')?.value?.trim() || '';
   if (!prompt) { showToast('Prompt 为空，请先配置风格或等待 AI 分析完成','warn'); return; }
 
   const btn = document.getElementById('s1-upload-gen-btn');
-  if (btn) { btn.disabled = true; btn.textContent = _t('<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>中…','Generating...'); }
+  if (btn) { btn.disabled = true; btn.textContent = _t('生成Generate中…','Generating...'); }
 
-  // <span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span> mask（若有标注）
+  // 生成Generate mask（若有标注）
   let maskB64 = null;
   if (annotState.annotations.length > 0) {
-    try { maskB64 = generateAnnotMask(); } catch(e) { console.warn('mask<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败', e); }
+    try { maskB64 = generateAnnotMask(); } catch(e) { console.warn('mask生成Generate失败', e); }
   }
 
   try {
@@ -3639,14 +3639,14 @@ async function generateFromUpload() {
     if (resultEl)  resultEl.style.display = '';
     if (data.note) showToast(data.note, 'warn');
   } catch(e) {
-    showToast('<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>失败：' + e.message, 'err');
+    showToast('生成Generate失败：' + e.message, 'err');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = _t('✦ <span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>新原图','✦ New Image'); }
+    if (btn) { btn.disabled = false; btn.textContent = _t('✦ 生成Generate新原图','✦ New Image'); }
   }
 }
 
 function generateAnnotMask() {
-  // <span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span> mask：annotated 区域=黑(保留)，其余=白(可修改)
+  // 生成Generate mask：annotated 区域=黑(保留)，其余=白(可修改)
   const canvas = document.getElementById('annot-canvas');
   if (!canvas || annotState.annotations.length === 0) return null;
   const mc = document.createElement('canvas');
@@ -3664,7 +3664,7 @@ function generateAnnotMask() {
   return mc.toDataURL('image/png').split(',')[1]; // base64
 }
 
-// ── genImagesFromPrompt — AI 模式<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>按钮，用 Prompt 面板文字 ──
+// ── genImagesFromPrompt — AI 模式生成Generate按钮，用 Prompt 面板文字 ──
 async function genImagesFromPrompt() {
   const prompt = document.getElementById('s1-prompt-text')?.value?.trim() || '';
   if (prompt) {
@@ -3674,7 +3674,7 @@ async function genImagesFromPrompt() {
 }
 
 // ── downloadAssetPack — 素材包下载 ──
-// ── <span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span> Prompt 弹窗 ──
+// ── 素材盘Material Panel Prompt 弹窗 ──
 let _ippImgIdx = -1;
 
 function showImgPromptPopup(imgIdx, thumbEl) {
@@ -3762,7 +3762,7 @@ async function downloadAssetPack(imgIdx) {
       ? '\n## 标注保留元素\n' + img.annotations.map(a => `- ${a.label}`).join('\n')
       : '',
     '',
-    `## <span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>时间`,
+    `## 生成Generate时间`,
     new Date().toLocaleString('zh-CN')
   ].join('\n');
 
