@@ -589,7 +589,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 <!-- USER MENU -->
 <div class="user-menu" id="user-menu">
   <div class="user-menu-item" onclick="openAuthModal('me')"><span class="lang-zh-label">👤 账户信息</span><span class="lang-en-label">👤 Account</span></div>
-  <div class="user-menu-item" onclick="closeUserMenu();openPricingModal()"><span class="lang-zh-label">💳 余额充值</span><span class="lang-en-label">💳 Recharge</span></div>
+  <div class="user-menu-item" onclick="closeUserMenu();openPricingModal()"><span class="lang-zh-label">💳 <span class='lang-zh-label'>余额充值</span><span class='lang-en-label'>Recharge</span></span><span class="lang-en-label">💳 Recharge</span></div>
   <div class="user-menu-item danger" onclick="doLogout()"><span class="lang-zh-label">退出登录</span><span class="lang-en-label">Logout</span></div>
 </div>
 
@@ -598,18 +598,18 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
   <div class="modal-box">
     <button class="modal-close" onclick="closeAuthModal()">✕</button>
     <div class="modal-title">Seedance Studio</div>
-    <div class="modal-sub">创建账户以保存你的作品和余额</div>
+    <div class="modal-sub"><span class='lang-zh-label'>创建账户以保存你的作品和余额</span><span class='lang-en-label'>Create an account to save your work and balance</span></div>
     <div class="modal-tabs">
-      <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')">登录</button>
-      <button class="modal-tab" id="tab-register" onclick="switchAuthTab('register')">注册</button>
+      <button class="modal-tab active" id="tab-login" onclick="switchAuthTab('login')"><span class="lang-zh-label">登录</span><span class="lang-en-label">Login</span></button>
+      <button class="modal-tab" id="tab-register" onclick="switchAuthTab('register')"><span class="lang-zh-label">注册</span><span class="lang-en-label">Register</span></button>
     </div>
     <div class="auth-field">
-      <label>邮箱</label>
+      <label><span class='lang-zh-label'>邮箱</span><span class='lang-en-label'>Email</span></label>
       <input class="auth-input" id="auth-email" type="email" placeholder="your@email.com" autocomplete="email">
     </div>
     <div class="auth-field">
-      <label>密码</label>
-      <input class="auth-input" id="auth-password" type="password" placeholder="至少 8 位" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+      <label><span class='lang-zh-label'>密码</span><span class='lang-en-label'>Password</span></label>
+      <input class="auth-input" id="auth-password" type="password" placeholder="..." data-zh-placeholder="至少 8 位" data-en-placeholder="At least 8 chars" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
     </div>
     <div id="auth-err" class="auth-err"></div>
     <button class="auth-submit" id="auth-submit" onclick="submitAuth()">登录</button>
@@ -628,13 +628,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
   <div class="modal-box" style="width:480px">
     <button class="modal-close" onclick="closePricingModal()">✕</button>
     <div class="modal-title">余额充值</div>
-    <div class="modal-sub">购买 Credits 用于生成图片与视频</div>
+    <div class="modal-sub"><span class='lang-zh-label'>购买 Credits 用于生成图片与视频</span><span class='lang-en-label'>Buy credits for image and video generation</span></div>
     <div class="balance-row" id="pricing-balance-row" style="display:none">
-      <span class="balance-label">当前余额</span>
+      <span class="balance-label"><span class='lang-zh-label'>当前余额</span><span class='lang-en-label'>Current Balance</span></span>
       <span class="balance-val" id="pricing-balance-val">—</span>
     </div>
     <div class="pricing-grid" id="pricing-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px">加载中…</div>
+      <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:13px"><span class='lang-zh-label'>加载中…</span><span class='lang-en-label'>Loading...</span></div>
     </div>
     <div class="pricing-note" id="pricing-note"></div>
   </div>
@@ -739,23 +739,23 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
         <div>
           <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px">选择主题 <span style="font-weight:400;opacity:.7">可多选</span></div>
           <div class="theme-grid">
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="portrait"><div class="icon">👤</div><div class="label">人物<span class="lang-en-label">Portrait</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="product"><div class="icon">📦</div><div class="label">产品<span class="lang-en-label">Product</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="architecture"><div class="icon">🏛️</div><div class="label">建筑<span class="lang-en-label">Architecture</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="nature"><div class="icon">🌿</div><div class="label">自然<span class="lang-en-label">Nature</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="street"><div class="icon">🌆</div><div class="label">街景<span class="lang-en-label">Street</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="animal"><div class="icon">🐾</div><div class="label">动物<span class="lang-en-label">Animal</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="food"><div class="icon">🍜</div><div class="label">美食<span class="lang-en-label">Food</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="abstract"><div class="icon">✨</div><div class="label">抽象艺术<span class="lang-en-label">Abstract</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="tech"><div class="icon">⚙️</div><div class="label">机械/科技<span class="lang-en-label">Tech</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="fashion"><div class="icon">👗</div><div class="label">时尚<span class="lang-en-label">Fashion</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="sports"><div class="icon">🏋️</div><div class="label">运动<span class="lang-en-label">Sports</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="fantasy"><div class="icon">🔮</div><div class="label">奇幻<span class="lang-en-label">Fantasy</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="dance"><div class="icon">💃</div><div class="label">跳舞<span class="lang-en-label">Dance</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="ancient"><div class="icon">🏯</div><div class="label">古装历史<span class="lang-en-label">Ancient</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="wedding"><div class="icon">💍</div><div class="label">婚礼<span class="lang-en-label">Wedding</span></div></div>
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="kids"><div class="icon">🧒</div><div class="label">萌宝<span class="lang-en-label">Kids</span></div></div>
-            <div class="theme-card" onclick="showOther('theme')" id="theme-other-card"><div class="icon">✏️</div><div class="label">其他<span class="lang-en-label">Other</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="portrait"><div class="icon">👤</div><div class="label"><span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="product"><div class="icon">📦</div><div class="label"><span class="lang-zh-label">产品</span><span class="lang-en-label">Product</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="architecture"><div class="icon">🏛️</div><div class="label"><span class="lang-zh-label">建筑</span><span class="lang-en-label">Architecture</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="nature"><div class="icon">🌿</div><div class="label"><span class="lang-zh-label">自然</span><span class="lang-en-label">Nature</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="street"><div class="icon">🌆</div><div class="label"><span class="lang-zh-label">街景</span><span class="lang-en-label">Street</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="animal"><div class="icon">🐾</div><div class="label"><span class="lang-zh-label">动物</span><span class="lang-en-label">Animal</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="food"><div class="icon">🍜</div><div class="label"><span class="lang-zh-label">美食</span><span class="lang-en-label">Food</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="abstract"><div class="icon">✨</div><div class="label"><span class="lang-zh-label">抽象艺术</span><span class="lang-en-label">Abstract</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="tech"><div class="icon">⚙️</div><div class="label"><span class="lang-zh-label">机械/科技</span><span class="lang-en-label">Tech</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="fashion"><div class="icon">👗</div><div class="label"><span class="lang-zh-label">时尚</span><span class="lang-en-label">Fashion</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="sports"><div class="icon">🏋️</div><div class="label"><span class="lang-zh-label">运动</span><span class="lang-en-label">Sports</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="fantasy"><div class="icon">🔮</div><div class="label"><span class="lang-zh-label">奇幻</span><span class="lang-en-label">Fantasy</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="dance"><div class="icon">💃</div><div class="label"><span class="lang-zh-label">跳舞</span><span class="lang-en-label">Dance</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="ancient"><div class="icon">🏯</div><div class="label"><span class="lang-zh-label">古装历史</span><span class="lang-en-label">Ancient</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="wedding"><div class="icon">💍</div><div class="label"><span class="lang-zh-label">婚礼</span><span class="lang-en-label">Wedding</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="kids"><div class="icon">🧒</div><div class="label"><span class="lang-zh-label">萌宝</span><span class="lang-en-label">Kids</span></div></div>
+            <div class="theme-card" onclick="showOther('theme')" id="theme-other-card"><div class="icon">✏️</div><div class="label"><span class="lang-zh-label">其他</span><span class="lang-en-label">Other</span></div></div>
           </div>
           <div class="other-wrap" id="other-theme">
             <input class="other-input" type="text" placeholder="输入自定义主题…" id="other-theme-input">
@@ -1580,8 +1580,8 @@ function switchAuthTab(tab) {
   _authTab = tab;
   document.getElementById('tab-login').classList.toggle('active', tab === 'login');
   document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-  document.getElementById('auth-submit').textContent = tab === 'login' ? '登录' : '创建账户';
-  document.getElementById('auth-password').placeholder = tab === 'register' ? '至少 8 位' : '密码';
+  document.getElementById('auth-submit').textContent = tab === 'login' ? _t('登录','Login') : _t('创建账户','Create Account');
+  document.getElementById('auth-password').placeholder = tab === 'register' ? _t('至少 8 位','At least 8 chars') : _t('密码','Password');
   document.getElementById('auth-err').textContent = '';
 }
 function toggleUserMenu() {
@@ -1680,7 +1680,7 @@ async function handleStudioGoogleCredential(response) {
     await fetchMe();
     showToast(d.is_new ? 'Welcome! Account created.' : 'Welcome back!', 'ok');
   } catch(e) {
-    errEl.textContent = '网络错误，请稍后重试';
+    errEl.textContent = _t('网络错误，请稍后重试','Network error, try again');
   }
 }
 
@@ -1720,10 +1720,10 @@ async function submitAuth() {
   const errEl = document.getElementById('auth-err');
   const btn = document.getElementById('auth-submit');
   errEl.textContent = '';
-  if (!email) { errEl.textContent = '请输入邮箱'; return; }
-  if (!password || password.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
+  if (!email) { errEl.textContent = _t('请输入邮箱','Please enter email'); return; }
+  if (!password || password.length < 6) { errEl.textContent = _t('密码至少 6 位','Password min 6 chars'); return; }
   btn.disabled = true;
-  btn.textContent = '请稍候…';
+  btn.textContent = _t('请稍候…','Please wait...');
   try {
     const endpoint = _authTab === 'login' ? '/api/auth/login' : '/api/auth/register';
     const body = _authTab === 'login'
@@ -1735,17 +1735,17 @@ async function submitAuth() {
       body: JSON.stringify(body)
     });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.detail || '操作失败'; return; }
+    if (!r.ok) { errEl.textContent = d.detail || _t('操作失败','Operation failed'); return; }
     AUTH_TOKEN = d.token;
     localStorage.setItem('seedance_token', AUTH_TOKEN);
     closeAuthModal();
-    showToast(_authTab === 'login' ? '✓ 登录成功' : '✓ 注册成功，欢迎！', 'ok');
+    showToast(_authTab === 'login' ? _t('✓ 登录成功','✓ Login OK') : _t('✓ 注册成功，欢迎！','✓ Registered!'), 'ok');
     await fetchMe();
   } catch(e) {
-    errEl.textContent = '网络错误，请稍后重试';
+    errEl.textContent = _t('网络错误，请稍后重试','Network error, try again');
   } finally {
     btn.disabled = false;
-    btn.textContent = _authTab === 'login' ? '登录' : '创建账户';
+    btn.textContent = _authTab === 'login' ? _t('登录','Login') : _t('创建账户','Create Account');
   }
 }
 
@@ -1755,7 +1755,7 @@ function doLogout() {
   localStorage.removeItem('seedance_token');
   closeUserMenu();
   showLoginBtn();
-  showToast('已退出登录', 'info');
+  showToast(_t('已退出登录','Logged out'), 'info');
 }
 
 // ── 定价 / 充值 ──
@@ -1810,7 +1810,7 @@ async function buyPackage(id, name, price) {
   if (!AUTH_TOKEN) {
     closePricingModal();
     openAuthModal('login');
-    showToast('请先登录后再购买', 'warn');
+    showToast(_t('请先登录后再购买','Login first'), 'warn');
     return;
   }
   // 尝试创建支付会话（当前返回 501）
@@ -1984,6 +1984,11 @@ function toggleLang() {
   document.body.classList.toggle('lang-en');
   document.getElementById('lang-btn').classList.toggle('active');
 }
+
+// ── i18n helper ────────────────────────────────
+function _t(zh, en) { return document.body.classList.contains('lang-en') ? en : zh; }
+function _tUpdate(el, zh, en) { el.textContent = _t(zh, en); }
+
 
 // ── IMAGE COUNT ──
 function selectCount(el) {
@@ -2193,7 +2198,7 @@ function buildPrompt() {
 // ── STORY TO PROMPT ──
 function storyToPrompt() {
   const story = document.getElementById('story-input').value.trim();
-  if (!story) { alert('请先输入剧情描述'); return; }
+  if (!story) { alert(_t('请先输入剧情描述','Enter narrative description')); return; }
   const prompt = `Animate the provided @Image1, preserve composition and colors. ${story} Shot in cinematic style, smooth motion, avoid jitter, avoid temporal flicker.`;
   document.getElementById('prompt-preview').textContent = prompt;
   switchMode('single');
@@ -2321,7 +2326,7 @@ function selectAdjImg(el, imgIdx) {
 }
 
 async function saveAdj() {
-  if (!_adjImgId) { showToast('请先选择一张原图', 'warn'); return; }
+  if (!_adjImgId) { showToast(_t('请先选择一张原图','Select an image first'), 'warn'); return; }
   const params = {
     brightness: +document.getElementById('sl-bright').value,
     contrast: +document.getElementById('sl-contrast').value,
@@ -2341,7 +2346,7 @@ async function saveAdj() {
       });
     } catch(_) {}
   }
-  showToast('✓ 调色参数已保存', 'ok');
+  showToast(_t('✓ 调色参数已保存','✓ Color saved'), 'ok');
 }
 
 // ── STEP 3: REF IMG ──
@@ -2413,12 +2418,12 @@ async function pollTask(pollPath, onProgress, maxMs = 120000) {
       const d = await apiGet(pollPath);
       if (typeof onProgress === 'function') onProgress(d);
       if (d.status === 'completed' || d.status === 'succeeded') return d;
-      if (d.status === 'failed') throw new Error(d.error || '生成失败');
+      if (d.status === 'failed') throw new Error(d.error || _t('生成失败','Generation failed'));
     } catch(e) {
-      if (e.message.includes('生成失败')) throw e;
+      if (e.message.includes(_t('生成失败','Generation failed'))) throw e;
     }
   }
-  throw new Error('等待超时，请稍后查看结果');
+  throw new Error(_t('等待超时，请稍后查看结果','Timeout, check later'));
 }
 
 // ── SSE 实时推送（优先）── 失败自动降级轮询
@@ -2432,7 +2437,7 @@ function watchTask(taskId, pollPath, onProgress, maxMs = 120000) {
     let es;
     let settled = false;
     const timer = setTimeout(() => {
-      if (!settled) { settled = true; es && es.close(); reject(new Error('等待超时，请稍后查看结果')); }
+      if (!settled) { settled = true; es && es.close(); reject(new Error(_t('等待超时，请稍后查看结果','Timeout, check later'))); }
     }, maxMs);
 
     const done = (data, err) => {
@@ -2450,13 +2455,13 @@ function watchTask(taskId, pollPath, onProgress, maxMs = 120000) {
           const d = JSON.parse(e.data);
           if (typeof onProgress === 'function') onProgress(d);
           if (d.status === 'completed' || d.status === 'succeeded') done(d, null);
-          else if (d.status === 'failed') done(null, new Error(d.error || '生成失败'));
+          else if (d.status === 'failed') done(null, new Error(d.error || _t('生成失败','Generation failed')));
         } catch(_) {}
       };
       es.addEventListener('done', (e) => {
         try {
           const d = JSON.parse(e.data);
-          if (d.status === 'failed') done(null, new Error(d.error || '生成失败'));
+          if (d.status === 'failed') done(null, new Error(d.error || _t('生成失败','Generation failed')));
           else done(d, null);
         } catch(_) {}
       });
@@ -2550,13 +2555,13 @@ async function genImages() {
     }
   } catch(e) {
     hideLoading('s1');
-    alert('图片生成失败：' + e.message);
+    alert(_t('图片生成失败：','Image gen failed: ') + e.message);
   }
 }
 
 async function saveImg(btn, name, icon) {
   const card = btn.closest('.gen-img-card');
-  if (state.imgs.length >= 9) { alert('素材盘已满（最多9张原图）'); return; }
+  if (state.imgs.length >= 9) { alert(_t(_t('素材盘已满（最多9张原图）','Panel full (max 9)'),'Panel full (max 9)')); return; }
   const url = card.dataset.url || '';
   let imgId = null;
   if (SESSION_ID && url) {
@@ -2822,7 +2827,7 @@ function resetUploadZone() {
 async function describeImage() {
   if (!annotState.url) { showToast('请先上传图片','warn'); return; }
   const btn = document.getElementById('describe-btn');
-  btn.disabled = true; btn.textContent = '分析中…';
+  btn.disabled = true; btn.textContent = _t('分析中…','Analyzing...');
   try {
     const themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').filter(Boolean).join(', ');
     const keywords = document.getElementById('extra-kw')?.value?.trim() || '';
@@ -2837,7 +2842,7 @@ async function describeImage() {
   } catch(e) {
     showToast('AI 描述失败：' + e.message, 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '✦ 分析图片';
+    btn.disabled = false; btn.textContent = _t('✦ 分析图片','✦ Analyze');
   }
 }
 
@@ -2846,7 +2851,7 @@ function applyDescribePrompt() {
   if (!prompt) return;
   // 注入到步骤三的 prompt 输入框（如有）或存到 annotState
   annotState.describePrompt = prompt;
-  showToast('✓ Prompt 已记录，保存图片后在步骤三可见', 'success');
+  showToast(_t('✓ Prompt 已记录，保存图片后在步骤三可见','✓ Prompt recorded'), 'success');
 }
 
 async function saveUploadedImgWithPrompt() {
@@ -2861,7 +2866,7 @@ async function saveUploadedImgWithPrompt() {
     ai_prompt: prompt   // 供步骤三默认使用
   });
   updateMat();
-  showToast('✓ 已保存到素材盘（含 AI Prompt）', 'success');
+  showToast(_t('✓ 已保存到素材盘（含 AI Prompt）','✓ Saved with AI prompt'), 'success');
   document.getElementById('save-guide').classList.add('visible');
 }
 
@@ -2930,7 +2935,7 @@ async function saveStylizedImg() {
 
 // ── 视频草稿生成 ──
 async function genVideo() {
-  if (state.videos.length >= 3) { alert('视频草稿已满（最多3个），请先删除旧草稿'); return; }
+  if (state.videos.length >= 3) { alert(_t('视频草稿已满（最多3个），请先删除旧草稿','Video panel full (max 3)')); return; }
   showLoading('s3');
   try {
     let prompt = document.getElementById('prompt-preview')?.textContent || '';
@@ -2980,13 +2985,13 @@ async function genVideo() {
     }
   } catch(e) {
     hideLoading('s3');
-    alert('视频草稿生成失败：' + e.message);
+    alert(_t('视频草稿生成失败：','Video draft failed: ') + e.message);
   }
 }
 
 // ── 音乐生成 ──
 async function genMusic() {
-  if (state.musics.length >= 3) { alert('音乐草稿已满（最多3个）'); return; }
+  if (state.musics.length >= 3) { alert(_t('音乐草稿已满（最多3个）','Music panel full (max 3)')); return; }
   showLoading('s4');
   try {
     const mood = document.querySelector('#music-mood .tag.selected')?.firstChild?.textContent?.trim() || '温柔舒缓';
@@ -3024,7 +3029,7 @@ async function genMusic() {
     }
   } catch(e) {
     hideLoading('s4');
-    alert('音乐生成失败：' + e.message);
+    alert(_t('音乐生成失败：','Music failed: ') + e.message);
   }
 }
 
@@ -3041,10 +3046,10 @@ async function genFinal() {
 
   // 必须选视频草稿
   if (!selVidCard && state.videos.length > 0) {
-    showToast('请先选择一个视频草稿', 'error'); return;
+    showToast(_t('请先选择一个视频草稿','Select a video draft'), 'error'); return;
   }
   if (!prompt) {
-    showToast('请填写最终 Prompt', 'error'); return;
+    showToast(_t('请填写最终 Prompt','Enter final prompt'), 'error'); return;
   }
 
   // 获取选中的实际 state 对象
@@ -3055,7 +3060,7 @@ async function genFinal() {
   _s5Cancelled = false;
   document.getElementById('s5-cancel-btn').style.display = '';
   document.getElementById('s5-gen-btn').style.display = 'none';
-  document.getElementById('s5-loadtext').textContent = '正在提交任务…';
+  document.getElementById('s5-loadtext').textContent = _t('正在提交任务…','Submitting...');
   showLoading('s5');
   try {
     if (SESSION_ID) {
@@ -3129,7 +3134,7 @@ async function genFinal() {
     hideLoading('s5');
     document.getElementById('s5-cancel-btn').style.display = 'none';
     document.getElementById('s5-gen-btn').style.display = '';
-    showToast('成片生成失败：' + e.message, 'error');
+    showToast(_t('成片生成失败：','Final cut failed: ') + e.message, 'error');
   }
 }
 
@@ -3169,7 +3174,7 @@ function _previewS3Video(file) {
 
 async function saveUploadedVideo() {
   if (!_s3UploadedVideoFile) return;
-  if (state.videos.length >= 3) { showToast('视频草稿已满（最多3个），请先删除旧草稿', 'error'); return; }
+  if (state.videos.length >= 3) { showToast(_t('视频草稿已满（最多3个），请先删除旧草稿','Video panel full (max 3)'), 'error'); return; }
 
   const loadingEl = document.getElementById('s3-upload-loading');
   const loadTextEl = document.getElementById('s3-upload-loadtext');
@@ -3276,7 +3281,7 @@ function toggleAssetS5(el, type) {
     // 图片最多2张
     const selected = el.closest('.asset-select-grid').querySelectorAll('.asset-card.selected');
     if (!el.classList.contains('selected') && selected.length >= 2) {
-      showToast('最多选择2张参考原图', 'error'); return;
+      showToast(_t('最多选择2张参考原图','Max 2 images'), 'error'); return;
     }
     el.classList.toggle('selected');
   } else if (type === 'vid') {
@@ -3329,7 +3334,7 @@ function cancelFinal() {
   hideLoading('s5');
   document.getElementById('s5-cancel-btn').style.display = 'none';
   document.getElementById('s5-gen-btn').style.display = '';
-  showToast('已取消生成', 'error');
+  showToast(_t('已取消生成','Cancelled'), 'error');
 }
 
 // ── 匹配视频风格 ──
@@ -3537,7 +3542,7 @@ function rebuildS1Prompt() { buildS1Prompt(); }
 function copyS1Prompt() {
   const t = document.getElementById('s1-prompt-text')?.value;
   if (!t) return;
-  navigator.clipboard.writeText(t).then(() => showToast('✓ Prompt 已复制', 'ok'));
+  navigator.clipboard.writeText(t).then(() => showToast(_t('✓ Prompt 已复制','✓ Prompt copied'), 'ok'));
 }
 
 function updateS1LockList() {
@@ -3588,7 +3593,7 @@ async function generateFromUpload() {
   if (!prompt) { showToast('Prompt 为空，请先配置风格或等待 AI 分析完成','warn'); return; }
 
   const btn = document.getElementById('s1-upload-gen-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '生成中…'; }
+  if (btn) { btn.disabled = true; btn.textContent = _t('生成中…','Generating...'); }
 
   // 生成 mask（若有标注）
   let maskB64 = null;
@@ -3624,7 +3629,7 @@ async function generateFromUpload() {
   } catch(e) {
     showToast('生成失败：' + e.message, 'err');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '✦ 生成新原图'; }
+    if (btn) { btn.disabled = false; btn.textContent = _t('✦ 生成新原图','✦ New Image'); }
   }
 }
 
@@ -3711,7 +3716,7 @@ function hideImgPromptPopup() {
 function copyIppPrompt() {
   const text = document.getElementById('ipp-text')?.textContent || '';
   if (!text || text === '（未记录 Prompt）') { showToast('暂无 Prompt 可复制', 'warn'); return; }
-  navigator.clipboard.writeText(text).then(() => showToast('✓ Prompt 已复制', 'success'));
+  navigator.clipboard.writeText(text).then(() => showToast(_t('✓ Prompt 已复制','✓ Prompt copied'), 'success'));
 }
 
 function applyIppToS1() {
