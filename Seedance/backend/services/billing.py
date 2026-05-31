@@ -15,24 +15,24 @@ def calculate_cost(task_type: str, model_key: Optional[str] = None, **params) ->
     - video_draft：按模型目录 per-second 价 × duration（对齐 EvoLink 按秒计费）
     - final_video：按 config cost_final_per_sec × duration
     """
-    from services.model_catalog import IMAGE, VIDEO_DRAFT, MUSIC, FINAL_VIDEO, get_price, get_video_price_per_sec
+    from services.model_catalog import IMAGE, VIDEO_DRAFT, MUSIC, FINAL_VIDEO, get_credits
 
     if task_type == VIDEO_DRAFT:
         duration = params.get("duration", 5)
         resolution = params.get("resolution", "720p")
-        per_sec = get_video_price_per_sec(model_key, resolution, settings.is_intl)
-        return round(per_sec * duration)
+        credits_per_sec = get_credits(VIDEO_DRAFT, model_key)
+        return credits_per_sec * duration
 
     if task_type in (IMAGE, MUSIC):
-        price = get_price(task_type, model_key, settings.is_intl)
+        credits = get_credits(task_type, model_key)
         count = params.get("count", 1)
-        return price * count
+        return credits * count
 
     if task_type == FINAL_VIDEO:
         resolution = params.get("resolution", "1080p")
         duration = params.get("duration", 12)
-        per_sec = settings.cost_final_per_sec.get(resolution, 0)
-        return round(per_sec * duration)
+        credits_per_sec = get_credits(FINAL_VIDEO, None, resolution)
+        return credits_per_sec * duration
 
     return 0
 
