@@ -14,7 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Copy pyproject.toml to root
-        run: cp comfyui-seedance-wizard/pyproject.toml pyproject.toml
+        run: |
+          cp comfyui-seedance-wizard/pyproject.toml pyproject.toml
+          echo "=== pyproject.toml contents ==="
+          cat pyproject.toml
+          echo "=== pwd and ls ==="
+          pwd && ls -la pyproject.toml
       - name: Publish to Comfy Registry
         uses: Comfy-Org/publish-node-action@main
         with:

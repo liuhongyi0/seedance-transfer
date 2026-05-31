@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-seedance-wizard"
 description = "AI video creation wizard — chat with AI director, analyze images, generate previews, and render with Seedance 2.0, Kling, Veo, and 15+ models — all inside ComfyUI"
-version = "1.0.2"
+version = "1.0.3"
 license = { file = "LICENSE" }
 dependencies = ["numpy", "Pillow"]
 
