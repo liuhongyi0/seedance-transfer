@@ -257,11 +257,11 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 .ws-download-btn { font-size: 10px; padding: 3px 8px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text3); border-radius: 5px; cursor: pointer; white-space: nowrap; }
 .ws-download-btn:hover { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
 
-/* 素材盘下载按钮 */
+/* <span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>下载按钮 */
 .mat-thumb .mat-dl { display: none; position: absolute; bottom: 3px; left: 3px; font-size: 9px; background: rgba(0,0,0,.65); color: #fff; border-radius: 4px; padding: 2px 5px; cursor: pointer; z-index: 2; }
 .mat-thumb:hover .mat-dl { display: block; }
 
-/* 素材盘 Prompt 弹窗 */
+/* <span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span> Prompt 弹窗 */
 #img-prompt-popup { position: fixed; z-index: 1200; width: 300px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.5); padding: 0; overflow: hidden; display: none; }
 #img-prompt-popup.visible { display: block; animation: popupIn .15s ease; }
 @keyframes popupIn { from { opacity:0; transform:scale(.95) translateY(4px); } to { opacity:1; transform:scale(1) translateY(0); } }
@@ -565,9 +565,9 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <div class="step-arrow">›</div>
     <div class="step-btn" onclick="goStep(2)" id="stepbtn-2"><div class="step-num">2</div><span class="lang-zh-label"> 调色</span><span class="lang-en-label"> Color</span></div>
     <div class="step-arrow">›</div>
-    <div class="step-btn" onclick="goStep(3)" id="stepbtn-3"><div class="step-num">3</div><span class="lang-zh-label"> 视频草稿</span><span class="lang-en-label"> Draft</span></div>
+    <div class="step-btn" onclick="goStep(3)" id="stepbtn-3"><div class="step-num">3</div><span class="lang-zh-label"> <span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span></span><span class="lang-en-label"> Draft</span></div>
     <div class="step-arrow">›</div>
-    <div class="step-btn" onclick="goStep(4)" id="stepbtn-4"><div class="step-num">4</div><span class="lang-zh-label"> 音乐草稿</span><span class="lang-en-label"> Music</span></div>
+    <div class="step-btn" onclick="goStep(4)" id="stepbtn-4"><div class="step-num">4</div><span class="lang-zh-label"> <span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span></span><span class="lang-en-label"> Music</span></div>
     <div class="step-arrow">›</div>
     <div class="step-btn" onclick="goStep(5)" id="stepbtn-5"><div class="step-num">5</div><span class="lang-zh-label"> 生成成片</span><span class="lang-en-label"> Final</span></div>
   </nav>
@@ -645,18 +645,18 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
 <!-- ═══ STEP 1 ═══ -->
 <div id="step1" class="step-panel active">
-  <div class="panel-title">第一步：参考原图工作台</div>
-  <div class="panel-subtitle">选择图片来源，配置风格，然后生成或处理原图。所有风格设置同时作用于 AI 生成、风格化和视频 Prompt。</div>
+  <div class="panel-title"><span class="lang-zh-label">第一步：参考原图工作台</span><span class="lang-en-label">Step 1: Reference Image Workbench</span></div>
+  <div class="panel-subtitle"><span class="lang-zh-label">选择图片来源，配置风格，然后生成或处理原图</span><span class="lang-en-label">Choose image source, configure style, generate or process images</span>。所有风格设置同时作用于 AI 生成、<span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span>和视频 Prompt。</div>
 
   <div class="card step1-workspace">
   <div class="ws-main">
 
-    <!-- ① 图片来源 -->
+    <!-- <span class="lang-zh-label">① 图片来源</span><span class="lang-en-label">① Image Source</span> -->
     <div class="ws-section">
-      <div class="ws-section-title" style="cursor:default">① 图片来源</div>
+      <div class="ws-section-title" style="cursor:default"><span class="lang-zh-label">① 图片来源</span><span class="lang-en-label">① Image Source</span></div>
       <div class="s1-mode-toggle">
-        <div class="s1-mode-btn active" onclick="switchS1Mode('ai')" id="s1-mode-ai">✦ AI 生成</div>
-        <div class="s1-mode-btn" onclick="switchS1Mode('upload')" id="s1-mode-upload">📤 上传原图</div>
+        <div class="s1-mode-btn active" onclick="switchS1Mode('ai')" id="s1-mode-ai"><span class="lang-zh-label">✦ AI 生成</span><span class="lang-en-label">✦ AI Generate</span></div>
+        <div class="s1-mode-btn" onclick="switchS1Mode('upload')" id="s1-mode-upload"><span class="lang-zh-label">📤 上传原图</span><span class="lang-en-label">📤 Upload</span></div>
       </div>
       <!-- 上传区（切换到上传模式后立即显示） -->
       <div id="s1-upload-zone-wrap" style="display:none;margin-top:16px">
@@ -674,7 +674,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
         <!-- 标注面板（上传后显示）-->
         <div id="s1-annot-panel" style="display:none;margin-top:16px">
           <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px">
-            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">标注重要目标 <span style="font-weight:400;color:var(--text3)">可选 — 拖动框选画面中的关键主体</span></div>
+            <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px"><span class="lang-zh-label">标注重要目标</span><span class="lang-en-label">Annotate Key Subjects</span> <span style="font-weight:400;color:var(--text3)"><span class="lang-zh-label"><span class="lang-zh-label">可选</span><span class="lang-en-label">Optional</span> — 拖动框选画面中的关键主体</span><span class="lang-en-label">Optional - drag to box key subjects</span></span></div>
             <div class="annot-wrapper" id="annot-wrapper">
               <img id="annot-img" alt="上传图片">
               <canvas id="annot-canvas"
@@ -684,14 +684,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
                       onmouseleave="onAnnotMouseUp(event)"></canvas>
             </div>
             <div class="annot-pending" id="annot-pending">
-              <input type="text" id="annot-label-input" placeholder="标注名称，如"人物"、"产品"、"背景"…" maxlength="20">
+              <input type="text" id="annot-label-input" placeholder="标注名称，如"<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>"、"产品"、"背景"…" maxlength="20">
               <div class="annot-pending-btns">
-                <button class="btn btn-primary" style="padding:5px 14px;font-size:12px" id="annot-confirm-btn">确认</button>
-                <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" id="annot-cancel-btn">取消</button>
+                <button class="btn btn-primary" style="padding:5px 14px;font-size:12px" id="annot-confirm-btn"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
+                <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" id="annot-cancel-btn"><span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span></button>
               </div>
             </div>
             <div class="annot-list" id="annot-list">
-              <div style="font-size:12px;color:var(--text3);padding:4px 0">在图片上拖动框选重要区域，添加标注</div>
+              <div style="font-size:12px;color:var(--text3);padding:4px 0"><span class="lang-zh-label">在图片上拖动框选重要区域，添加标注</span><span class="lang-en-label">Drag on the image to box important regions</span></div>
             </div>
           </div>
 
@@ -702,15 +702,15 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
             <button id="stylize-btn" onclick="stylizeImage()"></button>
           </div>
 
-          <!-- 风格化 loading + result -->
+          <!-- <span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span> loading + result -->
           <div class="loading-bar" id="stylize-loading" style="margin-top:8px"><div class="loading-bar-inner"></div></div>
-          <div class="loading-text" id="stylize-loadtext">AI 风格化中，约 20-30 秒…</div>
+          <div class="loading-text" id="stylize-loadtext"><span class="lang-zh-label">AI <span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span>中，约 20-30 秒…</span><span class="lang-en-label">AI stylizing, ~20-30 seconds...</span></div>
           <div id="stylize-result" style="display:none;margin-top:12px">
-            <div style="font-size:12px;color:var(--text3);margin-bottom:6px">生成结果 — 点击保存到素材盘</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:6px"><span class="lang-zh-label">生成结果 — 点击保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span></span><span class="lang-en-label">Results — click to save to material panel</span></div>
             <div class="gen-img-card" id="stylize-result-card" style="max-width:320px;cursor:pointer" onclick="saveStylizedImg()">
               <div class="gen-img-preview" id="stylize-preview" style="min-height:160px;background-size:cover;background-position:center"></div>
               <div class="gen-img-actions">
-                <button class="btn-save" onclick="event.stopPropagation();saveStylizedImg()">＋ 保存到素材盘</button>
+                <button class="btn-save" onclick="event.stopPropagation();saveStylizedImg()"><span class="lang-zh-label">＋ 保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span></span><span class="lang-en-label">+ Save to Panel</span></button>
               </div>
             </div>
           </div>
@@ -718,8 +718,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           <!-- 统一操作按钮 -->
           <div style="display:none;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px" id="s1-upload-actions">
             <button class="btn btn-primary" onclick="generateFromUpload()" style="flex:1;min-width:160px" id="s1-upload-gen-btn">✦ 生成新原图</button>
-            <button class="btn btn-secondary" onclick="saveUploadedImg()" style="font-size:12px;padding:8px 16px">＋ 保存原图</button>
-            <button class="btn btn-secondary" onclick="resetUploadZone()" style="font-size:12px;padding:8px 14px">↺ 换图</button>
+            <button class="btn btn-secondary" onclick="saveUploadedImg()" style="font-size:12px;padding:8px 16px"><span class="lang-zh-label">＋ 保存原图</span><span class="lang-en-label">+ Save Image</span></button>
+            <button class="btn btn-secondary" onclick="resetUploadZone()" style="font-size:12px;padding:8px 14px"><span class="lang-zh-label">↺ 换图</span><span class="lang-en-label">↺ Change</span></button>
           </div>
         </div><!-- /s1-annot-panel -->
       </div><!-- /s1-upload-zone-wrap -->
@@ -727,19 +727,19 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
     <div class="ws-divider"></div>
 
-    <!-- ② 风格设置（可折叠） -->
+    <!-- <span class="lang-zh-label">② 风格设置</span><span class="lang-en-label">② Style Settings</span>（可折叠） -->
     <div class="ws-section">
       <div class="ws-section-title" onclick="toggleStyleSettings()">
-        <span>② 风格设置</span>
+        <span><span class="lang-zh-label">② 风格设置</span><span class="lang-en-label">② Style Settings</span></span>
         <span class="ws-toggle-icon" id="style-toggle-icon">▾</span>
       </div>
       <div id="style-settings-body" class="ws-style-body">
 
-        <!-- 选择主题 -->
+        <!-- <span class="lang-zh-label">选择主题</span><span class="lang-en-label">Select Theme</span> -->
         <div>
-          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px">选择主题 <span style="font-weight:400;opacity:.7">可多选</span></div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px"><span class="lang-zh-label">选择主题</span><span class="lang-en-label">Select Theme</span> <span style="font-weight:400;opacity:.7"><span class="lang-zh-label">可多选</span><span class="lang-en-label">multi-select</span></span></div>
           <div class="theme-grid">
-            <div class="theme-card" onclick="toggleTheme(this)" data-val="portrait"><div class="icon">👤</div><div class="label"><span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span></div></div>
+            <div class="theme-card" onclick="toggleTheme(this)" data-val="portrait"><div class="icon">👤</div><div class="label"><span class="lang-zh-label"><span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span></span><span class="lang-en-label">Portrait</span></div></div>
             <div class="theme-card" onclick="toggleTheme(this)" data-val="product"><div class="icon">📦</div><div class="label"><span class="lang-zh-label">产品</span><span class="lang-en-label">Product</span></div></div>
             <div class="theme-card" onclick="toggleTheme(this)" data-val="architecture"><div class="icon">🏛️</div><div class="label"><span class="lang-zh-label">建筑</span><span class="lang-en-label">Architecture</span></div></div>
             <div class="theme-card" onclick="toggleTheme(this)" data-val="nature"><div class="icon">🌿</div><div class="label"><span class="lang-zh-label">自然</span><span class="lang-en-label">Nature</span></div></div>
@@ -759,10 +759,10 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           </div>
           <div class="other-wrap" id="other-theme">
             <input class="other-input" type="text" placeholder="输入自定义主题…" id="other-theme-input">
-            <button class="other-confirm" onclick="confirmOther('theme')">确认</button>
+            <button class="other-confirm" onclick="confirmOther('theme')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
           </div>
           <div style="margin-top:12px">
-            <div style="font-size:11px;color:var(--text3);margin-bottom:7px">场景预设 <span style="opacity:.6">/ Quick Scene Presets</span></div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:7px"><span class="lang-zh-label">场景预设</span><span class="lang-en-label">Quick Scene Presets</span> <span style="opacity:.6">/ Quick Scene Presets</span></div>
             <div class="preset-row">
               <div class="preset-chip" onclick="applyPreset('cyberpunk')">赛博朋克美女</div>
               <div class="preset-chip" onclick="applyPreset('ink')">水墨山水</div>
@@ -781,7 +781,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
             <div>
               <div style="font-size:11px;color:var(--text3);margin-bottom:7px">视觉风格 <span class="lang-en-label" style="display:inline">/ Visual Style</span></div>
               <div class="tag-row" id="style-tags">
-                <div class="tag" onclick="toggleTag(this,'style')" data-val="cinematic film">电影质感<span class="lang-en-label">Cinematic</span></div>
+                <div class="tag" onclick="toggleTag(this,'style')" data-val="cinematic film"><span class="lang-zh-label">电影质感</span><span class="lang-en-label">Cinematic</span><span class="lang-en-label">Cinematic</span></div>
                 <div class="tag" onclick="toggleTag(this,'style')" data-val="realistic photography">真实摄影<span class="lang-en-label">Photography</span></div>
                 <div class="tag" onclick="toggleTag(this,'style')" data-val="anime illustration">动漫插画<span class="lang-en-label">Anime</span></div>
                 <div class="tag" onclick="toggleTag(this,'style')" data-val="3D render">3D渲染<span class="lang-en-label">3D Render</span></div>
@@ -792,14 +792,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
               </div>
               <div class="other-wrap" id="other-style1">
                 <input class="other-input" type="text" placeholder="自定义视觉风格…" id="other-style1-input">
-                <button class="other-confirm" onclick="confirmOtherTag('style','style-tags','style1')">确认</button>
+                <button class="other-confirm" onclick="confirmOtherTag('style','style-tags','style1')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
               </div>
             </div>
             <div>
               <div style="font-size:11px;color:var(--text3);margin-bottom:7px">光线 / Lighting</div>
               <div class="tag-row" id="light-tags">
                 <div class="tag" onclick="toggleTag(this,'light')" data-val="golden hour">黄金时刻<span class="lang-en-label">Golden Hour</span></div>
-                <div class="tag" onclick="toggleTag(this,'light')" data-val="soft natural light">自然柔光<span class="lang-en-label">Soft Light</span></div>
+                <div class="tag" onclick="toggleTag(this,'light')" data-val="soft natural light"><span class="lang-zh-label">自然柔光</span><span class="lang-en-label">Soft Natural Light</span><span class="lang-en-label">Soft Light</span></div>
                 <div class="tag" onclick="toggleTag(this,'light')" data-val="neon lights">霓虹灯光<span class="lang-en-label">Neon</span></div>
                 <div class="tag" onclick="toggleTag(this,'light')" data-val="backlit silhouette">逆光剪影<span class="lang-en-label">Backlit</span></div>
                 <div class="tag" onclick="toggleTag(this,'light')" data-val="overcast diffused light">阴天漫反射<span class="lang-en-label">Overcast</span></div>
@@ -808,13 +808,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
               </div>
               <div class="other-wrap" id="other-light1">
                 <input class="other-input" type="text" placeholder="自定义光线描述…" id="other-light1-input">
-                <button class="other-confirm" onclick="confirmOtherTag('light','light-tags','light1')">确认</button>
+                <button class="other-confirm" onclick="confirmOtherTag('light','light-tags','light1')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
               </div>
             </div>
             <div>
               <div style="font-size:11px;color:var(--text3);margin-bottom:7px">情绪氛围 / Mood</div>
               <div class="tag-row" id="mood-tags">
-                <div class="tag" onclick="toggleTag(this,'mood')" data-val="warm healing">温暖治愈<span class="lang-en-label">Warm</span></div>
+                <div class="tag" onclick="toggleTag(this,'mood')" data-val="warm healing"><span class="lang-zh-label">温暖治愈</span><span class="lang-en-label">Warm Healing</span><span class="lang-en-label">Warm</span></div>
                 <div class="tag" onclick="toggleTag(this,'mood')" data-val="mysterious dark">神秘黑暗<span class="lang-en-label">Dark</span></div>
                 <div class="tag" onclick="toggleTag(this,'mood')" data-val="fresh bright">清新明亮<span class="lang-en-label">Fresh</span></div>
                 <div class="tag" onclick="toggleTag(this,'mood')" data-val="epic grand">史诗壮阔<span class="lang-en-label">Epic</span></div>
@@ -824,7 +824,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
               </div>
               <div class="other-wrap" id="other-mood1">
                 <input class="other-input" type="text" placeholder="自定义情绪氛围…" id="other-mood1-input">
-                <button class="other-confirm" onclick="confirmOtherTag('mood','mood-tags','mood1')">确认</button>
+                <button class="other-confirm" onclick="confirmOtherTag('mood','mood-tags','mood1')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
               </div>
             </div>
           </div>
@@ -843,7 +843,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
         <!-- 关键词 -->
         <div>
-          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px">关键词补充 <span style="font-weight:400;opacity:.7">可选，中文即可</span></div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px"><span class="lang-zh-label">关键词补充</span><span class="lang-en-label">Keywords — optional, any language</span> <span style="font-weight:400;opacity:.7"><span class="lang-zh-label">可选</span><span class="lang-en-label">Optional</span>，中文即可</span></div>
           <input class="text-input" type="text" placeholder="例如：樱花树下、未来城市、温暖的咖啡馆…" id="extra-kw" oninput="buildS1Prompt()">
         </div>
 
@@ -860,22 +860,22 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
       <div id="s1-ai-section">
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px">
           <div class="count-pills">
-            <span style="font-size:12px;color:var(--text3)">生成数量：</span>
+            <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">生成数量：</span><span class="lang-en-label">Count: </span></span>
             <div class="count-pill" onclick="selectCount(this)" data-count="1">1 张</div>
             <div class="count-pill selected" onclick="selectCount(this)" data-count="3">3 张</div>
             <div class="count-pill" onclick="selectCount(this)" data-count="4">4 张</div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-            <span style="font-size:12px;color:var(--text3)">模型:</span>
+            <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">模型:</span><span class="lang-en-label">Model:</span></span>
             <select class="param-select" style="width:auto;min-width:170px;font-size:12px" id="s1-model-select" onchange="refreshAllCosts()"></select>
           </div>
         </div>
         <div style="font-size:11px;margin-bottom:6px" id="s1-cost-info">约 ¥0.22/张 × 3张 = ¥0.66</div>
-        <button class="btn btn-primary" style="width:220px" onclick="genImagesFromPrompt()">✦ 生成原图（低分辨率）</button>
+        <button class="btn btn-primary" style="width:220px" onclick="genImagesFromPrompt()"><span class="lang-zh-label">✦ 生成原图（低<span class="lang-zh-label">分辨率</span><span class="lang-en-label">Resolution</span>）</span><span class="lang-en-label">✦ Generate Images (Low Res)</span></button>
         <div class="loading-bar" id="s1-loading"><div class="loading-bar-inner"></div></div>
-        <div class="loading-text" id="s1-loadtext">AI 正在生成中，约 15-25 秒…</div>
+        <div class="loading-text" id="s1-loadtext"><span class="lang-zh-label">AI 正在生成中，约 15-25 秒…</span><span class="lang-en-label">AI generating, ~15-25 seconds...</span></div>
         <div class="gen-result" id="s1-result">
-          <div style="font-size:13px;color:var(--text2);margin-bottom:10px;" id="s1-result-hint">生成了 3 张原图，选择保存到素材盘 ↓</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:10px;" id="s1-result-hint">生成了 3 张原图，选择保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span> ↓</div>
           <div class="gen-images" id="s1-gen-images">
             <div class="gen-img-card">
               <div class="gen-img-preview" style="background:linear-gradient(135deg,#1a1a3e,#0f3460,#533483)"><span style="font-size:32px">🌃</span></div>
@@ -899,7 +899,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
               </div>
             </div>
           </div>
-          <button class="btn btn-secondary" onclick="genImages()" style="font-size:12px;padding:8px 16px">↺ 重新生成一批</button>
+          <button class="btn btn-secondary" onclick="genImages()" style="font-size:12px;padding:8px 16px"><span class="lang-zh-label">↺ 重新生成一批</span><span class="lang-en-label">↺ Regenerate</span></button>
         </div>
       </div><!-- /s1-ai-section -->
 
@@ -910,7 +910,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <!-- 合规提示（内嵌卡片底部） -->
     <div style="margin:0 22px 20px;padding:12px 14px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:8px;display:flex;gap:10px;align-items:flex-start">
       <span style="font-size:14px;flex-shrink:0">⚠️</span>
-      <div style="font-size:12px;color:var(--text2);line-height:1.6"><strong>合规提示：</strong>请勿使用真实人物面孔、明星肖像或他人版权图片。Seedance API 会自动拒绝含真实人脸的图片，且可能导致账号限制。</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6"><strong>合规提示：</strong>请勿使用真实<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>面孔、明星肖像或他人版权图片。Seedance API 会自动拒绝含真实人脸的图片，且可能导致账号限制。</div>
     </div>
 
   </div><!-- /ws-main -->
@@ -923,7 +923,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     </div>
     <textarea class="ws-prompt-textarea" id="s1-prompt-text" placeholder="AI 描述分析结果 + 风格设置将自动填充…&#10;也可以直接手动编辑"></textarea>
     <div class="ws-prompt-actions">
-      <button class="ws-download-btn" onclick="rebuildS1Prompt()" style="flex:1">↺ 重建</button>
+      <button class="ws-download-btn" onclick="rebuildS1Prompt()" style="flex:1"><span class="lang-zh-label">↺ 重建</span><span class="lang-en-label">↺ Rebuild</span></button>
       <button class="ws-download-btn" onclick="copyS1Prompt()" title="复制 Prompt">📋</button>
     </div>
     <div id="s1-lock-section" style="display:none">
@@ -934,25 +934,25 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
   </div><!-- /card.step1-workspace -->
 
-  <div class="save-guide" id="save-guide">✓ 已保存到素材盘 — 继续去 <strong>步骤二调色</strong> →</div>
+  <div class="save-guide" id="save-guide">✓ 已保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span> — 继续去 <strong>步骤二调色</strong> →</div>
 
 </div>
 
 <!-- ═══ STEP 2 ═══ -->
 <div id="step2" class="step-panel">
-  <div class="panel-title">第二步：图片调色</div>
-  <div class="panel-subtitle">从素材盘选择一张原图进行调色。每张图的参数独立保存，调色结果将在生成视频时自动融入 Prompt。</div>
+  <div class="panel-title"><span class="lang-zh-label">第二步：图片调色</span><span class="lang-en-label">Step 2: Color Grading</span></div>
+  <div class="panel-subtitle"><span class="lang-zh-label">从<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>选择一张原图进行调色</span><span class="lang-en-label">Select a reference image from the material panel for color grading</span>。每张图的参数独立保存，调色结果将在生成视频时自动融入 Prompt。</div>
 
   <div class="card" style="padding:0;overflow:hidden">
     <div class="adjust-layout" style="padding:20px;gap:24px">
       <div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px;font-weight:600">选择原图</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px;font-weight:600"><span class="lang-zh-label">选择原图</span><span class="lang-en-label">Select Image</span></div>
         <div class="img-select-list" id="adj-img-list">
-          <div class="img-select-item empty" style="font-size:13px">← 先在步骤一保存原图</div>
+          <div class="img-select-item empty" style="font-size:13px"><span class="lang-zh-label">← 先在步骤一保存原图</span><span class="lang-en-label">← Save images in Step 1 first</span></div>
         </div>
       </div>
       <div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:600">调节参数</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:600"><span class="lang-zh-label">调节参数</span><span class="lang-en-label">Adjust Parameters</span></div>
         <div class="slider-group">
           <div class="slider-row">
             <div class="slider-label"><span>亮度 Brightness</span><span class="slider-val" id="val-bright">0</span></div>
@@ -982,19 +982,19 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           </div>
         </div>
         <div style="margin-top:14px;display:flex;gap:8px">
-          <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px" onclick="resetSliders()">↺ 重置</button>
-          <button class="btn btn-primary" style="font-size:12px;padding:7px 18px" onclick="saveAdj()">✓ 保存调色</button>
+          <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px" onclick="resetSliders()"><span class="lang-zh-label">↺ 重置</span><span class="lang-en-label">↺ Reset</span></button>
+          <button class="btn btn-primary" style="font-size:12px;padding:7px 18px" onclick="saveAdj()"><span class="lang-zh-label">✓ 保存调色</span><span class="lang-en-label">✓ Save Grading</span></button>
         </div>
       </div>
       <div>
         <div style="font-size:12px;color:var(--text3);margin-bottom:10px;font-weight:600;display:flex;justify-content:space-between;align-items:center">
-          <span>实时预览</span>
+          <span><span class="lang-zh-label">实时预览</span><span class="lang-en-label">Live Preview</span></span>
           <button class="btn btn-secondary" style="font-size:10px;padding:3px 10px" onclick="toggleBeforeAfter()" id="ba-toggle-btn">👁 对比原图</button>
         </div>
         <div class="img-preview-wrap" id="adj-preview">
           <div class="preview-mock" id="adj-mock-img">🌃</div>
         </div>
-        <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center" id="adj-preview-label">调节滑块即可实时预览调色效果</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center" id="adj-preview-label">调节滑块即可<span class="lang-zh-label">实时预览</span><span class="lang-en-label">Live Preview</span>调色效果</div>
       </div>
     </div>
   </div>
@@ -1002,31 +1002,31 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
 <!-- ═══ STEP 3 ═══ -->
 <div id="step3" class="step-panel">
-  <div class="panel-title">第三步：视频草稿生成</div>
-  <div class="panel-subtitle">选择参考原图，通过公式组合生成视频 Prompt。草稿固定为 <strong style="color:var(--yellow)">5秒 · 480p</strong>，快速验证风格后再生成成片。</div>
+  <div class="panel-title"><span class="lang-zh-label">第三步：<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>生成</span><span class="lang-en-label">Step 3: Video Draft Generation</span></div>
+  <div class="panel-subtitle"><span class="lang-zh-label"><span class="lang-zh-label">选择参考原图</span><span class="lang-en-label">Select Reference Images</span>，通过公式组合生成视频 Prompt</span><span class="lang-en-label">Select a reference image, compose a video prompt via formula</span>。草稿固定为 <strong style="color:var(--yellow)">5秒 · 480p</strong>，快速验证风格后再生成成片。</div>
 
   <!-- 视频来源选择 -->
   <div class="s1-mode-toggle" style="margin-bottom:16px">
-    <div class="s1-mode-btn active" id="s3-src-ai" onclick="switchS3Source('gen')">✦ AI 生成草稿</div>
-    <div class="s1-mode-btn" id="s3-src-upload" onclick="switchS3Source('upload')">📤 上传已有视频</div>
+    <div class="s1-mode-btn active" id="s3-src-ai" onclick="switchS3Source('gen')"><span class="lang-zh-label">✦ AI 生成</span><span class="lang-en-label">✦ AI Generate</span>草稿</div>
+    <div class="s1-mode-btn" id="s3-src-upload" onclick="switchS3Source('upload')"><span class="lang-zh-label">📤 上传已有视频</span><span class="lang-en-label">📤 Upload Existing Video</span></div>
   </div>
 
   <!-- AI 生成区 -->
   <div id="s3-gen-section">
   <div class="mode-tabs">
-    <div class="mode-tab active" onclick="switchMode('single')" id="tab-single">⚡ 单镜头模式（快速）</div>
-    <div class="mode-tab" onclick="switchMode('story')" id="tab-story">🎬 分镜 / 剧情模式</div>
+    <div class="mode-tab active" onclick="switchMode('single')" id="tab-single"><span class="lang-zh-label">⚡ 单镜头模式（快速）</span><span class="lang-en-label">⚡ Single Shot (Fast)</span></div>
+    <div class="mode-tab" onclick="switchMode('story')" id="tab-story"><span class="lang-zh-label">🎬 分镜 / 剧情模式</span><span class="lang-en-label">🎬 Storyboard Mode</span></div>
   </div>
 
   <!-- 分镜/剧情模式 -->
   <div class="mode-panel" id="mode-story">
     <div class="card">
-      <div class="card-title">剧情 / 分镜描述</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">用中文描述视频剧情，AI 将自动转换为 Seedance 英文 Prompt。支持描述多个连续动作，用逗号分隔。</div>
+      <div class="card-title"><span class="lang-zh-label">剧情 / 分镜描述</span><span class="lang-en-label">Storyboard Description</span></div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px"><span class="lang-zh-label">用中文描述视频剧情，AI 将自动转换为 Seedance 英文 Prompt</span><span class="lang-en-label">Describe the video narrative, AI will auto-convert to English prompt</span>。支持描述多个连续<span class="lang-zh-label">动作</span><span class="lang-en-label">Action</span>，用逗号分隔。</div>
       <textarea class="story-input" id="story-input" placeholder="例如：镜头从远处慢慢推进，一个穿白裙的女孩在樱花树下转身回眸，花瓣随风飘落，最后定格在她微笑的面部特写。"></textarea>
       <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
-        <button class="btn btn-primary" style="font-size:12px;padding:7px 16px" onclick="storyToPrompt()">✨ 转换为英文 Prompt</button>
-        <span style="font-size:11px;color:var(--text3)">自动填充到 Prompt 预览，再生成视频</span>
+        <button class="btn btn-primary" style="font-size:12px;padding:7px 16px" onclick="storyToPrompt()"><span class="lang-zh-label">✨ 转换为英文 Prompt</span><span class="lang-en-label">✨ Convert to English Prompt</span></button>
+        <span style="font-size:11px;color:var(--text3)"><span class="lang-zh-label">自动填充到 Prompt 预览，再生成视频</span><span class="lang-en-label">Auto-fills prompt preview, then generate video</span></span>
       </div>
     </div>
   </div>
@@ -1036,8 +1036,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
   <!-- 参考图选择 -->
   <div class="card">
-    <div class="card-title">绑定参考原图 <span style="font-size:11px;font-weight:400;color:var(--text3)">选择将作为视频起始画面的原图</span></div>
-    <div class="compliance-hint">⚠️ 所选原图不得含真实人物面孔，否则 API 将拒绝请求</div>
+    <div class="card-title"><span class="lang-zh-label">绑定参考原图</span><span class="lang-en-label">Bind Reference Image</span> <span style="font-size:11px;font-weight:400;color:var(--text3)">选择将作为视频起始画面的原图</span></div>
+    <div class="compliance-hint">⚠️ 所选原图不得含真实<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>面孔，否则 API 将拒绝请求</div>
     <div style="display:flex;gap:10px;align-items:center">
       <div style="display:flex;gap:8px" id="ref-img-row">
         <div class="mat-thumb selected" style="width:80px;border-color:var(--accent)" onclick="selectRefImg(this,'🌃')">
@@ -1053,12 +1053,12 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
   <!-- Prompt Builder -->
   <div class="card">
-    <div class="card-title">Prompt 构建器 <span style="font-size:11px;font-weight:400;color:var(--text3)">选择后自动拼接英文 Prompt</span></div>
+    <div class="card-title"><span class="lang-zh-label">Prompt 构建器</span><span class="lang-en-label">Prompt Builder</span> <span style="font-size:11px;font-weight:400;color:var(--text3)">选择后自动拼接英文 Prompt</span></div>
     <div class="prompt-builder">
 
       <!-- 1 Subject -->
       <div class="pb-step">
-        <div class="pb-step-head"><div class="pb-num">1</div><div class="pb-step-title">主体描述</div><div class="pb-step-en">Subject</div></div>
+        <div class="pb-step-head"><div class="pb-num">1</div><div class="pb-step-title"><span class="lang-zh-label">主体描述</span><span class="lang-en-label">Subject</span></div><div class="pb-step-en">Subject</div></div>
         <div class="tag-row" id="pb-subject">
           <div class="tag selected" onclick="pbSelect(this,'subject','A young woman in white dress')">白裙女性<span class="lang-en-label">White Dress</span></div>
           <div class="tag" onclick="pbSelect(this,'subject','A man in dark suit')">深色西装男<span class="lang-en-label">Dark Suit</span></div>
@@ -1070,15 +1070,15 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
         </div>
         <div class="other-wrap" id="other-subject">
           <input class="other-input" type="text" placeholder="描述主体（可中英文）…" id="other-subject-input">
-          <button class="other-confirm" onclick="confirmOtherPb('subject','pb-subject','other-subject')">确认</button>
+          <button class="other-confirm" onclick="confirmOtherPb('subject','pb-subject','other-subject')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
         </div>
       </div>
 
       <!-- 2 Action -->
       <div class="pb-step">
-        <div class="pb-step-head"><div class="pb-num">2</div><div class="pb-step-title">动作</div><div class="pb-step-en">Action</div></div>
+        <div class="pb-step-head"><div class="pb-num">2</div><div class="pb-step-title"><span class="lang-zh-label">动作</span><span class="lang-en-label">Action</span></div><div class="pb-step-en">Action</div></div>
         <div class="tag-row" id="pb-action">
-          <div class="tag" onclick="pbSelect(this,'action','slowly turns around, gentle breeze')">缓慢回眸<span class="lang-en-label">Turn</span></div>
+          <div class="tag" onclick="pbSelect(this,'action','slowly turns around, gentle breeze')"><span class="lang-zh-label">缓慢</span><span class="lang-en-label">Slow</span>回眸<span class="lang-en-label">Turn</span></div>
           <div class="tag" onclick="pbSelect(this,'action','walks forward with natural stride')">自然行走<span class="lang-en-label">Walk</span></div>
           <div class="tag" onclick="pbSelect(this,'action','takes a deep breath, adjusts expression')">深吸一口气<span class="lang-en-label">Breathe</span></div>
           <div class="tag" onclick="pbSelect(this,'action','stands still, chest rises and falls with breathing')">静止呼吸<span class="lang-en-label">Still</span></div>
@@ -1088,14 +1088,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           <div class="tag" onclick="showOther('action')">✏️ 其他<span class="lang-en-label">Other</span></div>
         </div>
         <div class="other-wrap" id="other-action">
-          <input class="other-input" type="text" placeholder="描述动作（英文）…" id="other-action-input">
-          <button class="other-confirm" onclick="confirmOtherPb('action','pb-action','other-action')">确认</button>
+          <input class="other-input" type="text" placeholder="描述<span class="lang-zh-label">动作</span><span class="lang-en-label">Action</span>（英文）…" id="other-action-input">
+          <button class="other-confirm" onclick="confirmOtherPb('action','pb-action','other-action')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
         </div>
       </div>
 
       <!-- 3 Environment -->
       <div class="pb-step">
-        <div class="pb-step-head"><div class="pb-num">3</div><div class="pb-step-title">环境</div><div class="pb-step-en">Environment</div></div>
+        <div class="pb-step-head"><div class="pb-num">3</div><div class="pb-step-title"><span class="lang-zh-label">环境</span><span class="lang-en-label">Environment</span></div><div class="pb-step-en">Environment</div></div>
         <div class="tag-row" id="pb-env">
           <div class="tag" onclick="pbSelect(this,'env','in an empty dawn parking lot, rain-slicked surface')">雨后停车场<span class="lang-en-label">Rainy Lot</span></div>
           <div class="tag" onclick="pbSelect(this,'env','in a sunlit minimalist studio')">极简摄影棚<span class="lang-en-label">Studio</span></div>
@@ -1106,14 +1106,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           <div class="tag" onclick="showOther('env')">✏️ 其他<span class="lang-en-label">Other</span></div>
         </div>
         <div class="other-wrap" id="other-env">
-          <input class="other-input" type="text" placeholder="描述环境/场景（英文）…" id="other-env-input">
-          <button class="other-confirm" onclick="confirmOtherPb('env','pb-env','other-env')">确认</button>
+          <input class="other-input" type="text" placeholder="描述<span class="lang-zh-label">环境</span><span class="lang-en-label">Environment</span>/场景（英文）…" id="other-env-input">
+          <button class="other-confirm" onclick="confirmOtherPb('env','pb-env','other-env')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
         </div>
       </div>
 
       <!-- 4 Camera -->
       <div class="pb-step">
-        <div class="pb-step-head"><div class="pb-num">4</div><div class="pb-step-title">镜头运动</div><div class="pb-step-en">Camera</div></div>
+        <div class="pb-step-head"><div class="pb-num">4</div><div class="pb-step-title"><span class="lang-zh-label">镜头运动</span><span class="lang-en-label">Camera Movement</span></div><div class="pb-step-en">Camera</div></div>
         <div id="pb-camera-wrap">
           <div class="cam-group-label">基础 / Basic</div>
           <div class="tag-row pb-camera-row">
@@ -1142,21 +1142,21 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
             <div class="tag" onclick="showOther('camera')">✏️ 其他<span class="lang-en-label">Other</span></div>
           </div>
           <div class="other-wrap" id="other-camera">
-            <input class="other-input" type="text" placeholder="输入自定义镜头运动（英文）…" id="other-camera-input">
-            <button class="other-confirm" onclick="confirmOtherCam()">确认</button>
+            <input class="other-input" type="text" placeholder="输入自定义<span class="lang-zh-label">镜头运动</span><span class="lang-en-label">Camera Movement</span>（英文）…" id="other-camera-input">
+            <button class="other-confirm" onclick="confirmOtherCam()"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
           </div>
         </div>
         <div style="margin-top:12px">
           <div style="font-size:11px;color:var(--text3);margin-bottom:6px">运动速度 / Speed</div>
           <input type="range" min="0" max="3" value="1" id="speed-sl" oninput="updateSpeedLabel()" style="width:200px">
-          <div class="speed-labels" style="width:200px"><span>极缓慢</span><span>缓慢</span><span>中等</span><span>⚠️快速</span></div>
+          <div class="speed-labels" style="width:200px"><span><span class="lang-zh-label">极<span class="lang-zh-label">缓慢</span><span class="lang-en-label">Slow</span></span><span class="lang-en-label">Very Slow</span></span><span><span class="lang-zh-label">缓慢</span><span class="lang-en-label">Slow</span></span><span><span class="lang-zh-label">中等</span><span class="lang-en-label">Medium</span></span><span><span class="lang-zh-label">⚠️快速</span><span class="lang-en-label">⚠️ Fast</span></span></div>
           <div style="font-size:11px;color:var(--accent2);margin-top:4px" id="speed-label">当前：slow, gentle</div>
         </div>
       </div>
 
       <!-- 5 Style -->
       <div class="pb-step">
-        <div class="pb-step-head"><div class="pb-num">5</div><div class="pb-step-title">风格与光线</div><div class="pb-step-en">Style</div></div>
+        <div class="pb-step-head"><div class="pb-num">5</div><div class="pb-step-title"><span class="lang-zh-label">风格与光线</span><span class="lang-en-label">Style & Lighting</span></div><div class="pb-step-en">Style</div></div>
         <div class="row-gap">
           <div class="tag-row" id="pb-style">
             <div class="tag selected" onclick="pbSelect(this,'style','35mm film tone, cinematic')">35mm胶片<span class="lang-en-label">35mm Film</span></div>
@@ -1168,7 +1168,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           </div>
           <div class="other-wrap" id="other-pbstyle">
             <input class="other-input" type="text" placeholder="自定义视频风格…" id="other-pbstyle-input">
-            <button class="other-confirm" onclick="confirmOtherPb('style','pb-style','other-pbstyle')">确认</button>
+            <button class="other-confirm" onclick="confirmOtherPb('style','pb-style','other-pbstyle')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
           </div>
           <div class="tag-row" id="pb-light">
             <div class="tag" onclick="pbToggle(this,'light','soft golden hour lighting')" data-val="soft golden hour lighting">🌅 黄金时刻光<span class="lang-en-label">Golden Hour</span></div>
@@ -1180,19 +1180,19 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           </div>
           <div class="other-wrap" id="other-pblight">
             <input class="other-input" type="text" placeholder="自定义光线（英文）…" id="other-pblight-input">
-            <button class="other-confirm" onclick="confirmOtherPbLight()">确认</button>
+            <button class="other-confirm" onclick="confirmOtherPbLight()"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
           </div>
         </div>
       </div>
 
       <!-- 6 Constraints -->
       <div class="pb-step">
-        <div class="pb-step-head"><div class="pb-num">6</div><div class="pb-step-title">负面约束</div><div class="pb-step-en">Constraints</div></div>
+        <div class="pb-step-head"><div class="pb-num">6</div><div class="pb-step-title"><span class="lang-zh-label">负面约束</span><span class="lang-en-label">Negative Constraints</span></div><div class="pb-step-en">Constraints</div></div>
         <div class="constraint-row">
           <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid jitter"><div class="dot"></div>防抖 <span style="color:var(--text3);font-size:10px">/ avoid jitter</span></div>
           <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid bent limbs"><div class="dot"></div>防肢体变形 <span style="color:var(--text3);font-size:10px">/ avoid bent limbs</span></div>
           <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid temporal flicker"><div class="dot"></div>防闪烁 <span style="color:var(--text3);font-size:10px">/ avoid temporal flicker</span></div>
-          <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid identity drift"><div class="dot"></div>防人物漂移 <span style="color:var(--text3);font-size:10px">/ avoid identity drift</span></div>
+          <div class="constraint-toggle on" onclick="this.classList.toggle('on')" data-val="avoid identity drift"><div class="dot"></div>防<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>漂移 <span style="color:var(--text3);font-size:10px">/ avoid identity drift</span></div>
           <div class="constraint-toggle" onclick="this.classList.toggle('on')" data-val="avoid chaotic composition"><div class="dot"></div>防构图混乱 <span style="color:var(--text3);font-size:10px">/ avoid chaotic composition</span></div>
         </div>
       </div>
@@ -1201,18 +1201,18 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
   <!-- Prompt Preview -->
   <div class="card">
-    <div class="card-title">当前 Prompt 预览
-      <button class="unlock-btn" id="unlock-btn" onclick="unlockPrompt()">🔓 解锁编辑</button>
+    <div class="card-title"><span class="lang-zh-label">当前 Prompt 预览</span><span class="lang-en-label">Current Prompt Preview</span>
+      <button class="unlock-btn" id="unlock-btn" onclick="unlockPrompt()"><span class="lang-zh-label">🔓 解锁编辑</span><span class="lang-en-label">🔓 Unlock Edit</span></button>
     </div>
     <div class="prompt-preview-box" id="prompt-preview-box">
-      <div class="label">自动拼接结果</div>
+      <div class="label"><span class="lang-zh-label">自动拼接结果</span><span class="lang-en-label">Auto-composed Result</span></div>
       <div class="en-prompt" id="prompt-preview" style="outline:none">Animate the provided @Image1, preserve composition and colors. A young woman in white dress, slowly turns around, gentle breeze, in a seaside at dusk, golden glow, camera fixed camera locked-off slow, gentle, 35mm film tone, cinematic, soft golden hour lighting, avoid jitter, avoid bent limbs, avoid temporal flicker, avoid identity drift.</div>
     </div>
     <div style="margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <div class="warn-text" id="s3-draft-info">⚡ 草稿：480p · 5秒 · <span id="s3-draft-provider">第三方API</span> · <strong id="s3-draft-price">—</strong></div>
+      <div class="warn-text" id="s3-draft-info">⚡ 草稿：480p · 5秒 · <span id="s3-draft-provider"><span class="lang-zh-label">第三方API</span><span class="lang-en-label">3rd Party API</span></span> · <strong id="s3-draft-price">—</strong></div>
     </div>
     <details style="margin-top:10px">
-      <summary style="font-size:12px;color:var(--accent2);cursor:pointer;user-select:none">✏️ 我想直接输入英文 Prompt</summary>
+      <summary style="font-size:12px;color:var(--accent2);cursor:pointer;user-select:none"><span class="lang-zh-label">✏️ 我想直接输入英文 Prompt</span><span class="lang-en-label">✏️ I want to enter English prompt directly</span></summary>
       <textarea class="text-input" rows="3" id="direct-prompt-input" style="margin-top:8px" placeholder="直接在此输入完整英文 Prompt…"></textarea>
       <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px;margin-top:6px" onclick="applyDirectPrompt()">↑ 同步到预览</button>
     </details>
@@ -1221,23 +1221,23 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
   </div><!-- /mode-single -->
 
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px">
-    <span style="font-size:12px;color:var(--text3)">模型:</span>
+    <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">模型:</span><span class="lang-en-label">Model:</span></span>
     <select class="param-select" style="width:auto;min-width:200px;font-size:12px" id="s3-model-select" onchange="refreshAllCosts()"></select>
   </div>
   <div style="font-size:11px;margin-bottom:6px" id="s3-cost-info">约 ¥2.70/个</div>
   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-    <button class="btn btn-primary" style="width:200px" onclick="genVideo()">▶ 生成视频草稿</button>
-    <span style="font-size:12px;color:var(--text3)">（最多保留3个草稿）</span>
+    <button class="btn btn-primary" style="width:200px" onclick="genVideo()"><span class="lang-zh-label">▶ 生成<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span></span><span class="lang-en-label">▶ Generate Video Draft</span></button>
+    <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">（最多保留3个草稿）</span><span class="lang-en-label">(max 3 drafts)</span></span>
   </div>
   <div class="loading-bar" id="s3-loading"><div class="loading-bar-inner"></div></div>
-  <div class="loading-text" id="s3-loadtext">Seedance 2.0 渲染中，约 30-60 秒…</div>
+  <div class="loading-text" id="s3-loadtext"><span class="lang-zh-label">Seedance 2.0 渲染中，约 30-60 秒…</span><span class="lang-en-label">Seedance 2.0 rendering, ~30-60 seconds...</span></div>
   </div><!-- /s3-gen-section -->
 
   <!-- 上传视频区 -->
   <div id="s3-upload-section" style="display:none">
     <div class="card">
-      <div class="card-title">上传视频文件</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">支持 mp4 / mov / webm，上传后直接加入素材盘作为视频草稿，可在步骤五直接使用</div>
+      <div class="card-title"><span class="lang-zh-label">上传视频文件</span><span class="lang-en-label">Upload Video File</span></div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">支持 mp4 / mov / webm，上传后直接加入<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>作为<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>，可在步骤五直接使用</div>
       <input type="file" id="s3-video-file" accept="video/mp4,video/quicktime,video/webm" style="display:none" onchange="handleVideoUpload(event)">
       <div class="upload-zone" id="s3-video-zone"
            onclick="document.getElementById('s3-video-file').click()"
@@ -1245,13 +1245,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
            ondragleave="this.classList.remove('dragover')"
            ondrop="handleVideoDrop(event)">
         <div class="upload-icon">🎬</div>
-        <div style="font-size:14px;color:var(--text2);margin-bottom:4px">点击或拖拽视频文件到此处</div>
-        <div class="upload-hint">mp4 / mov / webm · 建议不超过 500MB</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:4px"><span class="lang-zh-label">点击或拖拽视频文件到此处</span><span class="lang-en-label">Click or drag video file here</span></div>
+        <div class="upload-hint">mp4 / mov / webm · <span class="lang-zh-label">建议不超过 500MB</span><span class="lang-en-label">Recommended max 500MB</span></div>
       </div>
       <div id="s3-upload-preview" style="display:none;margin-top:14px">
         <video id="s3-preview-video" controls style="width:100%;border-radius:8px;background:#000;max-height:240px"></video>
         <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
-          <button class="btn btn-primary" style="padding:8px 20px" onclick="saveUploadedVideo()">＋ 保存到素材盘</button>
+          <button class="btn btn-primary" style="padding:8px 20px" onclick="saveUploadedVideo()"><span class="lang-zh-label">＋ 保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span></span><span class="lang-en-label">+ Save to Panel</span></button>
           <span style="font-size:12px;color:var(--text3)" id="s3-upload-filename"></span>
         </div>
       </div>
@@ -1263,14 +1263,14 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
 <!-- ═══ STEP 4 ═══ -->
 <div id="step4" class="step-panel">
-  <div class="panel-title">第四步：音乐草稿生成</div>
-  <div class="panel-subtitle">选择音乐情绪和风格，生成与视频匹配的背景音乐。草稿最长 <strong style="color:var(--yellow)">30秒 · 低码率</strong>，最多保留3个。</div>
+  <div class="panel-title"><span class="lang-zh-label">第四步：<span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span>生成</span><span class="lang-en-label">Step 4: Music Draft Generation</span></div>
+  <div class="panel-subtitle"><span class="lang-zh-label"><span class="lang-zh-label">选择音乐</span><span class="lang-en-label">Select Music</span>情绪和风格，生成与视频匹配的背景音乐</span><span class="lang-en-label">Choose mood and style to generate background music matching your video</span>。草稿最长 <strong style="color:var(--yellow)">30秒 · 低码率</strong>，最多保留3个。</div>
 
   <!-- 快速匹配按钮置顶 -->
   <div class="card sync-top-card">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <button class="btn btn-secondary" style="font-size:13px;padding:8px 20px" onclick="syncMusicStyle()">⟳ 一键匹配步骤三视频风格</button>
-      <span style="font-size:12px;color:var(--text2)">自动根据视频情绪填充匹配的音乐参数</span>
+      <button class="btn btn-secondary" style="font-size:13px;padding:8px 20px" onclick="syncMusicStyle()"><span class="lang-zh-label">⟳ 一键匹配步骤三视频风格</span><span class="lang-en-label">⟳ Match Step 3 Video Style</span></button>
+      <span style="font-size:12px;color:var(--text2)"><span class="lang-zh-label">自动根据视频情绪填充匹配的音乐参数</span><span class="lang-en-label">Auto-fill matching music params based on video mood</span></span>
     </div>
   </div>
 
@@ -1278,7 +1278,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <div class="card-title">音乐情绪 / Mood</div>
     <div class="tag-row" id="music-mood">
       <div class="tag" onclick="pbSelect(this,'music-mood','epic, intense, powerful')">热血/高能<span class="lang-en-label">Epic</span></div>
-      <div class="tag selected" onclick="pbSelect(this,'music-mood','gentle, soothing, calm')">温柔舒缓<span class="lang-en-label">Gentle</span></div>
+      <div class="tag selected" onclick="pbSelect(this,'music-mood','gentle, soothing, calm')"><span class="lang-zh-label">温柔舒缓</span><span class="lang-en-label">Gentle & Soothing</span><span class="lang-en-label">Gentle</span></div>
       <div class="tag" onclick="pbSelect(this,'music-mood','dark, mysterious, ominous')">神秘暗黑<span class="lang-en-label">Dark</span></div>
       <div class="tag" onclick="pbSelect(this,'music-mood','upbeat, playful, cheerful')">欢快轻松<span class="lang-en-label">Upbeat</span></div>
       <div class="tag" onclick="pbSelect(this,'music-mood','cinematic, orchestral, grand')">史诗磅礴<span class="lang-en-label">Cinematic</span></div>
@@ -1287,7 +1287,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     </div>
     <div class="other-wrap" id="other-music-mood">
       <input class="other-input" type="text" placeholder="自定义音乐情绪…" id="other-music-mood-input">
-      <button class="other-confirm" onclick="confirmOtherTag('music-mood','music-mood','music-mood')">确认</button>
+      <button class="other-confirm" onclick="confirmOtherTag('music-mood','music-mood','music-mood')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
     </div>
   </div>
 
@@ -1301,17 +1301,17 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
       <div class="tag" onclick="pbSelect(this,'music-genre','rock')">摇滚<span class="lang-en-label">Rock</span></div>
       <div class="tag" onclick="pbSelect(this,'music-genre','hip-hop')">嘻哈<span class="lang-en-label">Hip-hop</span></div>
       <div class="tag" onclick="pbSelect(this,'music-genre','Chinese traditional guqin')">国风古典<span class="lang-en-label">Guqin</span></div>
-      <div class="tag" onclick="pbSelect(this,'music-genre','solo piano')">纯钢琴<span class="lang-en-label">Piano</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-genre','solo piano')"><span class="lang-zh-label">纯钢琴</span><span class="lang-en-label">Solo Piano</span><span class="lang-en-label">Piano</span></div>
       <div class="tag" onclick="showOther('music-genre')">✏️ 其他<span class="lang-en-label">Other</span></div>
     </div>
     <div class="other-wrap" id="other-music-genre">
       <input class="other-input" type="text" placeholder="自定义音乐流派…" id="other-music-genre-input">
-      <button class="other-confirm" onclick="confirmOtherTag('music-genre','music-genre','music-genre')">确认</button>
+      <button class="other-confirm" onclick="confirmOtherTag('music-genre','music-genre','music-genre')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">主要乐器 <span style="font-size:11px;font-weight:400;color:var(--text3)">可多选 / Instruments</span></div>
+    <div class="card-title">主要乐器 <span style="font-size:11px;font-weight:400;color:var(--text3)"><span class="lang-zh-label">可多选</span><span class="lang-en-label">multi-select</span> / Instruments</span></div>
     <div class="tag-row" id="music-inst">
       <div class="tag" onclick="this.classList.toggle('selected')">🎹 钢琴<span class="lang-en-label">Piano</span></div>
       <div class="tag selected" onclick="this.classList.toggle('selected')">🎸 吉他<span class="lang-en-label">Guitar</span></div>
@@ -1324,7 +1324,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     </div>
     <div class="other-wrap" id="other-music-inst">
       <input class="other-input" type="text" placeholder="自定义乐器…" id="other-music-inst-input">
-      <button class="other-confirm" onclick="confirmOtherTag('music-inst','music-inst','music-inst')">确认</button>
+      <button class="other-confirm" onclick="confirmOtherTag('music-inst','music-inst','music-inst')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
     </div>
   </div>
 
@@ -1332,19 +1332,19 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <div class="card-title">节奏速度 / Tempo</div>
     <div class="tag-row" id="music-tempo">
       <div class="tag" onclick="pbSelect(this,'music-tempo','very slow, meditative, ASMR pace')">极慢（冥想）<span class="lang-en-label">Very Slow</span></div>
-      <div class="tag selected" onclick="pbSelect(this,'music-tempo','slow, relaxed tempo')">缓慢<span class="lang-en-label">Slow</span></div>
-      <div class="tag" onclick="pbSelect(this,'music-tempo','medium tempo, natural rhythm')">中等<span class="lang-en-label">Medium</span></div>
+      <div class="tag selected" onclick="pbSelect(this,'music-tempo','slow, relaxed tempo')"><span class="lang-zh-label">缓慢</span><span class="lang-en-label">Slow</span><span class="lang-en-label">Slow</span></div>
+      <div class="tag" onclick="pbSelect(this,'music-tempo','medium tempo, natural rhythm')"><span class="lang-zh-label">中等</span><span class="lang-en-label">Medium</span><span class="lang-en-label">Medium</span></div>
       <div class="tag" onclick="pbSelect(this,'music-tempo','fast, energetic, driving')">快速<span class="lang-en-label">Fast</span></div>
       <div class="tag" onclick="showOther('music-tempo')">✏️ 其他<span class="lang-en-label">Other</span></div>
     </div>
     <div class="other-wrap" id="other-music-tempo">
       <input class="other-input" type="text" placeholder="自定义节奏描述…" id="other-music-tempo-input">
-      <button class="other-confirm" onclick="confirmOtherTag('music-tempo','music-tempo','music-tempo')">确认</button>
+      <button class="other-confirm" onclick="confirmOtherTag('music-tempo','music-tempo','music-tempo')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">草稿时长 / Duration</div>
+    <div class="card-title">草稿<span class="lang-zh-label">时长</span><span class="lang-en-label">Duration</span> / Duration</div>
     <div class="tag-row" id="music-dur">
       <div class="tag" onclick="pbSelect(this,'music-dur','10')">10 秒</div>
       <div class="tag selected" onclick="pbSelect(this,'music-dur','20')">20 秒</div>
@@ -1353,57 +1353,57 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
   </div>
 
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-    <span style="font-size:12px;color:var(--text3)">模型:</span>
+    <span style="font-size:12px;color:var(--text3)"><span class="lang-zh-label">模型:</span><span class="lang-en-label">Model:</span></span>
     <select class="param-select" style="width:auto;min-width:170px;font-size:12px" id="s4-model-select" onchange="refreshAllCosts()"></select>
   </div>
   <div style="font-size:11px;margin-bottom:6px" id="s4-cost-info">约 ¥0.10/个</div>
   <div style="display:flex;align-items:center;gap:14px">
-    <button class="btn btn-primary" style="width:200px" onclick="genMusic()">♫ 生成音乐草稿</button>
+    <button class="btn btn-primary" style="width:200px" onclick="genMusic()"><span class="lang-zh-label">♫ 生成<span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span></span><span class="lang-en-label">♫ Generate Music Draft</span></button>
   </div>
   <div class="loading-bar" id="s4-loading"><div class="loading-bar-inner"></div></div>
-  <div class="loading-text" id="s4-loadtext">音乐生成中，约 20-40 秒…</div>
+  <div class="loading-text" id="s4-loadtext"><span class="lang-zh-label">音乐生成中，约 20-40 秒…</span><span class="lang-en-label">Music generating, ~20-40 seconds...</span></div>
 </div>
 
 <!-- ═══ STEP 5 ═══ -->
 <div id="step5" class="step-panel">
-  <div class="panel-title">第五步：生成最终成片</div>
-  <div class="panel-subtitle">从素材盘选择原图、视频草稿和音乐，确认最终 Prompt，设置分辨率和时长后生成高质量成片。</div>
+  <div class="panel-title"><span class="lang-zh-label">第五步：生成最终成片</span><span class="lang-en-label">Step 5: Generate Final Cut</span></div>
+  <div class="panel-subtitle">从<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span><span class="lang-zh-label">选择原图</span><span class="lang-en-label">Select Image</span>、<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>和音乐，<span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span><span class="lang-zh-label">最终 Prompt</span><span class="lang-en-label">Final Prompt</span>，设置<span class="lang-zh-label">分辨率</span><span class="lang-en-label">Resolution</span>和<span class="lang-zh-label">时长</span><span class="lang-en-label">Duration</span>后生成高质量成片。</div>
 
   <div class="card" id="s5-imgs-card">
-    <div class="card-title">选择参考原图 <span style="color:var(--text3);font-size:11px">可选 · 最多2张</span></div>
+    <div class="card-title"><span class="lang-zh-label">选择参考原图</span><span class="lang-en-label">Select Reference Images</span> <span style="color:var(--text3);font-size:11px"><span class="lang-zh-label"><span class="lang-zh-label">可选</span><span class="lang-en-label">Optional</span> · 最多2张</span><span class="lang-en-label">Optional · max 2</span></span></div>
     <div class="asset-select-grid" id="s5-imgs">
-      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤一保存原图，即可在此选择</div>
+      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0"><span class="lang-zh-label">← 先在步骤一保存原图</span><span class="lang-en-label">← Save images in Step 1 first</span>，即可在此选择</div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">选择视频草稿 <span style="color:var(--red);font-size:11px">必选</span></div>
+    <div class="card-title"><span class="lang-zh-label">选择<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span></span><span class="lang-en-label">Select Video Draft</span> <span style="color:var(--red);font-size:11px"><span class="lang-zh-label">必选</span><span class="lang-en-label">Required</span></span></div>
     <div class="asset-select-grid" id="s5-videos">
-      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三生成或上传视频草稿</div>
+      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三生成或上传<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">选择音乐 <span style="font-size:11px;font-weight:400;color:var(--text3)">可选</span></div>
+    <div class="card-title"><span class="lang-zh-label">选择音乐</span><span class="lang-en-label">Select Music</span> <span style="font-size:11px;font-weight:400;color:var(--text3)"><span class="lang-zh-label">可选</span><span class="lang-en-label">Optional</span></span></div>
     <div class="asset-select-grid" id="s5-music">
-      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四生成音乐草稿（可跳过）</div>
+      <div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四生成<span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span>（可跳过）</div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">最终 Prompt <span style="font-size:11px;font-weight:400;color:var(--text3)">可在此最终修改</span></div>
-    <textarea class="text-input" rows="4" id="final-prompt" placeholder="从步骤三 Prompt 自动同步，或手动输入。建议 60–100 词，聚焦主体动作与镜头运动。"></textarea>
+    <div class="card-title"><span class="lang-zh-label">最终 Prompt</span><span class="lang-en-label">Final Prompt</span> <span style="font-size:11px;font-weight:400;color:var(--text3)"><span class="lang-zh-label">可在此最终修改</span><span class="lang-en-label">Edit here</span></span></div>
+    <textarea class="text-input" rows="4" id="final-prompt" placeholder="从步骤三 Prompt 自动同步，或手动输入。建议 60–100 词，聚焦主体<span class="lang-zh-label">动作</span><span class="lang-en-label">Action</span>与<span class="lang-zh-label">镜头运动</span><span class="lang-en-label">Camera Movement</span>。"></textarea>
     <div style="margin-top:8px;display:flex;gap:8px">
-      <button class="btn btn-secondary" style="font-size:12px;padding:5px 14px;position:relative" id="s5-sync-btn" onclick="syncPromptFromS3()">⟳ 同步步骤三 Prompt<span id="s5-sync-dot" style="display:none;position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:var(--yellow);border-radius:50%;border:1.5px solid var(--bg2)"></span></button>
+      <button class="btn btn-secondary" style="font-size:12px;padding:5px 14px;position:relative" id="s5-sync-btn" onclick="syncPromptFromS3()"><span class="lang-zh-label">⟳ 同步步骤三 Prompt</span><span class="lang-en-label">⟳ Sync Step 3 Prompt</span><span id="s5-sync-dot" style="display:none;position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:var(--yellow);border-radius:50%;border:1.5px solid var(--bg2)"></span></button>
     </div>
-    <div style="font-size:11px;color:var(--text3);margin-top:6px">每次修改只改一个变量，多个动作用逗号分隔。</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px">每次修改只改一个变量，多个<span class="lang-zh-label">动作</span><span class="lang-en-label">Action</span>用逗号分隔。</div>
   </div>
 
   <div class="card">
-    <div class="card-title">输出参数</div>
+    <div class="card-title"><span class="lang-zh-label">输出参数</span><span class="lang-en-label">Output Parameters</span></div>
     <div class="param-row" style="margin-bottom:12px">
       <div class="param-group">
-        <label>分辨率</label>
+        <label><span class="lang-zh-label">分辨率</span><span class="lang-en-label">Resolution</span></label>
         <select class="param-select" id="res-select" onchange="updateCost()">
           <option value="720">720p（快）</option>
           <option value="1080" selected>1080p（推荐）</option>
@@ -1411,7 +1411,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
         </select>
       </div>
       <div class="param-group">
-        <label>时长</label>
+        <label><span class="lang-zh-label">时长</span><span class="lang-en-label">Duration</span></label>
         <select class="param-select" id="dur-select" onchange="updateCost()">
           <option value="6">6 秒</option>
           <option value="8">8 秒</option>
@@ -1423,20 +1423,20 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     </div>
     <div class="cost-display">
       <div class="cost-items">
-        <div class="cost-item"><div class="cost-item-label">分辨率</div><div class="cost-item-val" id="cost-res">1080p</div></div>
-        <div class="cost-item"><div class="cost-item-label">时长</div><div class="cost-item-val" id="cost-dur">12s</div></div>
-        <div class="cost-item"><div class="cost-item-label">API</div><div class="cost-item-val" style="font-size:13px">火山引擎官方</div></div>
+        <div class="cost-item"><div class="cost-item-label"><span class="lang-zh-label">分辨率</span><span class="lang-en-label">Resolution</span></div><div class="cost-item-val" id="cost-res">1080p</div></div>
+        <div class="cost-item"><div class="cost-item-label"><span class="lang-zh-label">时长</span><span class="lang-en-label">Duration</span></div><div class="cost-item-val" id="cost-dur">12s</div></div>
+        <div class="cost-item"><div class="cost-item-label">API</div><div class="cost-item-val" style="font-size:13px"><span class="lang-zh-label">火山引擎官方</span><span class="lang-en-label">Volcengine Official</span></div></div>
       </div>
       <div class="cost-total">
-        <div class="cost-total-label">预估费用</div>
+        <div class="cost-total-label"><span class="lang-zh-label">预估费用</span><span class="lang-en-label">Estimated Cost</span></div>
         <div class="cost-total-val" id="cost-total">¥25.6</div>
       </div>
     </div>
   </div>
 
   <div style="display:flex;gap:10px;align-items:center">
-    <button class="btn btn-primary btn-full" style="font-size:16px;padding:14px;flex:1" onclick="genFinal()" id="s5-gen-btn">🚀 生成最终成片</button>
-    <button class="btn btn-secondary" style="padding:14px 18px;display:none;font-size:14px" id="s5-cancel-btn" onclick="cancelFinal()">✕ 取消</button>
+    <button class="btn btn-primary btn-full" style="font-size:16px;padding:14px;flex:1" onclick="genFinal()" id="s5-gen-btn"><span class="lang-zh-label">🚀 生成最终成片</span><span class="lang-en-label">🚀 Generate Final Cut</span></button>
+    <button class="btn btn-secondary" style="padding:14px 18px;display:none;font-size:14px" id="s5-cancel-btn" onclick="cancelFinal()">✕ <span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span></button>
   </div>
   <div class="loading-bar" id="s5-loading"><div class="loading-bar-inner"></div></div>
   <div class="loading-text" id="s5-loadtext"></div>
@@ -1445,12 +1445,12 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <div class="card" style="border-color:var(--green)">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
         <div style="width:36px;height:36px;background:rgba(52,211,153,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid var(--green)">✓</div>
-        <div><div style="font-weight:700;color:var(--green)">成片生成完成！</div><div style="font-size:12px;color:var(--text3);margin-top:2px" id="s5-done-meta">Seedance 2.0</div></div>
+        <div><div style="font-weight:700;color:var(--green)"><span class="lang-zh-label">成片生成完成！</span><span class="lang-en-label">Final cut complete!</span></div><div style="font-size:12px;color:var(--text3);margin-top:2px" id="s5-done-meta">Seedance 2.0</div></div>
       </div>
       <div style="display:flex;gap:10px">
-        <button class="btn btn-primary" style="padding:9px 20px" id="dl-btn">⬇ 下载视频</button>
-        <button class="btn btn-secondary" style="padding:9px 20px">↗ 分享链接</button>
-        <button class="btn btn-secondary" style="padding:9px 20px" onclick="goStep(1)">+ 新建创作</button>
+        <button class="btn btn-primary" style="padding:9px 20px" id="dl-btn"><span class="lang-zh-label">⬇ 下载视频</span><span class="lang-en-label">⬇ Download</span></button>
+        <button class="btn btn-secondary" style="padding:9px 20px"><span class="lang-zh-label">↗ 分享链接</span><span class="lang-en-label">↗ Share</span></button>
+        <button class="btn btn-secondary" style="padding:9px 20px" onclick="goStep(1)"><span class="lang-zh-label">+ 新建创作</span><span class="lang-en-label">+ New Project</span></button>
       </div>
     </div>
   </div>
@@ -1458,12 +1458,12 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
 </div><!-- /main-content -->
 
-<!-- RIGHT: 素材盘 -->
+<!-- RIGHT: <span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span> -->
 <aside class="material-panel">
-  <div class="mat-header">素材盘</div>
+  <div class="mat-header"><span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span></div>
   <div class="mat-section">
     <div class="mat-section-title" onclick="toggleMatSection('imgs')">
-      原图区 <span class="mat-count" id="img-count">0 / 9</span>
+      <span class="lang-zh-label">原图区</span><span class="lang-en-label">Images</span> <span class="mat-count" id="img-count">0 / 9</span>
     </div>
     <div class="mat-body" id="imgs-body">
       <div class="mat-grid" id="imgs-grid">
@@ -1481,7 +1481,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
   </div>
   <div class="mat-section">
     <div class="mat-section-title">
-      视频草稿 <span class="mat-count" id="vid-count">0 / 3</span>
+      <span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span> <span class="mat-count" id="vid-count">0 / 3</span>
       <span class="draft-badge">480p · 5s</span>
     </div>
     <div class="mat-body">
@@ -1492,7 +1492,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
   </div>
   <div class="mat-section">
     <div class="mat-section-title">
-      音乐草稿 <span class="mat-count" id="mus-count">0 / 3</span>
+      <span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span> <span class="mat-count" id="mus-count">0 / 3</span>
     </div>
     <div class="mat-body">
       <div class="mat-list" id="mus-list">
@@ -1506,12 +1506,12 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 <div class="modal-overlay" id="vid-preview-overlay" onclick="if(event.target===this)closeVidPreview()">
   <div class="modal-box" style="width:680px;padding:24px 24px 20px">
     <button class="modal-close" onclick="closeVidPreview()">✕</button>
-    <div class="modal-title" id="vid-preview-title" style="font-size:16px;margin-bottom:2px">草稿预览</div>
+    <div class="modal-title" id="vid-preview-title" style="font-size:16px;margin-bottom:2px"><span class="lang-zh-label">草稿预览</span><span class="lang-en-label">Draft Preview</span></div>
     <div class="modal-sub" id="vid-preview-meta" style="margin-bottom:14px"></div>
     <video id="vid-preview-player" controls playsinline
            style="width:100%;border-radius:10px;background:#000;aspect-ratio:16/9;display:block"></video>
     <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
-      <button class="btn btn-secondary" style="font-size:12px;padding:7px 16px" onclick="openVidInTab()">↗ 新标签页打开</button>
+      <button class="btn btn-secondary" style="font-size:12px;padding:7px 16px" onclick="openVidInTab()"><span class="lang-zh-label">↗ 新标签页打开</span><span class="lang-en-label">↗ Open in New Tab</span></button>
       <span style="font-size:11px;color:var(--text3)" id="vid-preview-prompt-hint"></span>
     </div>
   </div>
@@ -1527,8 +1527,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <div class="ipp-label">Prompt</div>
     <div class="ipp-text" id="ipp-text"></div>
     <div class="ipp-actions">
-      <div class="ipp-btn" onclick="copyIppPrompt()">📋 复制全部</div>
-      <div class="ipp-btn primary" onclick="applyIppToS1()">→ 填入步骤一</div>
+      <div class="ipp-btn" onclick="copyIppPrompt()"><span class="lang-zh-label">📋 复制全部</span><span class="lang-en-label">📋 Copy All</span></div>
+      <div class="ipp-btn primary" onclick="applyIppToS1()"><span class="lang-zh-label">→ 填入步骤一</span><span class="lang-en-label">→ Fill into Step 1</span></div>
     </div>
   </div>
 </div>
@@ -1933,7 +1933,7 @@ function refreshAllCosts() {
     draftPriceEl.textContent = `${sym}${(perSec720 * 5).toFixed(1)}/个`;
   }
   if (draftProvEl && vidModel.provider) {
-    draftProvEl.textContent = vidModel.provider === 'volcengine' ? '火山引擎直连' : '第三方API';
+    draftProvEl.textContent = vidModel.provider === 'volcengine' ? '<span class="lang-zh-label">火山引擎直连</span><span class="lang-en-label">Volcengine Direct</span>' : '<span class="lang-zh-label">第三方API</span><span class="lang-en-label">3rd Party API</span>';
   }
 
   // Step 4 (music): unit price
@@ -2217,7 +2217,7 @@ function unlockPrompt() {
     btn.textContent = '🔒 锁定编辑';
   } else {
     preview.contentEditable = 'false';
-    btn.textContent = '🔓 解锁编辑';
+    btn.textContent = '<span class="lang-zh-label">🔓 解锁编辑</span><span class="lang-en-label">🔓 Unlock Edit</span>';
     const fp = document.getElementById('final-prompt');
     if (fp) fp.value = preview.textContent;
   }
@@ -2258,7 +2258,7 @@ function updateFilter() {
   const label = document.getElementById('adj-preview-label');
   if (label) {
     const hasAdj = b != 0 || c != 0 || s != 0 || t != 0 || document.getElementById('sl-shadow').value != 0 || document.getElementById('sl-hl').value != 0;
-    label.textContent = hasAdj ? '调节滑块即可实时预览调色效果' : 'CSS 滤镜实时预览，最终效果以实际生成为准';
+    label.textContent = hasAdj ? '调节滑块即可<span class="lang-zh-label">实时预览</span><span class="lang-en-label">Live Preview</span>调色效果' : 'CSS 滤镜<span class="lang-zh-label">实时预览</span><span class="lang-en-label">Live Preview</span>，最终效果以实际生成为准';
   }
 }
 
@@ -2287,7 +2287,7 @@ function resetSliders() {
   const btn = document.getElementById('ba-toggle-btn');
   if (btn) { btn.textContent = '👁 对比原图'; btn.style.borderColor = ''; btn.style.color = ''; }
   document.getElementById('adj-mock-img').style.filter = '';
-  document.getElementById('adj-preview-label').textContent = 'CSS 滤镜实时预览，最终效果以实际生成为准';
+  document.getElementById('adj-preview-label').textContent = 'CSS 滤镜<span class="lang-zh-label">实时预览</span><span class="lang-en-label">Live Preview</span>，最终效果以实际生成为准';
 }
 let _adjImgId = null;
 
@@ -2476,7 +2476,7 @@ function watchTask(taskId, pollPath, onProgress, maxMs = 120000) {
 }
 
 // ── 合规关键词检测 ──
-const BANNED_KW = ['真实人物','明星','名人','网红','celebrity','idol','偶像','艺人','演员',
+const BANNED_KW = ['真实<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>','明星','名人','网红','celebrity','idol','偶像','艺人','演员',
   '歌手','主播','博主','范冰冰','杨幂','肖战','王一博','易烊千玺','吴亦凡','鹿晗',
   'Taylor Swift','Elon Musk','Obama','Trump','马斯克','奥巴马','特朗普'];
 function checkCompliance(text) {
@@ -2491,11 +2491,11 @@ async function genImages() {
   try {
     const themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').join('/');
     const styleEl = document.querySelector('#style-tags .tag.selected');
-    const style = styleEl?.dataset.val || styleEl?.firstChild?.textContent?.trim() || '电影质感';
+    const style = styleEl?.dataset.val || styleEl?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">电影质感</span><span class="lang-en-label">Cinematic</span>';
     const lightEl = document.querySelector('#light-tags .tag.selected');
-    const lighting = lightEl?.dataset.val || lightEl?.firstChild?.textContent?.trim() || '自然柔光';
+    const lighting = lightEl?.dataset.val || lightEl?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">自然柔光</span><span class="lang-en-label">Soft Natural Light</span>';
     const moodEl = document.querySelector('#mood-tags .tag.selected');
-    const mood = moodEl?.dataset.val || moodEl?.firstChild?.textContent?.trim() || '温暖治愈';
+    const mood = moodEl?.dataset.val || moodEl?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">温暖治愈</span><span class="lang-en-label">Warm Healing</span>';
     const ratio = document.querySelector('#ratio-btns .ratio-btn.selected')?.dataset.val || '16:9';
     const kw = document.getElementById('extra-kw')?.value || '';
     const countPill = document.querySelector('.count-pill.selected');
@@ -2506,25 +2506,25 @@ async function genImages() {
     const hit = checkCompliance(allText);
     if (hit) {
       hideLoading('s1');
-      showToast(`⚠️ 提示词包含敏感词"${hit}"，请修改后重试。请勿使用真实人物/明星相关词汇。`, 'warn');
+      showToast(`⚠️ 提示词包含敏感词"${hit}"，请修改后重试。请勿使用真实<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>/明星相关词汇。`, 'warn');
       return;
     }
 
     // 使用 Prompt 面板覆盖（来自 genImagesFromPrompt）
-    let promptText = kw || themes || '人物';
+    let promptText = kw || themes || '<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>';
     if (s1State.overridePrompt) {
       promptText = s1State.overridePrompt;
       s1State.overridePrompt = '';
     }
 
-    document.getElementById('s1-result-hint').textContent = `生成了 ${count} 张原图，选择保存到素材盘 ↓`;
+    document.getElementById('s1-result-hint').textContent = `生成了 ${count} 张原图，选择保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span> ↓`;
 
     if (SESSION_ID) {
       const data = await apiPost('/api/image/generate', {
         session_id: SESSION_ID,
         prompt_cn: promptText,
         style, lighting, mood,
-        theme: themes.split('/')[0] || '人物',
+        theme: themes.split('/')[0] || '<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>',
         ratio, count,
         model_key: getSelectedModelKey('s1-model-select')
       });
@@ -2561,7 +2561,7 @@ async function genImages() {
 
 async function saveImg(btn, name, icon) {
   const card = btn.closest('.gen-img-card');
-  if (state.imgs.length >= 9) { alert(_t(_t('素材盘已满（最多9张原图）','Panel full (max 9)'),'Panel full (max 9)')); return; }
+  if (state.imgs.length >= 9) { alert(_t(_t('<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>已满（最多9张原图）','Panel full (max 9)'),'Panel full (max 9)')); return; }
   const url = card.dataset.url || '';
   let imgId = null;
   if (SESSION_ID && url) {
@@ -2576,7 +2576,7 @@ async function saveImg(btn, name, icon) {
   updateMat();
   card.style.opacity = '0.4';
   card.style.pointerEvents = 'none';
-  btn.textContent = '✓ 已保存';
+  btn.textContent = _t('✓ 已保存','✓ Saved');
   btn.style.opacity = '0.5';
   document.getElementById('save-guide').classList.add('visible');
 }
@@ -2714,7 +2714,7 @@ function onAnnotMouseUp(e) {
   pending.style.display = 'flex';
   const input = document.getElementById('annot-label-input');
   input.value = '';
-  input.placeholder = `如 "人物 ${annotState.annotations.length+1}"、"产品"、"背景"…`;
+  input.placeholder = `如 "<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span> ${annotState.annotations.length+1}"、"产品"、"背景"…`;
   input.focus();
   input.onkeydown = ev => { if(ev.key==='Enter') confirmAnnot(rect); if(ev.key==='Escape') cancelAnnot(); };
   document.getElementById('annot-confirm-btn').onclick = () => confirmAnnot(rect);
@@ -2768,7 +2768,7 @@ function renderAnnotOverlays() {
   const list = document.getElementById('annot-list');
   if (!list) return;
   if (annotState.annotations.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0">在图片上拖动框选重要区域，添加标注（可选）</div>';
+    list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0"><span class="lang-zh-label">在图片上拖动框选重要区域，添加标注</span><span class="lang-en-label">Drag on the image to box important regions</span>（<span class="lang-zh-label">可选</span><span class="lang-en-label">Optional</span>）</div>';
     return;
   }
   list.innerHTML = annotState.annotations.map((a,i) => `
@@ -2781,7 +2781,7 @@ function renderAnnotOverlays() {
 
 async function saveUploadedImg() {
   if (!annotState.url) { showToast('请先上传图片','warn'); return; }
-  if (state.imgs.length >= 9) { alert('素材盘已满（最多9张）'); return; }
+  if (state.imgs.length >= 9) { alert('<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>已满（最多9张）'); return; }
   const n = state.imgs.filter(i => i.uploaded).length + 1;
   const _themes = [...document.querySelectorAll('.theme-card.selected')].map(c => c.dataset.val || c.querySelector('.label')?.firstChild?.textContent?.trim() || '').filter(Boolean).join(', ');
   const _kw = document.getElementById('extra-kw')?.value?.trim() || '';
@@ -2797,7 +2797,7 @@ async function saveUploadedImg() {
     prompt: document.getElementById('s1-prompt-text')?.value?.trim() || ''
   });
   updateMat();
-  showToast('✓ 已保存到素材盘', 'success');
+  showToast('✓ 已保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>', 'success');
   document.getElementById('save-guide').classList.add('visible');
   annotState.annotations = [];
   renderAnnotOverlays();
@@ -2856,7 +2856,7 @@ function applyDescribePrompt() {
 
 async function saveUploadedImgWithPrompt() {
   if (!annotState.url) { showToast('请先上传图片','warn'); return; }
-  if (state.imgs.length >= 9) { alert('素材盘已满（最多9张）'); return; }
+  if (state.imgs.length >= 9) { alert('<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>已满（最多9张）'); return; }
   const prompt = document.getElementById('describe-prompt').value.trim();
   const n = state.imgs.filter(i => i.uploaded).length + 1;
   state.imgs.push({
@@ -2866,11 +2866,11 @@ async function saveUploadedImgWithPrompt() {
     ai_prompt: prompt   // 供步骤三默认使用
   });
   updateMat();
-  showToast(_t('✓ 已保存到素材盘（含 AI Prompt）','✓ Saved with AI prompt'), 'success');
+  showToast(_t('✓ 已保存到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>（含 AI Prompt）','✓ Saved with AI prompt'), 'success');
   document.getElementById('save-guide').classList.add('visible');
 }
 
-// ── AI 风格化 ──
+// ── AI <span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span> ──
 const stylizeState = { imageUrl: '', imageId: null };
 
 async function stylizeImage() {
@@ -2902,7 +2902,7 @@ async function stylizeImage() {
     document.getElementById('stylize-result').style.display = '';
     if (data.note) showToast(data.note, 'warn');
   } catch(e) {
-    showToast('AI 风格化失败：' + e.message, 'error');
+    showToast('AI <span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span>失败：' + e.message, 'error');
   } finally {
     btn.disabled = false;
     document.getElementById('stylize-loading').style.display = 'none';
@@ -2912,9 +2912,9 @@ async function stylizeImage() {
 
 async function saveStylizedImg() {
   if (!stylizeState.imageUrl) return;
-  if (state.imgs.length >= 9) { alert('素材盘已满（最多9张）'); return; }
+  if (state.imgs.length >= 9) { alert('<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>已满（最多9张）'); return; }
   const styleEl = document.querySelector('#stylize-style-tags .tag.selected');
-  const styleName = styleEl?.firstChild?.textContent?.trim() || '风格化';
+  const styleName = styleEl?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span>';
   const n = state.imgs.filter(i => i.stylized).length + 1;
   // 若已有 image_id（后端已保存）直接用，否则调保存接口
   let imgId = stylizeState.imageId;
@@ -2924,18 +2924,18 @@ async function saveStylizedImg() {
         session_id: SESSION_ID, task_id: '', image_urls: [stylizeState.imageUrl]
       });
       imgId = d.image_ids?.[0];
-    } catch(e) { console.warn('保存风格化图失败', e); }
+    } catch(e) { console.warn('保存<span class="lang-zh-label">风格化</span><span class="lang-en-label">Stylized</span>图失败', e); }
   }
   state.imgs.push({ id: imgId, name: `${styleName} ${n}`, icon: '🎨',
                     url: stylizeState.imageUrl, stylized: true });
   updateMat();
-  showToast(`✓ 已保存"${styleName}"到素材盘`, 'success');
+  showToast(`✓ 已保存"${styleName}"到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>`, 'success');
   document.getElementById('save-guide').classList.add('visible');
 }
 
-// ── 视频草稿生成 ──
+// ── <span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>生成 ──
 async function genVideo() {
-  if (state.videos.length >= 3) { alert(_t('视频草稿已满（最多3个），请先删除旧草稿','Video panel full (max 3)')); return; }
+  if (state.videos.length >= 3) { alert(_t('<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>已满（最多3个），请先删除旧草稿','Video panel full (max 3)')); return; }
   showLoading('s3');
   try {
     let prompt = document.getElementById('prompt-preview')?.textContent || '';
@@ -2985,17 +2985,17 @@ async function genVideo() {
     }
   } catch(e) {
     hideLoading('s3');
-    alert(_t('视频草稿生成失败：','Video draft failed: ') + e.message);
+    alert(_t('<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>生成失败：','Video draft failed: ') + e.message);
   }
 }
 
 // ── 音乐生成 ──
 async function genMusic() {
-  if (state.musics.length >= 3) { alert(_t('音乐草稿已满（最多3个）','Music panel full (max 3)')); return; }
+  if (state.musics.length >= 3) { alert(_t('<span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span>已满（最多3个）','Music panel full (max 3)')); return; }
   showLoading('s4');
   try {
-    const mood = document.querySelector('#music-mood .tag.selected')?.firstChild?.textContent?.trim() || '温柔舒缓';
-    const genre = document.querySelector('#music-genre .tag.selected')?.firstChild?.textContent?.trim() || '纯钢琴';
+    const mood = document.querySelector('#music-mood .tag.selected')?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">温柔舒缓</span><span class="lang-en-label">Gentle & Soothing</span>';
+    const genre = document.querySelector('#music-genre .tag.selected')?.firstChild?.textContent?.trim() || '<span class="lang-zh-label">纯钢琴</span><span class="lang-en-label">Solo Piano</span>';
     const durEl = document.querySelector('#music-dur .tag.selected')?.textContent?.trim() || '20 秒';
     const dur = parseInt(durEl) || 20;
     const instruments = [...document.querySelectorAll('#music-inst .tag.selected')].map(t => t.firstChild?.textContent?.trim() || t.textContent.trim());
@@ -3044,12 +3044,12 @@ async function genFinal() {
   const selVidCard  = document.querySelector('#s5-videos .asset-card.selected');
   const selMusCards = document.querySelectorAll('#s5-music .asset-card.selected');
 
-  // 必须选视频草稿
+  // 必须选<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>
   if (!selVidCard && state.videos.length > 0) {
-    showToast(_t('请先选择一个视频草稿','Select a video draft'), 'error'); return;
+    showToast(_t('请先选择一个<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>','Select a video draft'), 'error'); return;
   }
   if (!prompt) {
-    showToast(_t('请填写最终 Prompt','Enter final prompt'), 'error'); return;
+    showToast(_t('请填写<span class="lang-zh-label">最终 Prompt</span><span class="lang-en-label">Final Prompt</span>','Enter final prompt'), 'error'); return;
   }
 
   // 获取选中的实际 state 对象
@@ -3130,7 +3130,7 @@ async function genFinal() {
       document.getElementById('s5-done').scrollIntoView({ behavior: 'smooth' });
     }
   } catch(e) {
-    if (_s5Cancelled) return; // 取消后的异常忽略
+    if (_s5Cancelled) return; // <span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span>后的异常忽略
     hideLoading('s5');
     document.getElementById('s5-cancel-btn').style.display = 'none';
     document.getElementById('s5-gen-btn').style.display = '';
@@ -3159,7 +3159,7 @@ function handleVideoDrop(event) {
   document.getElementById('s3-video-zone').classList.remove('dragover');
   const file = event.dataTransfer.files[0];
   if (!file) return;
-  if (!file.type.startsWith('video/')) { showToast('请上传视频文件（mp4/mov/webm）', 'error'); return; }
+  if (!file.type.startsWith('video/')) { showToast('请<span class="lang-zh-label">上传视频文件</span><span class="lang-en-label">Upload Video File</span>（mp4/mov/webm）', 'error'); return; }
   _previewS3Video(file);
 }
 
@@ -3174,7 +3174,7 @@ function _previewS3Video(file) {
 
 async function saveUploadedVideo() {
   if (!_s3UploadedVideoFile) return;
-  if (state.videos.length >= 3) { showToast(_t('视频草稿已满（最多3个），请先删除旧草稿','Video panel full (max 3)'), 'error'); return; }
+  if (state.videos.length >= 3) { showToast(_t('<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>已满（最多3个），请先删除旧草稿','Video panel full (max 3)'), 'error'); return; }
 
   const loadingEl = document.getElementById('s3-upload-loading');
   const loadTextEl = document.getElementById('s3-upload-loadtext');
@@ -3196,7 +3196,7 @@ async function saveUploadedVideo() {
     const sizeMB = (_s3UploadedVideoFile.size / 1024 / 1024).toFixed(1);
     state.videos.push({ name, meta: `上传 · ${sizeMB}MB`, url: d.url, uploaded: true });
     updateMat();
-    showToast(`✓ 已上传并保存"${name}"到素材盘`, 'success');
+    showToast(`✓ 已上传并保存"${name}"到<span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span>`, 'success');
   } catch(e) {
     showToast('视频上传失败：' + e.message, 'error');
   } finally {
@@ -3213,7 +3213,7 @@ function updateS5() {
   const imgsGrid = document.getElementById('s5-imgs');
   if (imgsGrid) {
     if (state.imgs.length === 0) {
-      imgsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤一保存原图，即可在此选择</div>';
+      imgsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0"><span class="lang-zh-label">← 先在步骤一保存原图</span><span class="lang-en-label">← Save images in Step 1 first</span>，即可在此选择</div>';
     } else {
       imgsGrid.innerHTML = state.imgs.map((img, i) => {
         const previewBg = img.url
@@ -3231,11 +3231,11 @@ function updateS5() {
     }
   }
 
-  // 视频草稿
+  // <span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span>
   const vidsGrid = document.getElementById('s5-videos');
   if (vidsGrid) {
     if (state.videos.length === 0) {
-      vidsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三生成或上传视频草稿</div>';
+      vidsGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤三生成或上传<span class="lang-zh-label">视频草稿</span><span class="lang-en-label">Video Drafts</span></div>';
     } else {
       vidsGrid.innerHTML = state.videos.map((v, i) => {
         const icon = v.uploaded ? '📤' : '▶';
@@ -3253,11 +3253,11 @@ function updateS5() {
     }
   }
 
-  // 音乐草稿
+  // <span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span>
   const musGrid = document.getElementById('s5-music');
   if (musGrid) {
     if (state.musics.length === 0) {
-      musGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四生成音乐草稿（可跳过）</div>';
+      musGrid.innerHTML = '<div class="mat-placeholder" style="grid-column:1/-1;padding:16px 0">← 先在步骤四生成<span class="lang-zh-label">音乐草稿</span><span class="lang-en-label">Music Drafts</span>（可跳过）</div>';
     } else {
       musGrid.innerHTML = state.musics.map((m, i) => {
         const safeName = escapeHtml(m.name);
@@ -3275,7 +3275,7 @@ function updateS5() {
   }
 }
 
-// 步骤五 asset 选择（图片可多选最多2张，视频单选，音乐可取消选择）
+// 步骤五 asset 选择（图片<span class="lang-zh-label">可多选</span><span class="lang-en-label">multi-select</span>最多2张，视频单选，音乐可<span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span>选择）
 function toggleAssetS5(el, type) {
   if (type === 'img') {
     // 图片最多2张
@@ -3301,9 +3301,9 @@ function syncPromptFromS3() {
     ta.value = s3prompt;
     _s5LastSyncedPrompt = s3prompt;
     document.getElementById('s5-sync-dot').style.display = 'none';
-    showToast('✓ 已同步步骤三 Prompt', 'success');
+    showToast(_t('✓ 已同步步骤三 Prompt','✓ Prompt synced'), 'success');
   } else {
-    showToast('步骤三尚无 Prompt，请先配置', 'error');
+    showToast(_t('步骤三尚无 Prompt，请先配置','No Step 3 prompt'), 'error');
   }
 }
 
@@ -3322,11 +3322,11 @@ function checkS5PromptStale() {
   dot.style.display = stale ? 'block' : 'none';
   // 更新 title tooltip
   if (dot.parentElement) {
-    dot.parentElement.title = stale ? '步骤三 Prompt 已更新，点击同步' : '';
+    dot.parentElement.title = stale ? _t('步骤三 Prompt 已更新，点击同步','Step 3 prompt updated') : '';
   }
 }
 
-// ── 步骤五取消生成 ──
+// ── 步骤五<span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span>生成 ──
 let _s5Cancelled = false;
 
 function cancelFinal() {
@@ -3334,7 +3334,7 @@ function cancelFinal() {
   hideLoading('s5');
   document.getElementById('s5-cancel-btn').style.display = 'none';
   document.getElementById('s5-gen-btn').style.display = '';
-  showToast(_t('已取消生成','Cancelled'), 'error');
+  showToast(_t('已<span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span>生成','Cancelled'), 'error');
 }
 
 // ── 匹配视频风格 ──
@@ -3343,12 +3343,12 @@ function syncMusicStyle() {
   const styleVal = styleTag?.firstChild?.textContent?.trim() || '';
   const moodTags = document.querySelectorAll('#music-mood .tag');
   moodTags.forEach(t => t.classList.remove('selected'));
-  let idx = 1; // default: 温柔舒缓
+  let idx = 1; // default: <span class="lang-zh-label">温柔舒缓</span><span class="lang-en-label">Gentle & Soothing</span>
   if (styleVal.includes('35mm') || styleVal.includes('复古')) idx = 1;
   else if (styleVal.includes('4K') || styleVal.includes('纪录')) idx = 0;
   else if (styleVal.includes('动漫')) idx = 3;
   if (moodTags[idx]) moodTags[idx].classList.add('selected');
-  alert('✓ 已根据步骤三视频风格匹配音乐参数');
+  alert(_t('✓ 已根据步骤三视频风格匹配音乐参数','✓ Music matched to video'));
 }
 
 // ── MATERIAL PANEL ──
@@ -3385,7 +3385,7 @@ function updateMat() {
   const adjList = document.getElementById('adj-img-list');
   if (adjList) {
     if (state.imgs.length === 0) {
-      adjList.innerHTML = '<div class="img-select-item empty" style="font-size:13px">← 先在步骤一保存原图</div>';
+      adjList.innerHTML = '<div class="img-select-item empty" style="font-size:13px"><span class="lang-zh-label">← 先在步骤一保存原图</span><span class="lang-en-label">← Save images in Step 1 first</span></div>';
     } else {
       adjList.innerHTML = state.imgs.map((img, i) => {
         const bg = img.url ? `style="background-image:url(${img.url});background-size:cover;background-position:center"` : '';
@@ -3408,7 +3408,7 @@ function updateMat() {
   if (refRow && state.imgs.length > 0) {
     refRow.innerHTML = state.imgs.map((img, i) => {
       const bg = img.url ? `style="background-image:url(${img.url});background-size:cover;background-position:center;width:80px"` : `style="width:80px"`;
-      const refSafeName = escapeHtml(img.name || '原图');
+      const refSafeName = escapeHtml(img.name || _t('原图','Image'));
       return `<div class="mat-thumb${i===0?' selected':''}" ${bg} data-img-id="${img.id}" data-img-name="${refSafeName}" onclick="selectRefImg(this, this.dataset.imgName)">
         ${img.url ? '' : `<div style="font-size:22px">${img.icon||'🖼️'}</div>`}
         ${i===0?'<div style="position:absolute;top:3px;right:3px;width:14px;height:14px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">✓</div>':''}
@@ -3455,7 +3455,7 @@ let _previewingVidIdx = null;
 
 function previewVid(i) {
   const v = state.videos[i];
-  if (!v || !v.url) { showToast('视频 URL 未获取（Mock 模式）', 'error'); return; }
+  if (!v || !v.url) { showToast(_t('视频 URL 未获取（Mock 模式）','Mock mode'), 'error'); return; }
   _previewingVidIdx = i;
   document.getElementById('vid-preview-title').textContent = v.name || `草稿 ${i + 1}`;
   document.getElementById('vid-preview-meta').textContent = v.meta || (v.uploaded ? '上传视频' : '');
@@ -3488,7 +3488,7 @@ function previewMus(i) {
     a.style.cssText = 'position:fixed;bottom:16px;right:280px;z-index:999;background:#13131a;border-radius:8px;';
     document.body.appendChild(a);
     a.onended = () => a.remove();
-  } else alert('音乐URL未获取（Mock模式）');
+  } else alert(_t('音乐URL未获取（Mock模式）','Mock mode'));
 }
 
 function toggleMatSection(section) {
@@ -3662,7 +3662,7 @@ async function genImagesFromPrompt() {
 }
 
 // ── downloadAssetPack — 素材包下载 ──
-// ── 素材盘 Prompt 弹窗 ──
+// ── <span class="lang-zh-label">素材盘</span><span class="lang-en-label">Material Panel</span> Prompt 弹窗 ──
 let _ippImgIdx = -1;
 
 function showImgPromptPopup(imgIdx, thumbEl) {
@@ -3674,13 +3674,13 @@ function showImgPromptPopup(imgIdx, thumbEl) {
   const nameEl = document.getElementById('ipp-name');
   const textEl = document.getElementById('ipp-text');
 
-  nameEl.textContent = img.name || '原图';
+  nameEl.textContent = img.name || _t('原图','Image');
   const prompt = img.prompt || img.ai_prompt || '';
   if (prompt) {
     textEl.textContent = prompt;
     textEl.className = 'ipp-text';
   } else {
-    textEl.textContent = '（未记录 Prompt）';
+    textEl.textContent = _t('（未记录 Prompt）','(No prompt)');
     textEl.className = 'ipp-text ipp-empty';
   }
 
@@ -3715,13 +3715,13 @@ function hideImgPromptPopup() {
 
 function copyIppPrompt() {
   const text = document.getElementById('ipp-text')?.textContent || '';
-  if (!text || text === '（未记录 Prompt）') { showToast('暂无 Prompt 可复制', 'warn'); return; }
+  if (!text || text === _t('（未记录 Prompt）','(No prompt)')) { showToast('暂无 Prompt 可复制', 'warn'); return; }
   navigator.clipboard.writeText(text).then(() => showToast(_t('✓ Prompt 已复制','✓ Prompt copied'), 'success'));
 }
 
 function applyIppToS1() {
   const text = document.getElementById('ipp-text')?.textContent || '';
-  if (!text || text === '（未记录 Prompt）') { showToast('暂无 Prompt', 'warn'); return; }
+  if (!text || text === _t('（未记录 Prompt）','(No prompt)')) { showToast('暂无 Prompt', 'warn'); return; }
   const el = document.getElementById('s1-prompt-text');
   if (el) { el.value = text; showToast('✓ 已填入步骤一 Prompt', 'success'); }
   hideImgPromptPopup();
@@ -3745,7 +3745,7 @@ async function downloadAssetPack(imgIdx) {
     `# ${img.name}`,
     '',
     '## Prompt',
-    prompt || '（无）',
+    prompt || _t('（无）','(none)'),
     img.annotations?.length
       ? '\n## 标注保留元素\n' + img.annotations.map(a => `- ${a.label}`).join('\n')
       : '',
@@ -3757,7 +3757,7 @@ async function downloadAssetPack(imgIdx) {
   // 若有图片 URL，打包成 zip（图片 + prompt.txt）；否则仅下载 txt
   if (img.url && typeof JSZip !== 'undefined') {
     try {
-      showToast('正在打包…', 'success');
+      showToast(_t('正在打包…','Packing...'), 'success');
       let imgBlob;
       try {
         const res = await fetch(img.url);
