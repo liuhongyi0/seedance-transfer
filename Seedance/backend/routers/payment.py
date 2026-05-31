@@ -99,7 +99,7 @@ async def get_pricing():
         "symbol": sym,
         "packages": [
             {**p, "display": f"{sym}{p['amount']}",
-             "credits_display": f"{p['credits']} 点数"}
+             "credits_display": f"{p['credits']} pts"}
             for p in packages
         ],
         "note": "" if CREEM_API_KEY else ("支付功能即将上线" if not settings.is_intl else "Payment coming soon"),
