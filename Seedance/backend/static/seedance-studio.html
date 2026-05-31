@@ -667,8 +667,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
              ondragleave="this.classList.remove('dragover')"
              ondrop="handleUploadDrop(event)">
           <div class="upload-icon">🖼️</div>
-          <div style="font-size:14px;font-weight:600;color:var(--text2)">点击或拖拽上传客户原图</div>
-          <div class="upload-hint">支持 JPG / PNG / WEBP，最大 10MB</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text2)"><span class="lang-zh-label">点击或拖拽上传客户原图</span><span class="lang-en-label">Click or drag to upload your image</span></div>
+          <div class="upload-hint"><span class="lang-zh-label">支持 JPG / PNG / WEBP，最大 10MB</span><span class="lang-en-label">Supports JPG / PNG / WEBP, max 10MB</span></div>
         </div>
 
         <!-- 标注面板（上传后显示）-->
@@ -684,7 +684,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
                       onmouseleave="onAnnotMouseUp(event)"></canvas>
             </div>
             <div class="annot-pending" id="annot-pending">
-              <input type="text" id="annot-label-input" placeholder="标注名称，如"<span class="lang-zh-label">人物</span><span class="lang-en-label">Portrait</span>"、"产品"、"背景"…" maxlength="20">
+              <input type="text" id="annot-label-input" placeholder="" data-zh-placeholder="标注名称，如人物、产品、背景…" data-en-placeholder="Label, e.g. Subject, Product, Background..." maxlength="20" class="lang-placeholder">
               <div class="annot-pending-btns">
                 <button class="btn btn-primary" style="padding:5px 14px;font-size:12px" id="annot-confirm-btn"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
                 <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" id="annot-cancel-btn"><span class="lang-zh-label">取消</span><span class="lang-en-label">Cancel</span></button>
@@ -758,7 +758,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
             <div class="theme-card" onclick="showOther('theme')" id="theme-other-card"><div class="icon">✏️</div><div class="label"><span class="lang-zh-label">其他</span><span class="lang-en-label">Other</span></div></div>
           </div>
           <div class="other-wrap" id="other-theme">
-            <input class="other-input" type="text" placeholder="输入自定义主题…" id="other-theme-input">
+            <input class="other-input" type="text" placeholder="" data-zh-placeholder="输入自定义主题…" data-en-placeholder="Enter custom theme..." class="lang-placeholder" id="other-theme-input">
             <button class="other-confirm" onclick="confirmOther('theme')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
           </div>
           <div style="margin-top:12px">
@@ -791,7 +791,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
                 <div class="tag" onclick="showOther('style1')">✏️ 其他<span class="lang-en-label">Other</span></div>
               </div>
               <div class="other-wrap" id="other-style1">
-                <input class="other-input" type="text" placeholder="自定义视觉风格…" id="other-style1-input">
+                <input class="other-input" type="text" placeholder="" data-zh-placeholder="自定义视觉风格…" data-en-placeholder="Custom visual style..." class="lang-placeholder" id="other-style1-input">
                 <button class="other-confirm" onclick="confirmOtherTag('style','style-tags','style1')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
               </div>
             </div>
@@ -807,7 +807,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
                 <div class="tag" onclick="showOther('light1')">✏️ 其他<span class="lang-en-label">Other</span></div>
               </div>
               <div class="other-wrap" id="other-light1">
-                <input class="other-input" type="text" placeholder="自定义光线描述…" id="other-light1-input">
+                <input class="other-input" type="text" placeholder="" data-zh-placeholder="自定义光线描述…" data-en-placeholder="Custom lighting..." class="lang-placeholder" id="other-light1-input">
                 <button class="other-confirm" onclick="confirmOtherTag('light','light-tags','light1')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
               </div>
             </div>
@@ -823,7 +823,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
                 <div class="tag" onclick="showOther('mood1')">✏️ 其他<span class="lang-en-label">Other</span></div>
               </div>
               <div class="other-wrap" id="other-mood1">
-                <input class="other-input" type="text" placeholder="自定义情绪氛围…" id="other-mood1-input">
+                <input class="other-input" type="text" placeholder="" data-zh-placeholder="自定义情绪氛围…" data-en-placeholder="Custom mood..." class="lang-placeholder" id="other-mood1-input">
                 <button class="other-confirm" onclick="confirmOtherTag('mood','mood-tags','mood1')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
               </div>
             </div>
@@ -844,7 +844,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
         <!-- 关键词 -->
         <div>
           <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:10px"><span class="lang-zh-label">关键词补充</span><span class="lang-en-label">Keywords — optional, any language</span> <span style="font-weight:400;opacity:.7"><span class="lang-zh-label">可选</span><span class="lang-en-label">Optional</span><span class='lang-zh-label'>，中文即可</span><span class='lang-en-label'>, any language</span></span></div>
-          <input class="text-input" type="text" placeholder="例如：樱花树下、未来城市、温暖的咖啡馆…" id="extra-kw" oninput="buildS1Prompt()">
+          <input class="text-input" type="text" placeholder="" data-zh-placeholder="例如：樱花树下、未来城市、温暖的咖啡馆…" data-en-placeholder="e.g. cherry blossoms, futuristic city, warm cafe..." class="lang-placeholder" id="extra-kw" oninput="buildS1Prompt()">
         </div>
 
       </div><!-- /style-settings-body -->
@@ -921,7 +921,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
       <span>📝 Prompt</span>
       <span id="s1-prompt-status" style="font-size:10px;font-weight:400;color:var(--text3)"></span>
     </div>
-    <textarea class="ws-prompt-textarea" id="s1-prompt-text" placeholder="AI 描述分析结果 + 风格设置将自动填充…&#10;也可以直接手动编辑"></textarea>
+    <textarea class="ws-prompt-textarea" id="s1-prompt-text" placeholder="" data-zh-placeholder="AI 描述分析结果 + 风格设置将自动填充…&#10;也可以直接手动编辑" data-en-placeholder="AI description + style settings will auto-fill here…&#10;You can also edit manually" class="lang-placeholder"></textarea>
     <div class="ws-prompt-actions">
       <button class="ws-download-btn" onclick="rebuildS1Prompt()" style="flex:1"><span class="lang-zh-label">↺ 重建</span><span class="lang-en-label">↺ Rebuild</span></button>
       <button class="ws-download-btn" onclick="copyS1Prompt()" title="复制 Prompt">📋</button>
@@ -1023,7 +1023,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     <div class="card">
       <div class="card-title"><span class="lang-zh-label">剧情 / 分镜描述</span><span class="lang-en-label">Storyboard Description</span></div>
       <div style="font-size:12px;color:var(--text2);margin-bottom:10px"><span class="lang-zh-label">用中文描述视频剧情，AI 将自动转换为 Seedance 英文 Prompt</span><span class="lang-en-label">Describe the video narrative, AI will auto-convert to English prompt</span><span class='lang-zh-label'>。支持描述多个连续</span><span class='lang-en-label'>. Supports describing multiple consecutive </span><span class="lang-zh-label">动作</span><span class="lang-en-label">Action</span><span class='lang-zh-label'>，用逗号分隔。</span><span class='lang-en-label'>, separate with commas.</span></div>
-      <textarea class="story-input" id="story-input" placeholder="例如：镜头从远处慢慢推进，一个穿白裙的女孩在樱花树下转身<span class='lang-zh-label'>回眸</span><span class='lang-en-label'>Looking back</span>，花瓣随风飘落，最后定格在她微笑的面部特写。"></textarea>
+      <textarea class="story-input" id="story-input" placeholder="" data-zh-placeholder="例如：镜头从远处慢慢推进，一个穿白裙的女孩在樱花树下转身回眸，花瓣随风飘落，最后定格在她微笑的面部特写。" data-en-placeholder="e.g. A slow dolly-in through a misty bamboo forest at dawn, golden sunlight piercing through leaves, a lone traveler emerges from the fog." class="lang-placeholder"></textarea>
       <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
         <button class="btn btn-primary" style="font-size:12px;padding:7px 16px" onclick="storyToPrompt()"><span class="lang-zh-label">✨ 转换为英文 Prompt</span><span class="lang-en-label">✨ Convert to English Prompt</span></button>
         <span style="font-size:11px;color:var(--text3)"><span class="lang-zh-label">自动填充到 Prompt 预览，再<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span>视频</span><span class="lang-en-label">Auto-fills prompt preview, then generate video</span></span>
@@ -1069,7 +1069,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
           <div class="tag" onclick="showOther('subject')">✏️ 其他<span class="lang-en-label">Other</span></div>
         </div>
         <div class="other-wrap" id="other-subject">
-          <input class="other-input" type="text" placeholder="描述主体（可中英文）…" id="other-subject-input">
+          <input class="other-input" type="text" placeholder="" data-zh-placeholder="描述主体（可中英文）…" data-en-placeholder="Describe subject (any language)..." class="lang-placeholder" id="other-subject-input">
           <button class="other-confirm" onclick="confirmOtherPb('subject','pb-subject','other-subject')"><span class="lang-zh-label">确认</span><span class="lang-en-label">Confirm</span></button>
         </div>
       </div>
@@ -1486,7 +1486,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     </div>
     <div class="mat-body">
       <div class="mat-list" id="vid-list">
-        <div class="mat-placeholder">暂无<span class='lang-zh-label'>草稿</span><span class='lang-en-label'>Draft</span>，在步骤三<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span></div>
+        <div class="mat-placeholder"><span class='lang-zh-label'>暂无草稿，在步骤三生成</span><span class='lang-en-label'>No drafts yet. Generate in Step 3</span></div>
       </div>
     </div>
   </div>
@@ -1496,7 +1496,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
     </div>
     <div class="mat-body">
       <div class="mat-list" id="mus-list">
-        <div class="mat-placeholder">暂无音乐，在步骤四<span class='lang-zh-label'>生成</span><span class='lang-en-label'>Generate</span></div>
+        <div class="mat-placeholder"><span class='lang-zh-label'>暂无音乐，在步骤四生成</span><span class='lang-en-label'>No music yet. Generate in Step 4</span></div>
       </div>
     </div>
   </div>
@@ -2820,8 +2820,8 @@ function resetUploadZone() {
   const zone = document.getElementById('s1-upload-zone');
   zone.style.display = '';
   zone.innerHTML = `<div class="upload-icon">🖼️</div>
-    <div style="font-size:14px;font-weight:600;color:var(--text2)">点击或拖拽上传客户原图</div>
-    <div class="upload-hint">支持 JPG / PNG / WEBP，最大 10MB</div>`;
+    <div style="font-size:14px;font-weight:600;color:var(--text2)"><span class="lang-zh-label">点击或拖拽上传客户原图</span><span class="lang-en-label">Click or drag to upload your image</span></div>
+    <div class="upload-hint"><span class="lang-zh-label">支持 JPG / PNG / WEBP，最大 10MB</span><span class="lang-en-label">Supports JPG / PNG / WEBP, max 10MB</span></div>`;
   zone.onclick = () => document.getElementById('upload-file-input').click();
   document.getElementById('s1-annot-panel').style.display = 'none';
   document.getElementById('describe-result').style.display = 'none';
