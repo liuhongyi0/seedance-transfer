@@ -11,12 +11,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: comfyui-seedance-wizard
     steps:
       - uses: actions/checkout@v4
       - name: Publish to Comfy Registry
         uses: Comfy-Org/publish-node-action@main
         with:
           personal_access_token: ${{ secrets.COMFY_REGISTRY_TOKEN }}
+          path: comfyui-seedance-wizard
