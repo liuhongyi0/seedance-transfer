@@ -1935,7 +1935,7 @@ function refreshAllCosts() {
     draftPriceEl.textContent = `${sym}${(perSec720 * 5).toFixed(1)}/${_unit('个','each')}`;
   }
   if (draftProvEl && vidModel.provider) {
-    draftProvEl.textContent = vidModel.provider === 'volcengine' ? '<span class="lang-zh-label">火山引擎直连</span><span class="lang-en-label">Volcengine Direct</span>' : '<span class="lang-zh-label">第三方API</span><span class="lang-en-label">3rd Party API</span>';
+    draftProvEl.innerHTML = vidModel.provider === 'volcengine' ? '<span class="lang-zh-label">火山引擎直连</span><span class="lang-en-label">Volcengine Direct</span>' : '<span class="lang-zh-label">第三方API</span><span class="lang-en-label">3rd Party API</span>';
   }
 
   // Step 4 (music): unit price
@@ -3833,6 +3833,11 @@ initSession().then(() => {
 });
 fetchMe();
 loadModelCatalog();
+// Init bilingual placeholders
+document.querySelectorAll('.lang-placeholder').forEach(el => {
+  el.placeholder = document.body.classList.contains('lang-en') ?
+    (el.dataset.enPlaceholder || '') : (el.dataset.zhPlaceholder || '');
+});
 </script>
 </body>
 </html>
