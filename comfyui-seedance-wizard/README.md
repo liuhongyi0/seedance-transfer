@@ -1,112 +1,72 @@
 # Seedance Wizard — ComfyUI Custom Node
 
-AI-powered video creation wizard for [Seedance 2.0](https://seedance.com), built as a ComfyUI custom node.
+AI video creation directly inside ComfyUI. Upload an image, describe your vision, and generate a complete video — with AI script writing, preview images, video drafts, music, and final rendering via 18 AI models.
 
 ## Features
 
-- **4-step guided wizard** — Upload image → AI analysis (Qwen VL + DeepSeek) → Parameter tuning → Video generation
-- **Structured parameter panel** — 5 categorical dropdowns (style/lighting/shot/mood/color) + 4 numeric sliders with 600ms debounced live preview
-- **Flux preview images** — Generate keyframe previews via fal.ai before committing to video (requires `FAL_KEY`)
-- **Graceful degradation** — If Flux is unavailable, original uploaded image is shown as reference
-- **Seedance 2.0 T2V + I2V** — Text-to-video and image-to-video via muapi.ai
-- **WebSocket push** — Real-time progress updates back to the sidebar UI
+- **Dual mode** — Sidebar wizard (interactive) + Pipeline node (connect images/prompts from other nodes)
+- **AI analysis** — Analyzes your reference image with vision models, auto-generates style/mood/camera/prompt suggestions
+- **18 AI models** — Seedance 2.0, Kling O3, Veo 3.1, Sora 2, Wan 2.7, and more — all included
+- **Live preview** — Generate keyframe images before committing to video
+- **Background music** — AI-generated soundtrack via Suno V5
+- **WebSocket push** — Real-time progress: analyze → preview → generating → complete
+- **Credit system** — Pay-as-you-go. Credits never expire. No subscription.
 
-## Quick Start
-
-### 1. Backend Setup (required)
-
-```bash
-cd seedance-transfer/backend
-cp .env.example .env   # or edit .env directly
-# Fill in: DEEPSEEK_API_KEY, DASHSCOPE_API_KEY, MUAPI_KEY, FAL_KEY (optional)
-npm run dev
-```
-
-### 2. Install Node
+## Install
 
 ```bash
 cd ComfyUI/custom_nodes
-ln -s /path/to/seedance-transfer/comfyui-seedance-wizard ./comfyui-seedance-wizard
-# Or clone directly:
-# git clone https://github.com/your-org/comfyui-seedance-wizard.git
+git clone https://github.com/liuhongyi0/comfyui-seedance-wizard.git
+# No extra Python packages required beyond numpy + Pillow
 ```
 
-No extra Python packages required — uses only stdlib (`urllib`, `json`).
+## Configure
 
-### 3. Configure API Key
+1. Open ComfyUI → Seedance sidebar tab → ⚙ Settings
+2. Set **Backend URL**: `https://see4dance.com`
+3. Register at [see4dance.com](https://see4dance.com) → get your API Key (`sk-seed-...`)
 
-Start ComfyUI, open the **Seedance** sidebar tab, click ⚙ and set:
-- **API Key**: your `sk-seed-...` key (create one at `POST /api/keys`)
-- **Backend URL**: `http://localhost:3000`
-
-Or create `ComfyUI/user/default/seedance_config.json` directly:
+Or create `ComfyUI/user/default/seedance_config.json`:
 
 ```json
 {
-  "api_key": "sk-seed-...",
-  "backend_url": "http://localhost:3000",
-  "language": "zh"
+  "api_key": "sk-seed-xxxx",
+  "backend_url": "https://see4dance.com",
+  "language": "en"
 }
 ```
-
-### 4. Verify Routes (H-3 test)
-
-```bash
-# ComfyUI must be running on port 8188
-curl http://localhost:8188/seedance/settings
-# → {"api_key_configured": true, "backend_url": "http://localhost:3000", ...}
-
-curl http://localhost:8188/seedance/balance
-# → {"amount_fen": ..., "amount_yuan": ..., "currency": "CNY"}
-```
-
-## Wizard Flow
-
-```
-Step 1  →  Upload image + describe idea + pick ratio
-Step 2  →  AI analyzing (Qwen VL → DeepSeek → Flux preview)
-Step 3  →  Tune 9 parameters, preview updates every 600ms
-Step 4  →  Video generation progress + download link
-```
-
-## PromptServer Routes
-
-| Method | Route | Backend |
-|--------|-------|---------|
-| POST | `/seedance/wizard/analyze` | `/api/wizard/analyze` |
-| POST | `/seedance/wizard/preview` | `/api/wizard/preview` |
-| POST | `/seedance/video/generate` | `/api/video/generate` |
-| GET  | `/seedance/video/status?task_id=` | `/api/video/{id}/status` |
-| GET  | `/seedance/video/result?task_id=` | `/api/video/{id}/result` |
-| GET  | `/seedance/balance` | `/api/balance` |
-| GET  | `/seedance/settings` | local config |
-| POST | `/seedance/settings` | local config |
 
 ## Nodes
 
 ### SeedanceWizardNode
 
-Main output node. Polls for video completion when triggered.
+Main output node. Sidebar mode polls for results; Pipeline mode runs the full analyze → preview → generate pipeline automatically.
 
 | Input | Type | Description |
 |-------|------|-------------|
-| `trigger` | INT | Increment to start polling |
-| `api_key` | STRING (opt) | Override API key from config |
+| trigger | INT | Sidebar: increment to start polling |
+| image | IMAGE | Pipeline: connect LoadImage or any image node |
+| prompt | STRING | Pipeline: optional creative direction |
+| model_key | select | seedance-1.5 / seedance-2.0 / veo3.1-fast / kling-o3 / ... |
+| aspect_ratio | select | 16:9 / 9:16 / 1:1 |
+| style / mood / camera / lighting / color_tone | select | AI will auto-fill these from image analysis |
 
-**Output**: `video_path` (STRING) — local path to downloaded MP4
+**Outputs**: `video_path`, `preview_thumbnail`, `final_prompt`
 
 ### SeedanceApiKeyNode
 
-Optional: provide API key as a workflow wire instead of config file.
+Optional: wire a key into the workflow instead of using config file.
 
-## Architecture
+### SeedanceImageInputNode
 
-```
-wizard.html  ←postMessage→  main.js  ←fetch→  nodes.py routes
-                              main.js  ←WebSocket←  nodes.py
-nodes.py  ←HTTP→  Node.js backend  ←API→  DeepSeek / Qwen VL / fal.ai / Seedance
-```
+Pipeline helper: makes image flow explicit in the node graph.
+
+## Backend
+
+This node requires a Seedance Studio backend. The public instance runs at `https://see4dance.com`.
+
+[Self-hosting instructions →](https://github.com/liuhongyi0/seedance-transfer)
 
 ## License
 
-MIT — Copyright (c) 2025 Seedance Wizard Contributors
+MIT — Copyright (c) 2025-2026 Seedance Wizard Contributors
