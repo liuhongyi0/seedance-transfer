@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * blob:; connect-src *; frame-src https://accounts.google.com;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seedance Studio · 视频创作工作台</title>
+<title>Seedance Studio · AI Video Workshop</title>
 <style>
 :root {
   --bg: #0a0a0f; --bg2: #13131a; --bg3: #1c1c26; --bg4: #252535;
@@ -34,8 +34,9 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 /* LANG TOGGLE */
 .lang-toggle-btn { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; background: var(--bg3); border: 1.5px solid var(--border2); cursor: pointer; color: var(--text2); transition: all .15s; white-space: nowrap; }
 .lang-toggle-btn.active { border-color: var(--accent); color: var(--accent2); background: var(--accent-glow); }
-.lang-en-label { display: none; font-size: 10px; color: var(--text3); margin-top: 1px; line-height: 1; }
-body.lang-en .lang-en-label { display: block; }
+.lang-en-label { display: none; }
+body.lang-en .lang-en-label { display: inline; }
+body.lang-en .lang-zh-label { display: none; }
 
 /* LAYOUT */
 .workspace { display: flex; flex: 1; overflow: hidden; }
@@ -560,25 +561,25 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 <header>
   <a href="/" class="logo" style="text-decoration:none"><div class="logo-dot"></div>Seedance Studio</a>
   <nav class="step-nav">
-    <div class="step-btn active" onclick="goStep(1)" id="stepbtn-1"><div class="step-num">1</div> 原图</div>
+    <div class="step-btn active" onclick="goStep(1)" id="stepbtn-1"><div class="step-num">1</div><span class="lang-zh-label"> 原图</span><span class="lang-en-label"> Image</span></div>
     <div class="step-arrow">›</div>
-    <div class="step-btn" onclick="goStep(2)" id="stepbtn-2"><div class="step-num">2</div> 调色</div>
+    <div class="step-btn" onclick="goStep(2)" id="stepbtn-2"><div class="step-num">2</div><span class="lang-zh-label"> 调色</span><span class="lang-en-label"> Color</span></div>
     <div class="step-arrow">›</div>
-    <div class="step-btn" onclick="goStep(3)" id="stepbtn-3"><div class="step-num">3</div> 视频草稿</div>
+    <div class="step-btn" onclick="goStep(3)" id="stepbtn-3"><div class="step-num">3</div><span class="lang-zh-label"> 视频草稿</span><span class="lang-en-label"> Draft</span></div>
     <div class="step-arrow">›</div>
-    <div class="step-btn" onclick="goStep(4)" id="stepbtn-4"><div class="step-num">4</div> 音乐草稿</div>
+    <div class="step-btn" onclick="goStep(4)" id="stepbtn-4"><div class="step-num">4</div><span class="lang-zh-label"> 音乐草稿</span><span class="lang-en-label"> Music</span></div>
     <div class="step-arrow">›</div>
-    <div class="step-btn" onclick="goStep(5)" id="stepbtn-5"><div class="step-num">5</div> 生成成片</div>
+    <div class="step-btn" onclick="goStep(5)" id="stepbtn-5"><div class="step-num">5</div><span class="lang-zh-label"> 生成成片</span><span class="lang-en-label"> Final</span></div>
   </nav>
   <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
-    <button class="lang-toggle-btn" id="lang-btn" onclick="toggleLang()">中 / EN</button>
+    <button class="lang-toggle-btn" id="lang-btn" onclick="toggleLang()"><span class="lang-zh-label">中</span><span class="lang-en-label">EN</span></button>
     <!-- 未登录 -->
-    <button class="auth-btn" id="auth-login-btn" onclick="openAuthModal('login')" style="display:none">登录 / 注册</button>
+    <button class="auth-btn" id="auth-login-btn" onclick="openAuthModal('login')" style="display:none"><span class="lang-zh-label">登录 / 注册</span><span class="lang-en-label">Login / Sign Up</span></button>
     <!-- 已登录 -->
     <div class="user-chip" id="user-chip" style="display:none" onclick="toggleUserMenu()">
       <div class="user-avatar" id="user-avatar">U</div>
       <div>
-        <div class="user-name" id="user-name">用户</div>
+        <div class="user-name" id="user-name"><span class="lang-zh-label">用户</span><span class="lang-en-label">User</span></div>
         <div class="user-balance" id="user-balance"></div>
       </div>
     </div>
@@ -587,9 +588,9 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px;
 
 <!-- USER MENU -->
 <div class="user-menu" id="user-menu">
-  <div class="user-menu-item" onclick="openAuthModal('me')">👤 账户信息</div>
-  <div class="user-menu-item" onclick="closeUserMenu();openPricingModal()">💳 余额充值</div>
-  <div class="user-menu-item danger" onclick="doLogout()">退出登录</div>
+  <div class="user-menu-item" onclick="openAuthModal('me')"><span class="lang-zh-label">👤 账户信息</span><span class="lang-en-label">👤 Account</span></div>
+  <div class="user-menu-item" onclick="closeUserMenu();openPricingModal()"><span class="lang-zh-label">💳 余额充值</span><span class="lang-en-label">💳 Recharge</span></div>
+  <div class="user-menu-item danger" onclick="doLogout()"><span class="lang-zh-label">退出登录</span><span class="lang-en-label">Logout</span></div>
 </div>
 
 <!-- AUTH MODAL -->
