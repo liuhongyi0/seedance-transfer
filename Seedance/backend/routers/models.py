@@ -44,6 +44,7 @@ async def list_models(step: str = ""):
             "is_default": m.get("default", False),
             "tags": m.get("tags", []),
             "provider": m.get("provider", "evolink"),
+            "tier": m.get("tier", "standard"),
         }
         if step == VIDEO_DRAFT:
             per_sec_map = m.get("price_per_sec_intl" if is_intl else "price_per_sec_cn", {})
