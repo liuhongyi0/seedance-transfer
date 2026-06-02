@@ -39,7 +39,12 @@ STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
 async def _daily_backup_loop():
     """Background task: run DB backup daily at 3:00 AM local time."""
-    import asyncio, datetime, subprocess, gzip, io, uuid
+    import asyncio
+    import datetime
+    import subprocess  # nosec B404 — pg_dump is a fixed command, not user input
+    import gzip
+    import io
+    import uuid
     await asyncio.sleep(10)  # wait for startup to settle
 
     while True:
@@ -64,7 +69,7 @@ async def _daily_backup_loop():
             backup_id = uuid.uuid4().hex[:8]
             filename = f"seedance_{timestamp}_{backup_id}.sql.gz"
 
-            result = subprocess.run(
+            result = subprocess.run(  # nosec S603,S607 — db_url is from DATABASE_URL env, not user input
                 ["pg_dump", db_url, "--no-owner", "--no-acl", "--clean"],
                 capture_output=True, text=False, timeout=300,
             )
@@ -356,7 +361,7 @@ async def admin_init_db(request: Request):
 
     for stmt in sql.split(";"):
         lines = stmt.strip().split("\n")
-        sql_lines = [l for l in lines if not l.strip().startswith("--") and l.strip()]
+        sql_lines = [line for line in lines if not line.strip().startswith("--") and line.strip()]
         clean = "\n".join(sql_lines).strip()
         if clean:
             try:
@@ -398,7 +403,7 @@ async def admin_backup(request: Request):
     if not db_url:
         return {"status": "error", "detail": "DATABASE_URL not configured"}
 
-    result = subprocess.run(
+    result = subprocess.run(  # nosec S603,S607 — db_url is from DATABASE_URL env
         ["pg_dump", db_url, "--no-owner", "--no-acl", "--clean"],
         capture_output=True, text=False, timeout=300,
     )
@@ -408,7 +413,8 @@ async def admin_backup(request: Request):
         raise HTTPException(status_code=500, detail=f"pg_dump failed: {result.stderr.decode()[:200]}")
 
     # gzip
-    import gzip, io
+    import gzip
+    import io
     buf = io.BytesIO()
     with gzip.GzipFile(filename="", fileobj=buf, mode="wb") as gz:
         gz.write(result.stdout)

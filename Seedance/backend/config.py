@@ -111,6 +111,6 @@ def validate_keys():
     if not settings.VOLC_API_KEY:
         missing.append("VOLC_API_KEY")
     if missing:
-        logger.warning(f"⚠️  警告：以下API Key未配置，相关功能将返回Mock数据：{missing}")
+        logger.warning(f"⚠️  警告：以下API Key未配置，相关功能将返回Mock数据：{missing}")  # noqa: RUF001
         logger.info("   请在 backend/.env 文件中填写对应Key")
     return len(missing) == 0
