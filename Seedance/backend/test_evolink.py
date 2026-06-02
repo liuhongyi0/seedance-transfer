@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """EvoLink 三端点验证"""
-import aiohttp, asyncio, os, json, random, sys
+import aiohttp
+import asyncio
+import os
+import json
+import random
+import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from dotenv import load_dotenv
 load_dotenv()

@@ -250,7 +250,7 @@ async def video_generate(req: VideoGenerateRequest, request: Request):
     # Check required API key for the provider
     if provider == "volcengine" and not settings.VOLC_API_KEY:
         return {"success": True, "task_id": task_id, "status": "processing",
-                "note": f"Mock mode (no VOLC_API_KEY)"}
+                "note": "Mock mode (no VOLC_API_KEY)"}
     if provider != "volcengine" and not settings.EVOLINK_API_KEY:
         return {"success": True, "task_id": task_id, "status": "processing",
                 "note": "Mock mode (no EVOLINK_API_KEY)"}

@@ -4,7 +4,6 @@ Pydantic 数据模型 —— 所有API请求/响应的类型定义
 
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
-from enum import Enum
 
 
 # ─── 通用 ───────────────────────────────────────────────────────────────────

@@ -13,8 +13,11 @@ import asyncio
 
 from config import settings
 from store import store
-from services.music_prompt_builder import build_music_prompt
 from services.billing import calculate_cost, charge, refund, require_user
+from services.moderation import screen_prompt
+from log_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 

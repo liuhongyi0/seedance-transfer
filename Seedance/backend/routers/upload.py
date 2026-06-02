@@ -4,7 +4,7 @@ POST /api/upload/video  → 上传视频到 R2，返回永久 URL
 POST /api/upload/image  → 上传图片到 R2，返回永久 URL
 """
 
-from fastapi import APIRouter, HTTPException, Request, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from services.storage import upload_bytes
 from log_config import get_logger
 

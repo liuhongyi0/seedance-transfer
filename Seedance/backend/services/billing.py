@@ -4,7 +4,6 @@
 """
 
 from typing import Optional
-from config import settings
 from store import store
 
 

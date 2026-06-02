@@ -10,13 +10,13 @@ import asyncio
 import httpx
 from typing import Optional
 from log_config import get_logger
-
-logger = get_logger(__name__)
-
 from config import settings
+
 from services.model_catalog import (
     VIDEO_DRAFT, get_provider, get_volc_model, get_evolink_name
 )
+
+logger = get_logger(__name__)
 
 
 async def submit_video(

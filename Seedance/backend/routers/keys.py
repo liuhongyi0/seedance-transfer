@@ -7,10 +7,8 @@ DELETE /api/keys/{key_id} → 撤销 API Key
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
-from typing import Optional
 import hashlib
 import secrets
-import os
 
 from store import store
 from services.billing import require_user

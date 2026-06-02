@@ -15,11 +15,8 @@ import asyncio
 
 from config import settings
 from store import store
-from services.translate import translate_to_english
 from services.prompt_builder import build_image_prompt
 from services.billing import calculate_cost, charge, refund, require_user
-from services.moderation import screen_prompt
-from services.moderation import screen_prompt
 from log_config import get_logger
 
 logger = get_logger(__name__)
@@ -367,8 +364,9 @@ async def describe_image(req: DescribeRequest, request: Request):
         except Exception:
             detail = raw
         raise HTTPException(status_code=502, detail=f"视觉模型调用失败({e.response.status_code}): {detail}")
-    except Exception as e:
-        import traceback; traceback.print_exc()
+    except Exception:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail="Image description failed due to an internal error")
 
 
@@ -511,7 +509,7 @@ async def stylize_image(req: StylizeRequest, request: Request):
         except Exception as inner_e:
             logger.warning(f"⚠️ 风格化回退失败: {inner_e}")
         raise HTTPException(status_code=502, detail=f"EvoLink风格化失败: {e.response.status_code}")
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Image stylization failed due to an internal error")
 @router.post("/color")
 async def save_color(req: ColorSaveRequest):

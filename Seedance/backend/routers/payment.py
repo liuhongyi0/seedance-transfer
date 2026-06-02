@@ -175,7 +175,6 @@ async def create_checkout(req: CheckoutRequest, request: Request):
     user_email = user.get("email", "") if user else ""
 
     success_url = req.success_url or f"{BASE_URL}/"
-    cancel_url = req.cancel_url or f"{BASE_URL}/"
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as http:

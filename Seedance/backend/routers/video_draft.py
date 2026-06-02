@@ -84,7 +84,7 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
                 status_code=402,
                 detail=f"Insufficient balance. Need {cost_subunit} {settings.currency_subunit}, have {balance}."
             )
-        await charge(user_id, "video_draft", cost_subunit, f"480p 5s draft")
+        await charge(user_id, "video_draft", cost_subunit, "480p 5s draft")
 
     ref_url = req.reference_image_url
     if not ref_url and req.reference_image_id:

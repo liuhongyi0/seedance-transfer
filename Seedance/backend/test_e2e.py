@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """Seedance Studio 端到端业务流程测试 — 注册→上传→分析→预览→视频→音乐→成片"""
-import aiohttp, asyncio, struct, zlib, random, json, time, os, sys
+import aiohttp
+import asyncio
+import struct
+import zlib
+import random
+import time
+import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 from dotenv import load_dotenv
@@ -131,7 +138,7 @@ async def main():
     elapsed = time.time() - total_start
     print("\n" + "=" * 65)
     print(f"  ✅ 端到端测试完成！耗时 {elapsed:.1f}s")
-    print(f"  所有 10 项核心流程通过")
+    print("  所有 10 项核心流程通过")
     print("=" * 65)
 
 asyncio.run(main())

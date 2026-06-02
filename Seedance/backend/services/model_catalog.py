@@ -177,11 +177,14 @@ def get_default(step: str) -> dict:
         if info.get("default"):
             return {**info, "key": key}
     first = next(iter(catalog.items()), None)
-    if first: key, info = first; return {**info, "key": key}
+    if first:
+        key, info = first
+        return {**info, "key": key}
     return {"key": "unknown", "evolink": "unknown"}
 
 def get_evolink_name(step: str, key: Optional[str] = None) -> str:
-    if not key: return get_default(step)["evolink"]
+    if not key:
+        return get_default(step)["evolink"]
     model = get_model(step, key)
     return model["evolink"] if model else get_default(step)["evolink"]
 
@@ -191,9 +194,11 @@ def get_provider(step: str, key: Optional[str] = None) -> str:
 
 def get_volc_model(step: str, key: Optional[str], resolution: str = "720p") -> str:
     model = get_model(step, key) if key else get_default(step)
-    if not model: return ""
+    if not model:
+        return ""
     volc = model.get("volc_model", "")
-    if isinstance(volc, dict): return volc.get(resolution, volc.get("720p", ""))
+    if isinstance(volc, dict):
+        return volc.get(resolution, volc.get("720p", ""))
     return volc
 
 def get_credits(step: str, key: Optional[str] = None, resolution: str = "720p") -> int:
@@ -209,19 +214,23 @@ def get_credits(step: str, key: Optional[str] = None, resolution: str = "720p") 
         return model.get("credits_per_sec", 1) if model else 1
     elif step == FINAL_VIDEO:
         model = get_model(step, key) if key else get_default(step)
-        if not model: return 2
+        if not model:
+            return 2
         cps = model.get("credits_per_sec", {"720p": 2, "1080p": 3})
-        if isinstance(cps, dict): return cps.get(resolution, cps.get("720p", 2))
+        if isinstance(cps, dict):
+            return cps.get(resolution, cps.get("720p", 2))
         return cps
     return 1
 
 def get_credits_per_sec(key: Optional[str], resolution: str = "720p") -> int:
     model = get_model(VIDEO_DRAFT, key) if key else get_default(VIDEO_DRAFT)
-    if not model: return 1
+    if not model:
+        return 1
     return model.get("credits_per_sec", 1)
 
 def get_final_credits_per_sec(resolution: str = "720p") -> int:
     model = get_default(FINAL_VIDEO)
     cps = model.get("credits_per_sec", {"720p": 2, "1080p": 3})
-    if isinstance(cps, dict): return cps.get(resolution, 2)
+    if isinstance(cps, dict):
+        return cps.get(resolution, 2)
     return cps

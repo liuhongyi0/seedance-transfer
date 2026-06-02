@@ -6,7 +6,6 @@ Seedance Studio API 联调验证脚本
 """
 import asyncio
 import httpx
-import json
 import sys
 import os
 from dotenv import load_dotenv
@@ -275,7 +274,7 @@ async def test_final_video(client, sid):
     data = r.json()
     note = data.get("note", "")
     if "Mock" in str(note):
-        warn(f"最终成片 → Mock模式")
+        warn("最终成片 → Mock模式")
     else:
         ok(f"成片提交成功! task_id={data.get('task_id','')[:8]}… status={data.get('status')}")
     return data
@@ -288,7 +287,6 @@ async def test_sse_poll(client, sid, task_id, label):
         return
     print(f"\n─── {label}（轮询验证）───")
     # Poll via REST endpoint (SSE requires persistent connection)
-    import time
     for attempt in range(10):
         await asyncio.sleep(2)
         try:
@@ -309,7 +307,7 @@ async def test_sse_poll(client, sid, task_id, label):
                 return
         except Exception:
             pass
-    warn(f"轮询超时（任务可能仍在运行）")
+    warn("轮询超时（任务可能仍在运行）")
 
 
 # ─── 新增测试：ComfyUI Wizard ──────────────────────────────────────────────
@@ -318,7 +316,7 @@ async def test_wizard_balance(client):
     print("\n─── 14. Wizard 余额查询 ───")
     r = await client.get(f"{BASE}/api/balance")
     if r.status_code == 200:
-        ok(f"余额接口正常")
+        ok("余额接口正常")
     else:
         warn(f"余额接口返回 {r.status_code}（可能需要认证）")
 
@@ -396,7 +394,8 @@ async def test_upload_image(client, token):
         warn("跳过（无 token）")
         return
     # Create a tiny valid PNG (1x1 pixel)
-    import struct, zlib
+    import struct
+    import zlib
     def make_png():
         def chunk(typ, data):
             c = typ + data
@@ -480,7 +479,7 @@ async def test_api_key_create_delete(client, token):
                 "Authorization": f"Bearer {token}"
             })
             if r2.status_code == 200:
-                ok(f"Key删除成功")
+                ok("Key删除成功")
             else:
                 warn(f"Key删除返回 {r2.status_code}")
     elif r.status_code == 501:

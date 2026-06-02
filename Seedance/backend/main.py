@@ -426,7 +426,7 @@ async def admin_backup(request: Request):
         url = await upload_bytes(compressed, "application/gzip", prefix="backups")
     except RuntimeError as e:
         logger.error(f"[BACKUP] Upload failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {e}") from e
 
     logger.info(f"[BACKUP] ✅ {filename} → {url}")
     return {

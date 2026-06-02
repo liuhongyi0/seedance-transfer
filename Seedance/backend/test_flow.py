@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Seedance Studio 前端创作流程 API 联调"""
-import aiohttp, asyncio, json, os, random, struct, sys, zlib
+import aiohttp
+import asyncio
+import os
+import random
+import struct
+import sys
+import zlib
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "Seedance", "backend"))
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), "Seedance", "backend", ".env"))

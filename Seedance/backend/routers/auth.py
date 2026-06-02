@@ -188,7 +188,7 @@ async def google_auth(req: GoogleAuthRequest, request: Request):
 
     google_id = token_info.get("sub")
     email = token_info.get("email", "")
-    name = token_info.get("name", "")
+    token_info.get("name", "")
     avatar = token_info.get("picture", "")
 
     if not google_id:
@@ -330,7 +330,7 @@ async def github_callback(code: str = ""):
 
     github_id = str(gh_user.get("id", ""))
     login = gh_user.get("login", "")
-    name = gh_user.get("name") or login
+    gh_user.get("name") or login
     avatar = gh_user.get("avatar_url", "")
 
     # 3. Try to get email (may need separate call)
@@ -354,7 +354,7 @@ async def github_callback(code: str = ""):
                     elif emails:
                         email = emails[0]["email"]
         except Exception:
-            logger.error(f"[auth] GitHub email fetch failed (non-fatal)")
+            logger.error("[auth] GitHub email fetch failed (non-fatal)")
             pass  # email is optional
 
     if not github_id:

@@ -12,12 +12,11 @@ import os
 import hashlib
 import logging
 from typing import Dict, Optional
-from log_config import get_logger
-
-logger = logging.getLogger("seedance.store")
 
 from config import settings
 from sse_broker import sse_broker
+
+logger = logging.getLogger("seedance.store")
 
 REDIS_URL = os.getenv("REDIS_URL", "")
 
@@ -70,7 +69,7 @@ class SessionStore:
         for stmt in sql.split(";"):
             # remove leading/trailing whitespace, then strip comment lines
             lines = stmt.strip().split("\n")
-            sql_lines = [l for l in lines if not l.strip().startswith("--") and l.strip()]
+            sql_lines = [ln for ln in lines if not ln.strip().startswith("--") and ln.strip()]
             clean = "\n".join(sql_lines).strip()
             if clean:
                 try:

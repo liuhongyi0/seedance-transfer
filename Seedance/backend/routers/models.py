@@ -2,9 +2,7 @@
 模型选择路由
 GET /api/models?step=image|video_draft|music|final_video → 可用模型列表（含信用点消耗）"""
 from fastapi import APIRouter, HTTPException
-from config import settings
-from services.model_catalog import (IMAGE, VIDEO_DRAFT, MUSIC, FINAL_VIDEO, get_models,
-                                     get_credits, get_credits_per_sec)
+from services.model_catalog import (IMAGE, VIDEO_DRAFT, MUSIC, FINAL_VIDEO, get_models)
 
 router = APIRouter()
 VALID_STEPS = {IMAGE, VIDEO_DRAFT, MUSIC, FINAL_VIDEO}
@@ -16,7 +14,6 @@ async def list_models(step: str = ""):
         raise HTTPException(status_code=400, detail=detail)
 
     models_raw = get_models(step)
-    is_intl = settings.is_intl
 
     models = []
     for m in models_raw:
