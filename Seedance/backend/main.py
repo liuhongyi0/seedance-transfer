@@ -69,7 +69,7 @@ async def _daily_backup_loop():
             backup_id = uuid.uuid4().hex[:8]
             filename = f"seedance_{timestamp}_{backup_id}.sql.gz"
 
-            result = subprocess.run(  # nosec S603,S607 — db_url is from DATABASE_URL env, not user input
+            result = subprocess.run(  # noqa: S603,S607
                 ["pg_dump", db_url, "--no-owner", "--no-acl", "--clean"],
                 capture_output=True, text=False, timeout=300,
             )
@@ -403,7 +403,7 @@ async def admin_backup(request: Request):
     if not db_url:
         return {"status": "error", "detail": "DATABASE_URL not configured"}
 
-    result = subprocess.run(  # nosec S603,S607 — db_url is from DATABASE_URL env
+    result = subprocess.run(  # noqa: S603,S607
         ["pg_dump", db_url, "--no-owner", "--no-acl", "--clean"],
         capture_output=True, text=False, timeout=300,
     )
