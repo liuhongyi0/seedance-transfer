@@ -128,7 +128,7 @@ async def register(req: RegisterRequest):
     except Exception as e:
         import traceback
         logger.error(f"[REGISTER ERROR] {e}\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail="Registration failed due to an internal error")
+        raise HTTPException(status_code=500, detail="Registration failed due to an internal error") from e
 
 
 @router.post("/login")
@@ -179,7 +179,7 @@ async def google_auth(req: GoogleAuthRequest, request: Request):
         raise
     except Exception as e:
         logger.info(f"[GOOGLE AUTH] Token verification error: {e}")
-        raise HTTPException(status_code=502, detail="Google token verification failed")
+        raise HTTPException(status_code=502, detail="Google token verification failed") from e
 
     # 验证 audience（如果有配置 GOOGLE_CLIENT_ID）
     client_id = os.getenv("GOOGLE_CLIENT_ID", "")
@@ -302,7 +302,7 @@ async def github_callback(code: str = ""):
         raise
     except Exception as e:
         logger.info(f"[GITHUB AUTH] Token exchange error: {e}")
-        raise HTTPException(status_code=502, detail="GitHub token exchange failed")
+        raise HTTPException(status_code=502, detail="GitHub token exchange failed") from e
 
     access_token = token_data.get("access_token")
     if not access_token:
@@ -326,7 +326,7 @@ async def github_callback(code: str = ""):
         raise
     except Exception as e:
         logger.info(f"[GITHUB AUTH] User fetch error: {e}")
-        raise HTTPException(status_code=502, detail="GitHub user fetch failed")
+        raise HTTPException(status_code=502, detail="GitHub user fetch failed") from e
 
     github_id = str(gh_user.get("id", ""))
     login = gh_user.get("login", "")

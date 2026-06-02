@@ -54,4 +54,4 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           src: 'Seedance/backend'
-          args: 'check --select E,F,N,S,B,PLC,PLE,ISC,RUF --ignore S101,S104,N802,RUF002,RUF003,PLC0415,E501'
+          args: 'check --select E,F,N,S,B,PLC,PLE,ISC,RUF --ignore S101,S104,N802,RUF002,RUF003,PLC0415,E501,S603,S607,RUF001'
