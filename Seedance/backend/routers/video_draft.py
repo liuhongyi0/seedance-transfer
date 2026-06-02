@@ -16,6 +16,7 @@ from config import settings
 from store import store
 from services.color_to_prompt import color_params_to_prompt
 from services.billing import calculate_cost, charge, refund, require_user
+from services.moderation import screen_prompt
 from log_config import get_logger
 
 logger = get_logger(__name__)
@@ -141,7 +142,10 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
             public_ref_url = await rehost_image(ref_url, http)
             logger.info(f"🖼️ 参考图中转: {ref_url[:60]}... → {public_ref_url[:60]}...")
 
-        from services.video_provider import submit_video, poll_video
+        # Content moderation
+    await screen_prompt(full_prompt, f"video-draft/generate:{user_id}")
+
+    from services.video_provider import submit_video, poll_video
 
         # Submit to provider → return immediately, poll in background
         submit_result = await submit_video(

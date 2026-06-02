@@ -20,6 +20,7 @@ import json as _json
 from config import settings
 from store import store
 from services.billing import require_user, charge, calculate_cost
+from services.moderation import screen_prompt
 from log_config import get_logger
 
 logger = get_logger(__name__)
@@ -114,10 +115,14 @@ async def wizard_analyze(req: WizardAnalyzeRequest, request: Request):
             "note": "Mock (no VOLC_API_KEY configured)"
         }
 
+    # Content moderation
+    if req.idea_text:
+        await screen_prompt(req.idea_text, f"wizard/analyze:{user_id}")
+
     http = request.app.state.http_client
     try:
         resp = await http.post(
-            f"{settings.VOLC_BASE_URL}/chat/completions",
+            f"{settings.VOLC_BASE_URL}/chat/completions"
             headers={
                 "Authorization": f"Bearer {settings.VOLC_API_KEY}",
                 "Content-Type": "application/json"
@@ -178,6 +183,9 @@ async def wizard_preview(req: WizardPreviewRequest, request: Request):
     balance = await charge(user_id, "image", cost, f"wizard_preview:{req.prompt_en[:50]}")
     if balance is None:
         raise HTTPException(status_code=402, detail="Insufficient balance")
+
+    # Content moderation
+    await screen_prompt(req.prompt_en, f"wizard/preview:{user_id}")
 
     if not settings.EVOLINK_API_KEY:
         return {"success": True, "preview_url": "", "note": "Mock (no EVOLINK_API_KEY)"}
@@ -249,7 +257,10 @@ async def video_generate(req: VideoGenerateRequest, request: Request):
 
     http = request.app.state.http_client
     try:
-        from services.video_provider import submit_video
+        # Content moderation
+    await screen_prompt(req.prompt_en, f"video/generate:{user_id}")
+
+    from services.video_provider import submit_video
 
         result = await submit_video(
             http,

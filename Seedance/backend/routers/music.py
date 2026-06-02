@@ -131,6 +131,9 @@ async def generate_music(req: MusicGenRequest, request: Request):
     try:
         await store.update_task(req.session_id, task_id, status="processing", progress=5)
 
+        # Content moderation
+        await screen_prompt(suno_prompt, f"music/generate:{user_id}")
+
         from services.model_catalog import get_evolink_name
         evolink_model = get_evolink_name("music", req.model_key)
 
