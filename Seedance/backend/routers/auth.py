@@ -108,12 +108,20 @@ async def register(req: RegisterRequest):
                 auth_provider="phone"
             )
 
+        # 🎁 Free trial: 20 credits (~1 short video) for new users
+        try:
+            await store.topup_balance(user_id, 2000, tx_type="gift",
+                                      note="Free trial: 20 credits. Welcome to Seedance!")
+        except Exception as e2:
+            logger.warning("Failed to grant trial credits to %s (non-fatal): %s", user_id, e2)
+
         token = create_jwt(user_id)
         return {
             "success": True,
             "user_id": user_id,
             "token": token,
             "expires_in": JWT_EXPIRY,
+            "trial_credits": 20,
         }
     except HTTPException:
         raise
