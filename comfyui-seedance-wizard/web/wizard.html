@@ -842,6 +842,7 @@
       </div>
       <div id="video-progress-text">0%</div>
     </div>
+    <button id="btn-cancel-gen" style="display:none;margin:12px auto;padding:6px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--red);cursor:pointer;font-size:12px">✕ Cancel</button>
 
     <!-- 完成状态 -->
     <div id="video-result">
@@ -855,7 +856,7 @@
 
   <!-- 设置弹窗 -->
   <div id="settings-modal" role="dialog" aria-modal="true">
-    <div class="modal-card">
+    <div class="modal-card" style="width:380px;max-width:95vw">
       <div class="modal-title" data-i18n="settings_title">⚙ Seedance 设置</div>
 
       <!-- 注册 / 登录 Tab -->
@@ -865,7 +866,7 @@
       </div>
 
       <div id="settings-register-panel">
-        <p style="font-size:12px;color:var(--text2);margin:0 0 10px" data-i18n="settings_register_hint">一步注册，自动激活 API Key</p>
+        <p style="font-size:12px;color:var(--text2);margin:0 0 10px" data-i18n="settings_register_hint">One-step register, auto-activates API Key</p>
         <div class="form-group">
           <label for="set-email" data-i18n="settings_email_label">邮箱</label>
           <input type="email" id="set-email" placeholder="you@example.com" autocomplete="email">
@@ -874,8 +875,9 @@
           <label for="set-password" data-i18n="settings_password_label">密码（至少8位）</label>
           <input type="password" id="set-password" placeholder="········" autocomplete="new-password">
         </div>
+        <div style="display:flex;align-items:center;gap:6px;margin:-6px 0 8px;font-size:11px;color:var(--text3)"><input type="checkbox" id="show-pw-reg" onchange="var pw=document.getElementById('set-password');pw.type=this.checked?'text':'password'"><label for="show-pw-reg">Show password</label></div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
-          <button class="btn-save" id="btn-register-activate" style="flex:1" data-i18n="settings_register_btn">注册并激活</button>
+          <button id="btn-test-conn" style="flex:1;margin-right:8px;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:13px">🔌 Test Connection</button><button class="btn-save" id="btn-register-activate" style="flex:1" data-i18n="settings_register_btn">注册并激活</button>
         </div>
       </div>
 
@@ -890,7 +892,7 @@
           <input type="password" id="set-password2" placeholder="········" autocomplete="current-password">
         </div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
-          <button class="btn-save" id="btn-login-activate" style="flex:1" data-i18n="settings_login_btn">登录并激活</button>
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1"><button class="btn-save" id="btn-login-activate" style="width:100%" data-i18n="settings_login_btn">Login & Activate</button><a href="https://see4dance.com" target="_blank" style="font-size:11px;color:var(--accent2);text-align:center">Forgot password?</a></div>
         </div>
       </div>
 
@@ -1046,7 +1048,58 @@
     _llmColorPalette: null,
   };
 
+
+  // ── Presets / History ─────────────────────────────────────────
+  var PRESETS = {
+    'cinematic': {
+      style: 'cinematic', mood: 'dramatic', color_palette: 'warm golden hour',
+      camera: 'slow pan right', lighting: 'soft_diffused', motion_intensity: 0.5,
+      label: 'Cinematic Scene'
+    },
+    'product': {
+      style: 'realistic photography', mood: 'fresh bright', color_palette: 'neutral daylight',
+      camera: 'static', lighting: 'studio_light', motion_intensity: 0.2,
+      label: 'Product Shot'
+    },
+    'anime': {
+      style: 'anime illustration', mood: 'dreamy ethereal', color_palette: 'vibrant pastel',
+      camera: 'medium_shot', lighting: 'soft_diffused', motion_intensity: 0.7,
+      label: 'Anime Style'
+    }
+  };
+
+  function applyPreset(key) {
+    var p = PRESETS[key];
+    if (!p) return;
+    Object.keys(p).forEach(function(k) {
+      if (k === 'label') return;
+      if (state.currentParams[k] !== undefined) state.currentParams[k] = p[k];
+      var el = document.getElementById('param-' + k);
+      if (el) el.value = p[k];
+    });
+    refreshPreview();
+    showToast('Preset applied: ' + p.label, 'success');
+  }
+
+  function loadHistory() {
+    try {
+      var h = JSON.parse(localStorage.getItem('seedance_history') || '[]');
+      return Array.isArray(h) ? h : [];
+    } catch(e) { return []; }
+  }
+
+  function saveToHistory(taskId, prompt, thumbUrl) {
+    var h = loadHistory();
+    h.unshift({ ts: Date.now(), taskId: taskId, prompt: prompt, thumb: thumbUrl || '' });
+    if (h.length > 10) h = h.slice(0, 10);
+    try { localStorage.setItem('seedance_history', JSON.stringify(h)); } catch(e) {}
+  }
+
   // ── Toast 提示 ───────────────────────────────────────────────
+
+
+  // ── Email validation ─────────────────────────────────────────
+  function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
   var toastTimer = null;
   function showToast(msg, type, retryFn) {
@@ -1065,6 +1118,31 @@
       el.classList.remove("visible");
     }, retryFn ? 8000 : 4000);
   }
+
+
+  // ── Keyboard Shortcuts ────────────────────────────────────────
+  document.addEventListener('keydown', function(e) {
+    // Don't trigger shortcuts when typing in inputs
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      if (e.key === 'Enter' && e.target.id === 'desc-input') {
+        e.preventDefault();
+        if (typeof analyzeImage === 'function') analyzeImage();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      document.getElementById('settings-modal').classList.remove('show');
+      document.getElementById('pricing-modal').classList.remove('show');
+      if (typeof cancelGeneration === 'function' && document.getElementById('btn-cancel-gen').style.display !== 'none') {
+        cancelGeneration();
+      }
+    }
+    if (e.key === '1' && !e.ctrlKey && !e.metaKey) goToStep(1);
+    if (e.key === '2' && !e.ctrlKey && !e.metaKey) goToStep(2);
+    if (e.key === '3' && !e.ctrlKey && !e.metaKey) goToStep(3);
+    if (e.key === '4' && !e.ctrlKey && !e.metaKey) goToStep(4);
+  });
 
   // ── 步骤切换 ─────────────────────────────────────────────────
 
@@ -1449,6 +1527,7 @@
     videoProgressFill.style.width = "0%";
     videoProgressText.textContent = "0%";
     btnGenVideo.disabled = true;
+    document.getElementById('btn-cancel-gen').style.display = 'block';
 
     // I2V: prefer original uploaded image as reference (always base64)
     var i2vMode = Boolean(state.previewUrl || state.imageB64);
@@ -1477,6 +1556,21 @@
 
   var videoPollTimer = null;
 
+  // ── 取消生成 ───────────────────────────────────────────────
+
+  function cancelGeneration() {
+    if (videoPollTimer) { clearInterval(videoPollTimer); videoPollTimer = null; }
+    state.videoTaskId = null;
+    document.getElementById("btn-cancel-gen").style.display = "none";
+    videoSpinner.style.display = "none";
+    videoStatusTitle.textContent = __t("video_cancelled");
+    showToast(__t("video_cancelled"), "info");
+    goToStep(3);
+  }
+
+  document.getElementById("btn-cancel-gen").addEventListener("click", cancelGeneration);
+
+
   function startVideoPoll() {
     if (videoPollTimer) clearInterval(videoPollTimer);
     videoPollTimer = setInterval(function () {
@@ -1490,13 +1584,16 @@
 
           if (data.status === "completed") {
             clearInterval(videoPollTimer);
+            document.getElementById('btn-cancel-gen').style.display = 'none';
             onVideoComplete(data.video_url);
+            saveToHistory(state.videoTaskId, state.composedPrompt || '', data.video_url || '');
           } else if (data.status === "failed") {
             clearInterval(videoPollTimer);
+            document.getElementById('btn-cancel-gen').style.display = 'none';
             onVideoFailed(data.error_message);
           }
         })
-        .catch(function () {});
+        .catch(function () { document.getElementById("btn-cancel-gen").style.display = "none"; });
     }, 3000);
   }
 
@@ -1631,7 +1728,7 @@
         $("#set-backend").value  = cfg.backend_url || "http://localhost:8000";
         $("#set-lang").value     = cfg.language    || __getLocale();
       })
-      .catch(function () {});
+      .catch(function () { document.getElementById("btn-cancel-gen").style.display = "none"; });
     settingsModal.classList.add("open");
   });
 
@@ -1826,7 +1923,7 @@
       .then(function (data) {
         updateBalanceDisplay(data.amount_fen);
       })
-      .catch(function () {});
+      .catch(function () { document.getElementById("btn-cancel-gen").style.display = "none"; });
   }
 
   function updateBalanceDisplay(amountFen) {
@@ -1885,5 +1982,6 @@
 
 })();
 </script>
+<script src="filter-preview.js"></script>
 </body>
 </html>

@@ -1,14 +1,18 @@
 {
   "name": "Seedance Wizard",
   "author": "Seedance Team",
-  "description": "AI-powered video creation wizard for Seedance 2.0. Chat with DeepSeek AI director, analyze reference images, adjust CSS filters in real-time, generate Flux previews, and export videos directly in ComfyUI.",
-  "repo": "https://github.com/your-org/comfyui-seedance-wizard",
+  "description": "AI video creation wizard inside ComfyUI. Upload an image, AI analyzes it (style/mood/camera), then generates previews and complete videos with 18 models via Seedance Studio. Non-blocking async generation with real-time progress.",
+  "repo": "https://github.com/liuhongyi0/seedance-transfer",
+  "version": "1.0.5",
+  "publisher": "seedance-studios",
+  "icon": "https://see4dance.com/favicon.ico",
   "nodes": {
-    "SeedanceWizardNode": "Main wizard node — polls for video completion and outputs the downloaded video file path",
-    "SeedanceApiKeyNode": "Optional standalone API key input node"
+    "SeedanceWizardNode": "Main wizard node — dual-mode (sidebar interactive + pipeline) AI video generation with 18 models",
+    "SeedanceApiKeyNode": "Optional standalone API key input node",
+    "SeedanceImageInputNode": "Pipeline helper — explicit image passthrough for workflow clarity"
   },
   "install_type": "git-clone",
   "requirements": [],
   "category": "Video",
-  "tags": ["video", "AI", "seedance", "text-to-video", "image-to-video", "wizard", "chat"]
+  "tags": ["video", "AI", "seedance", "text-to-video", "image-to-video", "wizard", "generation"]
 }
