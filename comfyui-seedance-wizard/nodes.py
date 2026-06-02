@@ -178,7 +178,10 @@ def save_config(updates: dict) -> None:
 
 
 def get_api_key() -> str:
-    """Return the configured API key (may be empty string)."""
+    """Return the configured API key — checks env var first, then config file."""
+    env_key = os.environ.get("SEEDANCE_API_KEY", "").strip()
+    if env_key:
+        return env_key
     return load_config().get("api_key", "")
 
 
@@ -192,13 +195,15 @@ def get_backend_url() -> str:
 # ──────────────────────────────────────────────
 
 class SeedanceApiClient:
-    """Synchronous HTTP client that forwards requests to the backend
-    with Bearer token authentication."""
+    """Synchronous HTTP client with retry + backoff for Seedance backend."""
+
+    RETRYABLE_STATUSES = {408, 429, 500, 502, 503, 504}
+    MAX_RETRIES = 3
+    RETRY_BASE_DELAY = 1.0  # seconds (1s → 2s → 4s)
 
     def __init__(self, api_key: str, backend_url: str):
         self.api_key = api_key
         self.backend_url = backend_url.rstrip("/")
-        self._timeout = 120  # seconds
 
     def _build_headers(self, content_type: str = "application/json") -> dict:
         headers = {"Content-Type": content_type}
@@ -207,8 +212,8 @@ class SeedanceApiClient:
         return headers
 
     def forward(self, method: str, path: str, data: Optional[dict] = None,
-                params: Optional[dict] = None) -> tuple:
-        """Forward a request to the backend. Returns (response_dict, status_code)."""
+                params: Optional[dict] = None, _attempt: int = 0) -> tuple:
+        """Forward a request with exponential backoff retry. Returns (response_dict, status_code)."""
         url = f"{self.backend_url}{path}"
         if params:
             query = urllib.parse.urlencode(params)
@@ -219,17 +224,27 @@ class SeedanceApiClient:
         if data is not None and method.upper() != "GET":
             body = json.dumps(data).encode("utf-8")
 
-        logger.debug("Forwarding %s %s", method.upper(), url)
+        if _attempt > 0:
+            logger.debug("Retry #%d: %s %s", _attempt, method.upper(), path)
 
         try:
             req = urllib.request.Request(url, data=body, headers=headers, method=method.upper())
-            with urllib.request.urlopen(req, timeout=self._timeout) as resp:
+            with urllib.request.urlopen(req, timeout=(10, 120)) as resp:
                 status = resp.status
                 raw = resp.read().decode("utf-8")
                 try:
                     result = json.loads(raw)
                 except json.JSONDecodeError:
                     result = {"raw": raw}
+
+                # Retry on transient server errors
+                if status in self.RETRYABLE_STATUSES and _attempt < self.MAX_RETRIES:
+                    delay = self.RETRY_BASE_DELAY * (2 ** _attempt)
+                    logger.warning("Backend returned %d — retrying in %.0fs (attempt %d/%d)",
+                                   status, delay, _attempt + 1, self.MAX_RETRIES)
+                    time.sleep(delay)
+                    return self.forward(method, path, data, params, _attempt + 1)
+
                 return result, status
 
         except urllib.error.HTTPError as e:
@@ -239,13 +254,28 @@ class SeedanceApiClient:
                 result = json.loads(body)
             except Exception:
                 result = {"error": "HTTP_ERROR", "message": str(e)}
+
+            if status in self.RETRYABLE_STATUSES and _attempt < self.MAX_RETRIES:
+                delay = self.RETRY_BASE_DELAY * (2 ** _attempt)
+                logger.warning("HTTP %d — retrying in %.0fs (attempt %d/%d)",
+                               status, delay, _attempt + 1, self.MAX_RETRIES)
+                time.sleep(delay)
+                return self.forward(method, path, data, params, _attempt + 1)
+
             return result, status
 
         except urllib.error.URLError as e:
-            logger.error("Connection to backend failed: %s", e)
+            if _attempt < self.MAX_RETRIES:
+                delay = self.RETRY_BASE_DELAY * (2 ** _attempt)
+                logger.warning("Connection failed — retrying in %.0fs (attempt %d/%d)",
+                               delay, _attempt + 1, self.MAX_RETRIES)
+                time.sleep(delay)
+                return self.forward(method, path, data, params, _attempt + 1)
+
+            logger.error("Connection to backend failed after %d retries: %s", self.MAX_RETRIES, e)
             return {
                 "error": "CONNECTION_ERROR",
-                "message": f"Cannot reach backend at {self.backend_url}. Is it running?"
+                "message": f"Cannot reach backend at {self.backend_url}. Please check your network and backend URL."
             }, 503
 
         except Exception as e:
@@ -480,6 +510,11 @@ class SeedanceWizardNode:
     RETURN_TYPES = ("STRING", "IMAGE", "STRING")
     RETURN_NAMES = ("video_path", "preview_thumbnail", "final_prompt")
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Local file path to the generated MP4 video (STRING)",
+        "Preview thumbnail as IMAGE tensor (may be empty if async)",
+        "Final composed English prompt sent to the video model (STRING)",
+    )
     FUNCTION = "process"
 
     @classmethod
@@ -533,10 +568,8 @@ class SeedanceWizardNode:
                     "default": 0, "min": 0, "max": 0xffffffffffffffff,
                     "tooltip": "Random seed (0 = random)."
                 }),
-                "api_key": ("STRING", {
+                "api_key": ("HIDDEN", {
                     "default": "",
-                    "multiline": False,
-                    "tooltip": "Override API key (leave empty to use config file)."
                 }),
                 "model_key": (["seedance-1.5", "seedance-2.0", "veo3.1-fast", "veo3-fast", "veo3.1-pro", "sora-2", "kling-v3", "kling-o3", "wan-2.6", "wan-2.7", "hailuo-2.3"], {
                     "default": "seedance-1.5",
@@ -572,83 +605,69 @@ class SeedanceWizardNode:
     # ── Sidebar Mode ──────────────────────────────────────────────────
 
     def _sidebar_mode(self, trigger: int, api_key: str = "") -> tuple:
-        """Poll for video completion from sidebar wizard submission."""
+        """Check video task status ONCE and return immediately.
+        Does NOT block the ComfyUI execution queue.
+        The JS frontend (wizard.html) handles polling independently via RPC.
+        This method just fetches the result when the task is complete.
+        """
         if trigger < 1:
             return ("", None, "")
 
         task_id = _wizard_state.get("current_task_id")
         if not task_id:
-            logger.debug("SeedanceWizardNode (sidebar): no task_id, returning empty")
             return ("", None, "")
-
-        logger.info("SeedanceWizardNode (sidebar): waiting for task %s", task_id)
 
         client = _get_client()
 
-        max_wait = 600
-        poll_interval = 3
-        elapsed = 0
+        # Single non-blocking poll — just check current status
+        result, status = client.forward("GET", f"/api/video/{task_id}/status")
+        task_status = result.get("status", "unknown")
+        progress = result.get("progress", 0)
 
-        while elapsed < max_wait:
-            result, status = client.forward("GET", f"/api/video/{task_id}/status")
-            task_status = result.get("status", "unknown")
-            progress = result.get("progress", 0)
+        if status >= 500 or result.get("error"):
+            err_msg = result.get("error", f"Backend error (HTTP {status})")
+            _wizard_state["last_error"] = err_msg
+            _wizard_state["task_status"] = "failed"
+            self._push_ws("seedance_error", {"code": "BACKEND_ERROR", "message": err_msg, "task_id": task_id})
+            return ("", None, "")
 
-            logger.debug("Task %s status: %s (%d%%)", task_id, task_status, progress)
-
-            # Check for connection / backend errors
-            if status >= 500 or result.get("error"):
-                err_msg = result.get("error", f"Backend error (HTTP {status})")
-                _wizard_state["last_error"] = err_msg
-                _wizard_state["task_status"] = "failed"
-                self._push_ws("seedance_error", {"code": "BACKEND_ERROR", "message": err_msg, "task_id": task_id})
-                return ("", None, "")
-
-            if task_status == "completed":
-                video_url = result.get("video_url", "")
-                if not video_url:
-                    res2, _ = client.forward("GET", f"/api/video/{task_id}/result")
-                    video_url = res2.get("video_url", "")
-
-                if video_url:
-                    local_path = self._download_video(video_url, task_id)
-                    _wizard_state["video_path"] = local_path
-                    _wizard_state["video_url"] = video_url
-                    _wizard_state["task_status"] = "completed"
-
-                    self._push_ws("seedance_video_complete", {
-                        "task_id": task_id,
-                        "video_url": video_url,
-                        "local_path": local_path,
-                        "message": "Video ready!",
-                    })
-
-                    return (local_path, None, "")
-
-                _wizard_state["last_error"] = "No video URL in completed response"
-                return ("", None, "")
-
-            elif task_status == "failed":
-                error_msg = result.get("error", result.get("message", "Unknown error"))
-                _wizard_state["last_error"] = error_msg
-                _wizard_state["task_status"] = "failed"
-                self._push_ws("seedance_error", {
-                    "code": "GENERATION_FAILED",
-                    "message": error_msg,
-                    "task_id": task_id,
-                })
-                return ("", None, "")
-
-            time.sleep(poll_interval)
-            elapsed += poll_interval
-
-        _wizard_state["last_error"] = f"Video generation timed out after {max_wait}s"
-        _wizard_state["task_status"] = "timeout"
-        self._push_ws("seedance_error", {
-            "code": "TIMEOUT",
-            "message": _wizard_state["last_error"],
-            "task_id": task_id,
+        # Push progress to frontend
+        self._push_ws("seedance_video_progress", {
+            "task_id": task_id, "status": task_status, "progress": progress,
+            "message": f"Status: {task_status} ({progress}%)",
         })
+
+        if task_status == "completed":
+            video_url = result.get("video_url", "")
+            if not video_url:
+                res2, _ = client.forward("GET", f"/api/video/{task_id}/result")
+                video_url = res2.get("video_url", "")
+
+            if video_url:
+                local_path = self._download_video(video_url, task_id)
+                _wizard_state["video_path"] = local_path
+                _wizard_state["video_url"] = video_url
+                _wizard_state["task_status"] = "completed"
+
+                self._push_ws("seedance_video_complete", {
+                    "task_id": task_id,
+                    "video_url": video_url,
+                    "local_path": local_path,
+                    "message": "Video ready!",
+                })
+                return (local_path, None, "")
+            return ("", None, "")
+
+        elif task_status == "failed":
+            error_msg = result.get("error", result.get("message", "Unknown error"))
+            _wizard_state["last_error"] = error_msg
+            _wizard_state["task_status"] = "failed"
+            self._push_ws("seedance_error", {
+                "code": "GENERATION_FAILED", "message": error_msg, "task_id": task_id,
+            })
+            return ("", None, "")
+
+        # Still processing — return empty, frontend will re-trigger
         return ("", None, "")
 
     # ── Pipeline Mode ─────────────────────────────────────────────────
@@ -916,6 +935,7 @@ class SeedanceApiKeyNode:
     CATEGORY = "Seedance Wizard"
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("api_key",)
+    OUTPUT_TOOLTIPS = ("Seedance API key for authentication (sk-seed-...)",)
     FUNCTION = "load_key"
 
     @classmethod
@@ -954,6 +974,7 @@ class SeedanceImageInputNode:
     CATEGORY = "Seedance Wizard"
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("image",)
+    OUTPUT_TOOLTIPS = ("Reference image passed through to SeedanceWizardNode",)
     FUNCTION = "passthrough"
 
     @classmethod

@@ -90,6 +90,13 @@ app.registerExtension({
         //   { type: "seedance_rpc_result", id, error }  — on failure
 
         window.addEventListener("message", async (event) => {
+            // Validate origin to prevent XSS via postMessage
+            const comfyOrigin = window.location.origin;
+            if (event.origin !== comfyOrigin) {
+                console.warn("[Seedance] Rejected postMessage from unknown origin:", event.origin);
+                return;
+            }
+
             const msg = event.data;
             if (!msg || msg.type !== "seedance_rpc") return;
 

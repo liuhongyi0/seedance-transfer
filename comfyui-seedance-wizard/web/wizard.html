@@ -550,8 +550,10 @@
   transform: translateX(-50%) translateY(10px);
 }
 #toast.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
-#toast.error { background: #dc2626; color: #fff; }
-#toast.warn  { background: #d97706; color: #fff; }
+#toast.error   { background: #dc2626; color: #fff; }
+#toast.warn    { background: #d97706; color: #fff; }
+#toast.success { background: #34d399; color: #111; }
+#toast.info    { background: #60a5fa; color: #fff; }
 </style>
 </head>
 <body>
@@ -1047,17 +1049,21 @@
   // ── Toast 提示 ───────────────────────────────────────────────
 
   var toastTimer = null;
-  function showToast(msg, type) {
+  function showToast(msg, type, retryFn) {
     type = type || "error";
     var el = document.getElementById("toast");
     if (!el) return;
-    el.textContent = msg;
+    var text = msg;
+    if (retryFn) {
+      text += ' <button onclick="event.stopPropagation();(' + retryFn.toString() + ')()" style="margin-left:8px;padding:2px 8px;border-radius:4px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:inherit;cursor:pointer;font-size:11px">Retry</button>';
+    }
+    el.innerHTML = text;
     el.className = type;
     el.classList.add("visible");
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(function () {
       el.classList.remove("visible");
-    }, 4000);
+    }, retryFn ? 8000 : 4000);
   }
 
   // ── 步骤切换 ─────────────────────────────────────────────────
