@@ -1,5 +1,5 @@
 """
-Seedance Studio 后端服务
+see4dance Studio 后端服务
 FastAPI + 异步HTTP中转，支持 EvoLink（图片/音乐/视频草稿）+ 火山引擎（最终成片）
 """
 
@@ -99,7 +99,7 @@ async def lifespan(app: FastAPI):
     # 启动定时备份任务
     import asyncio
     backup_task = asyncio.create_task(_daily_backup_loop())
-    logger.info("Seedance Studio 后端启动成功")
+    logger.info("see4dance Studio 后端启动成功")
     yield
     # 关闭时清理
     backup_task.cancel()
@@ -109,7 +109,7 @@ async def lifespan(app: FastAPI):
     logger.info("后端服务已关闭")
 
 app = FastAPI(
-    title="Seedance Studio API",
+    title="see4dance Studio API",
     description="Seedance 视频创作工作台后端 - API中转服务",
     version="1.0.0",
     lifespan=lifespan
@@ -152,7 +152,7 @@ async def portal():
     if os.path.exists(studio_path):
         return FileResponse(studio_path, media_type="text/html")
     return {
-        "service": "Seedance Studio API",
+        "service": "see4dance Studio API",
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs"
@@ -175,7 +175,7 @@ async def privacy():
     return HTMLResponse("""<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Privacy Policy · Seedance Studio</title>
+<title>Privacy Policy · see4dance Studio</title>
 <style>
 :root{--bg:#0a0a0f;--text:#e8e8f0;--text2:#9090a8;--accent:#7c6dfa}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -187,7 +187,7 @@ p{margin-bottom:12px;color:var(--text2)}
 a{color:var(--accent)}
 </style></head>
 <body>
-<h1><span>Seedance Studio</span> Privacy Policy</h1>
+<h1><span>see4dance Studio</span> Privacy Policy</h1>
 <p>Last updated: May 31, 2026</p>
 
 <h2>1. Information We Collect</h2>
@@ -203,10 +203,10 @@ a{color:var(--accent)}
 <p>We use the following third-party services: EvoLink AI (image/video/music generation), Volcano Engine (video rendering), Cloudflare R2 (file storage), Creem (payment processing), and Sentry (error monitoring).</p>
 
 <h2>5. Your Rights</h2>
-<p>You can delete your account and all associated data at any time by contacting <a href="mailto:support@see4dance.com">support@see4dance.com</a>. You can also request a copy of your data.</p>
+<p>You can delete your account and all associated data at any time by contacting <a href="mailto:straathofbeechler@gmail.com">straathofbeechler@gmail.com</a>. You can also request a copy of your data.</p>
 
 <h2>6. Contact</h2>
-<p>For privacy-related inquiries: <a href="mailto:support@see4dance.com">support@see4dance.com</a></p>
+<p>For privacy-related inquiries: <a href="mailto:straathofbeechler@gmail.com">straathofbeechler@gmail.com</a></p>
 </body></html>""")
 
 
@@ -217,7 +217,7 @@ async def terms():
     return HTMLResponse("""<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Terms of Service · Seedance Studio</title>
+<title>Terms of Service · see4dance Studio</title>
 <style>
 :root{--bg:#0a0a0f;--text:#e8e8f0;--text2:#9090a8;--accent:#7c6dfa}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -230,14 +230,14 @@ a{color:var(--accent)}
 ul{padding-left:20px}
 </style></head>
 <body>
-<h1><span>Seedance Studio</span> Terms of Service</h1>
+<h1><span>see4dance Studio</span> Terms of Service</h1>
 <p>Last updated: May 31, 2026</p>
 
 <h2>1. Acceptance of Terms</h2>
-<p>By using Seedance Studio ("the Service"), you agree to these Terms. If you do not agree, do not use the Service.</p>
+<p>By using see4dance Studio ("the Service"), you agree to these Terms. If you do not agree, do not use the Service.</p>
 
 <h2>2. Description of Service</h2>
-<p>Seedance Studio is an AI-powered video creation platform. Users upload images and describe their creative ideas; the platform generates preview images, video drafts, music, and final rendered videos using third-party AI models.</p>
+<p>see4dance Studio is an AI-powered video creation platform. Users upload images and describe their creative ideas; the platform generates preview images, video drafts, music, and final rendered videos using third-party AI models.</p>
 
 <h2>3. Credits & Payments</h2>
 <p>All payments are one-time purchases of credits. Credits never expire. Each AI operation (image generation, video drafting, music, final rendering) consumes a specified number of credits based on the model selected. Prices are displayed before each operation.</p>
@@ -255,7 +255,7 @@ ul{padding-left:20px}
 <p>The Service is provided "as is". We are not liable for any damages arising from use of the Service. AI models may occasionally produce unexpected results — we do not guarantee specific outcomes.</p>
 
 <h2>8. Contact</h2>
-<p><a href="mailto:support@see4dance.com">support@see4dance.com</a></p>
+<p><a href="mailto:straathofbeechler@gmail.com">straathofbeechler@gmail.com</a></p>
 </body></html>""")
 @app.get("/share/{share_id}")
 async def view_share(share_id: str):
@@ -295,7 +295,7 @@ video {{ width:100%; display:block; }}
   <p>{share.get('resolution','1080p')} · {share.get('duration',12)}s</p>
 </div>
 <div class="brand">
-  <a href="/">🎬 Made with Seedance Studio</a>
+  <a href="/">🎬 Made with see4dance Studio</a>
 </div>
 </body>
 </html>"""
