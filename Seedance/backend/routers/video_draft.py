@@ -143,9 +143,9 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
             logger.info(f"🖼️ 参考图中转: {ref_url[:60]}... → {public_ref_url[:60]}...")
 
         # Content moderation
-    await screen_prompt(full_prompt, f"video-draft/generate:{user_id}")
+        await screen_prompt(full_prompt, f"video-draft/generate:{user_id}")
 
-    from services.video_provider import submit_video, poll_video
+        from services.video_provider import submit_video, poll_video
 
         # Submit to provider → return immediately, poll in background
         submit_result = await submit_video(

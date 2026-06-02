@@ -122,7 +122,7 @@ async def wizard_analyze(req: WizardAnalyzeRequest, request: Request):
     http = request.app.state.http_client
     try:
         resp = await http.post(
-            f"{settings.VOLC_BASE_URL}/chat/completions"
+            f"{settings.VOLC_BASE_URL}/chat/completions",
             headers={
                 "Authorization": f"Bearer {settings.VOLC_API_KEY}",
                 "Content-Type": "application/json"
@@ -258,9 +258,9 @@ async def video_generate(req: VideoGenerateRequest, request: Request):
     http = request.app.state.http_client
     try:
         # Content moderation
-    await screen_prompt(req.prompt_en, f"video/generate:{user_id}")
+        await screen_prompt(req.prompt_en, f"video/generate:{user_id}")
 
-    from services.video_provider import submit_video
+        from services.video_provider import submit_video
 
         result = await submit_video(
             http,
