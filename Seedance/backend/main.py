@@ -203,10 +203,10 @@ a{color:var(--accent)}
 <p>We use the following third-party services: EvoLink AI (image/video/music generation), Volcano Engine (video rendering), Cloudflare R2 (file storage), Creem (payment processing), and Sentry (error monitoring).</p>
 
 <h2>5. Your Rights</h2>
-<p>You can delete your account and all associated data at any time by contacting <a href="mailto:straathofbeechler@gmail.com">straathofbeechler@gmail.com</a>. You can also request a copy of your data.</p>
+<p>You can delete your account and all associated data at any time by contacting <a href="mailto:support@see4dance.com">support@see4dance.com</a>. You can also request a copy of your data.</p>
 
 <h2>6. Contact</h2>
-<p>For privacy-related inquiries: <a href="mailto:straathofbeechler@gmail.com">straathofbeechler@gmail.com</a></p>
+<p>For privacy-related inquiries: <a href="mailto:support@see4dance.com">support@see4dance.com</a></p>
 </body></html>""")
 
 
@@ -255,7 +255,7 @@ ul{padding-left:20px}
 <p>The Service is provided "as is". We are not liable for any damages arising from use of the Service. AI models may occasionally produce unexpected results — we do not guarantee specific outcomes.</p>
 
 <h2>8. Contact</h2>
-<p><a href="mailto:straathofbeechler@gmail.com">straathofbeechler@gmail.com</a></p>
+<p><a href="mailto:support@see4dance.com">support@see4dance.com</a></p>
 </body></html>""")
 @app.get("/share/{share_id}")
 async def view_share(share_id: str):

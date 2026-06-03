@@ -27,10 +27,12 @@ async def screen_prompt(prompt: str, external_id: str = "") -> bool:
     - "deny"  → block with error
     - API failure → fail closed (block, do not generate)
     """
-    if not CREEM_API_KEY or not CREEM_API_KEY.startswith("creem_"):
-        # No Creem key configured — skip moderation (dev/self-hosted)
-        logger.warning("No Creem API key; skipping content moderation")
-        return True
+    if not CREEM_API_KEY:
+        logger.error("CREEM_API_KEY not configured — cannot screen prompts. Set CREEM_API_KEY in Railway env.")
+        raise HTTPException(status_code=503, detail="Content moderation not configured. Please contact support.")
+    if not CREEM_API_KEY.startswith("creem_"):
+        logger.error("CREEM_API_KEY is set but does not start with 'creem_' — invalid key. Update your env.")
+        raise HTTPException(status_code=503, detail="Content moderation misconfigured. Please contact support.")
 
     if not prompt or not prompt.strip():
         return True  # empty prompt is validated elsewhere
@@ -59,13 +61,14 @@ async def screen_prompt(prompt: str, external_id: str = "") -> bool:
 
             data = resp.json()
             decision = data.get("decision", "deny")
+            mod_id = data.get("id", "unknown")
 
             if decision == "allow":
-                logger.debug(f"Moderation: ✅ ALLOWED — {external_id}")
+                logger.info(f"✅ CREEM MODERATION PASSED [{mod_id}] — {external_id} — prompt: {prompt[:80]}")
                 return True
 
             # flag or deny → block
-            logger.warning(f"Moderation: 🚫 {decision.upper()} — {external_id} — prompt: {prompt[:100]}")
+            logger.warning(f"🚫 CREEM MODERATION BLOCKED [{mod_id}] decision={decision.upper()} — {external_id} — prompt: {prompt[:100]}")
             raise HTTPException(
                 status_code=400,
                 detail="Your prompt contains prohibited content and was blocked by our content safety system. Please revise your prompt and try again."
