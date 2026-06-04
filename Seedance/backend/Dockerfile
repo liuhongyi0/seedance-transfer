@@ -1,5 +1,5 @@
 FROM python:3.11-slim
-# cache-bust: 2026-06-01-v4-fix-i18n
+# cache-bust: 2026-06-01-v5-moderation-fix
 
 WORKDIR /app
 
