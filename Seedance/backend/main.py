@@ -231,7 +231,7 @@ ul{padding-left:20px}
 </style></head>
 <body>
 <h1><span>see4dance Studio</span> Terms of Service</h1>
-<p>Last updated: May 31, 2026</p>
+<p>Last updated: June 4, 2026</p>
 
 <h2>1. Acceptance of Terms</h2>
 <p>By using see4dance Studio ("the Service"), you agree to these Terms. If you do not agree, do not use the Service.</p>
@@ -245,16 +245,33 @@ ul{padding-left:20px}
 <h2>4. Refund Policy</h2>
 <p>Unused credits are eligible for a full refund within 14 days of purchase. Consumed credits are non-refundable because the associated AI API costs have already been incurred.</p>
 
-<h2>5. Acceptable Use</h2>
-<p>You agree not to use the Service to generate: illegal content, hate speech, adult content, deepfakes of real individuals without consent, or content that infringes third-party intellectual property.</p>
+<h2>5. Acceptable Use Policy</h2>
+<p>You agree not to use the Service to generate, upload, or distribute any of the following prohibited content:</p>
+<ul>
+  <li>Sexually-oriented, pornographic, or NSFW content of any kind, including AI-generated adult material</li>
+  <li>Face-swap, deepfake, or face-manipulation content of any kind, regardless of consent claims</li>
+  <li>Content that infringes third-party intellectual property rights, including copyrighted characters, trademarked brands, or licensed artwork without authorization</li>
+  <li>Hate speech, harassment, or content that promotes discrimination based on race, gender, religion, sexual orientation, or other protected characteristics</li>
+  <li>Content depicting or promoting violence, self-harm, or illegal activities</li>
+  <li>Content that impersonates real individuals without their explicit consent</li>
+  <li>Content designed to deceive, defraud, or manipulate viewers (disinformation, phishing, scam material)</li>
+  <li>Any content that violates applicable laws or regulations in your jurisdiction</li>
+</ul>
+<p>We actively screen all user prompts through a content moderation system before AI generation. Prompts flagged as prohibited will be blocked and the generation will not proceed. Repeated violations may result in account suspension.</p>
 
 <h2>6. Intellectual Property</h2>
-<p>You retain ownership of your uploaded content. Videos you generate belong to you. We reserve no rights to your generated content.</p>
+<p>You retain ownership of your uploaded content. Videos you generate belong to you. We reserve no rights to your generated content. You are solely responsible for ensuring your uploaded content and prompts do not infringe third-party rights.</p>
 
-<h2>7. Limitation of Liability</h2>
-<p>The Service is provided "as is". We are not liable for any damages arising from use of the Service. AI models may occasionally produce unexpected results — we do not guarantee specific outcomes.</p>
+<h2>7. AI-Specific Disclosures</h2>
+<p>The Service uses third-party AI models (including but not limited to Seedance 2.0 by ByteDance, Kling by Kuaishou, Veo by Google, and Suno for music). These models are integrated into our creative workflow — we do not resell raw API access. AI-generated results may vary in quality and are not guaranteed to meet specific creative expectations.</p>
 
-<h2>8. Contact</h2>
+<h2>8. Limitation of Liability</h2>
+<p>The Service is provided "as is". We are not liable for any damages arising from use of the Service or from AI-generated content. We do not guarantee specific creative outcomes, and users are responsible for reviewing AI-generated content before publication or distribution.</p>
+
+<h2>9. Content Moderation</h2>
+<p>All prompts are screened through our content moderation system before reaching any AI model. If the moderation system is temporarily unavailable, generation will be blocked rather than proceeding unscreened. This ensures compliance with our Acceptable Use Policy at all times.</p>
+
+<h2>10. Contact</h2>
 <p><a href="mailto:support@see4dance.com">support@see4dance.com</a></p>
 </body></html>""")
 @app.get("/share/{share_id}")
