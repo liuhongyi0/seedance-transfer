@@ -271,8 +271,8 @@ ul{padding-left:20px}
 <h2>9. Content Moderation</h2>
 <p>All prompts are screened through our content moderation system before reaching any AI model. If the moderation system is temporarily unavailable, generation will be blocked rather than proceeding unscreened. This ensures compliance with our Acceptable Use Policy at all times.</p>
 
-<h2>10. Contact</h2>
-<p><a href="mailto:support@see4dance.com">support@see4dance.com</a></p>
+<h2>10. Support</h2>
+<p>We respond to all customer inquiries within 3 business days. Contact us at <a href="mailto:support@see4dance.com">support@see4dance.com</a> for billing questions, technical support, refund requests, or account-related issues.</p>
 </body></html>""")
 @app.get("/share/{share_id}")
 async def view_share(share_id: str):
