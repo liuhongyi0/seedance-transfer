@@ -18,6 +18,7 @@ from store import store
 from services.billing import calculate_cost, charge, refund, require_user
 from services.storage import upload_bytes
 
+from services.moderation import screen_prompt
 from log_config import get_logger
 logger = get_logger(__name__)
 
@@ -123,6 +124,10 @@ async def generate_final_video(req: FinalVideoRequest, request: Request):
             )
         await charge(user_id, "final_video", cost_subunit,
                      f"{req.resolution} {req.duration}s")
+
+    # Content moderation (Creem required)
+    if req.prompt_en:
+        await screen_prompt(req.prompt_en, f"final-video/generate:{user_id}")
 
     # 收集参考图URL
     image_urls = list(req.reference_image_urls)
