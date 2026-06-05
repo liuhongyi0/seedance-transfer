@@ -108,10 +108,10 @@ async def register(req: RegisterRequest):
                 auth_provider="phone"
             )
 
-        # 🎁 Free trial: 20 credits (~1 short video) for new users
+        # 🎁 Free trial: 23 credits (~1 full Kling video) for new users
         try:
-            await store.topup_balance(user_id, 2000, tx_type="gift",
-                                      note="Free trial: 20 credits. Welcome to Seedance!")
+            await store.topup_balance(user_id, 2300, tx_type="gift",
+                                      note="Free trial: 23 credits. Welcome to see4dance!")
         except Exception as e2:
             logger.warning("Failed to grant trial credits to %s (non-fatal): %s", user_id, e2)
 
@@ -121,7 +121,7 @@ async def register(req: RegisterRequest):
             "user_id": user_id,
             "token": token,
             "expires_in": JWT_EXPIRY,
-            "trial_credits": 20,
+            "trial_credits": 23,
         }
     except HTTPException:
         raise
