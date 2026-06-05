@@ -74,6 +74,23 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
         raise HTTPException(status_code=404, detail=str(e))
 
     user_id = await require_user(request)
+
+    # Content moderation (Creem required) — screen BEFORE billing
+    # Build full prompt first so we can screen it
+    full_prompt_early = req.prompt_en
+    if req.reference_image_id:
+        try:
+            s_temp = await store.require(req.session_id)
+            for img in s_temp["assets"]["images"]:
+                if img["id"] == req.reference_image_id and img.get("color_params"):
+                    color_addon = color_params_to_prompt(img["color_params"])
+                    if color_addon:
+                        full_prompt_early = f"{full_prompt_early}, {color_addon}"
+                    break
+        except ValueError:
+            pass
+    await screen_prompt(full_prompt_early, f"video-draft/generate:{user_id}")
+
     cost_subunit = calculate_cost("video_draft", model_key=req.model_key,
                                   duration=req.duration, resolution=req.resolution)
     if user_id:
@@ -141,9 +158,6 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
         if ref_url and provider != "volcengine":
             public_ref_url = await rehost_image(ref_url, http)
             logger.info(f"🖼️ 参考图中转: {ref_url[:60]}... → {public_ref_url[:60]}...")
-
-        # Content moderation
-        await screen_prompt(full_prompt, f"video-draft/generate:{user_id}")
 
         from services.video_provider import submit_video, poll_video
 

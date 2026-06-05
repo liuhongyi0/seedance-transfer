@@ -74,8 +74,12 @@ async def generate_images(req: ImageGenRequest, request: Request):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-    # 计费：提取用户、计算成本、检查余额、扣款
+    # Content moderation (Creem required) — screen BEFORE billing/generation
     user_id = await require_user(request)
+    from services.moderation import screen_prompt
+    await screen_prompt(req.prompt_cn, f"image/generate:{user_id}")
+
+    # 计费：计算成本、检查余额、扣款
     cost_subunit = calculate_cost("image", count=req.count, model_key=req.model_key)
     if user_id:
         user = await store.get_user_by_id(user_id)
@@ -90,10 +94,6 @@ async def generate_images(req: ImageGenRequest, request: Request):
                          f"{req.count}x images, prompt: {req.prompt_cn[:50]}")
         except ValueError as e:
             raise HTTPException(status_code=402, detail=str(e))
-
-    # Content moderation (Creem required) — screen before generation
-    from services.moderation import screen_prompt
-    await screen_prompt(req.prompt_cn, f"image/generate:{user_id}")
 
     # 构建英文Prompt
     prompt_en = build_image_prompt(

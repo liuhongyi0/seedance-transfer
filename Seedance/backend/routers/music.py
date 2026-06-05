@@ -81,6 +81,22 @@ async def generate_music(req: MusicGenRequest, request: Request):
         raise HTTPException(status_code=404, detail=str(e))
 
     user_id = await require_user(request)
+
+    # Content moderation (Creem required) — screen BEFORE billing
+    # Build suno_prompt first so we can screen it
+    if req.prompt_override:
+        suno_prompt_early = req.prompt_override
+    else:
+        mood_en = MOOD_MAP.get(req.mood, req.mood)
+        genre_en = GENRE_MAP.get(req.genre, req.genre)
+        tempo_en = TEMPO_MAP.get(req.tempo, "moderate")
+        instruments_en = ", ".join(req.instruments) if req.instruments else ""
+        suno_prompt_early = f"{mood_en}, {genre_en}"
+        if instruments_en:
+            suno_prompt_early += f", featuring {instruments_en}"
+        suno_prompt_early += f", {tempo_en}, {req.duration} seconds"
+    await screen_prompt(suno_prompt_early, f"music/generate:{user_id}")
+
     cost_subunit = calculate_cost("music", model_key=req.model_key)
     if user_id:
         user = await store.get_user_by_id(user_id)
@@ -133,9 +149,6 @@ async def generate_music(req: MusicGenRequest, request: Request):
     http = request.app.state.http_client
     try:
         await store.update_task(req.session_id, task_id, status="processing", progress=5)
-
-        # Content moderation
-        await screen_prompt(suno_prompt, f"music/generate:{user_id}")
 
         from services.model_catalog import get_evolink_name
         evolink_model = get_evolink_name("music", req.model_key)

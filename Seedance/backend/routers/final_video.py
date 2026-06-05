@@ -113,6 +113,11 @@ async def generate_final_video(req: FinalVideoRequest, request: Request):
         raise HTTPException(status_code=404, detail=str(e))
 
     user_id = await require_user(request)
+
+    # Content moderation (Creem required) — screen BEFORE billing
+    if req.prompt_en:
+        await screen_prompt(req.prompt_en, f"final-video/generate:{user_id}")
+
     cost_subunit = calculate_cost("final_video", resolution=req.resolution, duration=req.duration)
     if user_id:
         user = await store.get_user_by_id(user_id)
@@ -124,10 +129,6 @@ async def generate_final_video(req: FinalVideoRequest, request: Request):
             )
         await charge(user_id, "final_video", cost_subunit,
                      f"{req.resolution} {req.duration}s")
-
-    # Content moderation (Creem required)
-    if req.prompt_en:
-        await screen_prompt(req.prompt_en, f"final-video/generate:{user_id}")
 
     # 收集参考图URL
     image_urls = list(req.reference_image_urls)
