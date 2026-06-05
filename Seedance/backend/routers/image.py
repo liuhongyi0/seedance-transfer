@@ -76,6 +76,9 @@ async def generate_images(req: ImageGenRequest, request: Request):
 
     # Content moderation (Creem required) — screen BEFORE billing/generation
     user_id = await require_user(request)
+    from services.trial_gate import check_trial_gate
+    from services.model_catalog import IMAGE as _IMG
+    await check_trial_gate(user_id, _IMG, req.model_key)
     from services.moderation import screen_prompt
     await screen_prompt(req.prompt_cn, f"image/generate:{user_id}")
 

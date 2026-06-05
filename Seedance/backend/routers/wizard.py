@@ -235,6 +235,10 @@ async def video_generate(req: VideoGenerateRequest, request: Request):
     if not user_id:
         raise HTTPException(status_code=401, detail="Authentication required")
 
+    from services.trial_gate import check_trial_gate
+    from services.model_catalog import VIDEO_DRAFT as _VD
+    await check_trial_gate(user_id, _VD, req.model_key)
+
     from services.model_catalog import VIDEO_DRAFT, get_provider
 
     cost = calculate_cost("video_draft", model_key=req.model_key,

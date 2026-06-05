@@ -75,6 +75,10 @@ async def generate_video_draft(req: VideoDraftGenRequest, request: Request):
 
     user_id = await require_user(request)
 
+    from services.trial_gate import check_trial_gate
+    from services.model_catalog import VIDEO_DRAFT as _VD
+    await check_trial_gate(user_id, _VD, req.model_key)
+
     # Content moderation (Creem required) — screen BEFORE billing
     # Build full prompt first so we can screen it
     full_prompt_early = req.prompt_en

@@ -114,6 +114,10 @@ async def generate_final_video(req: FinalVideoRequest, request: Request):
 
     user_id = await require_user(request)
 
+    from services.trial_gate import check_trial_gate
+    from services.model_catalog import FINAL_VIDEO as _FV
+    await check_trial_gate(user_id, _FV, None)
+
     # Content moderation (Creem required) — screen BEFORE billing
     if req.prompt_en:
         await screen_prompt(req.prompt_en, f"final-video/generate:{user_id}")

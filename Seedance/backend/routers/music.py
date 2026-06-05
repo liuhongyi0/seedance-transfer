@@ -82,6 +82,10 @@ async def generate_music(req: MusicGenRequest, request: Request):
 
     user_id = await require_user(request)
 
+    from services.trial_gate import check_trial_gate
+    from services.model_catalog import MUSIC as _MU
+    await check_trial_gate(user_id, _MU, req.model_key)
+
     # Content moderation (Creem required) — screen BEFORE billing
     # Build suno_prompt first so we can screen it
     if req.prompt_override:
