@@ -92,14 +92,8 @@ async def generate_images(req: ImageGenRequest, request: Request):
             raise HTTPException(status_code=402, detail=str(e))
 
     # Content moderation (Creem required) — screen before generation
-    if settings.is_intl:
-        try:
-            from services.moderation import screen_prompt
-            await screen_prompt(req.prompt_cn, f"image/generate:{user_id}")
-        except HTTPException:
-            raise
-        except Exception:
-            pass  # fail-open in dev, fail-closed checked by moderation.py internally
+    from services.moderation import screen_prompt
+    await screen_prompt(req.prompt_cn, f"image/generate:{user_id}")
 
     # 构建英文Prompt
     prompt_en = build_image_prompt(
